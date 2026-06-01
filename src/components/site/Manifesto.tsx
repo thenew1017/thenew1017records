@@ -1,0 +1,53 @@
+import { motion, useScroll, useTransform } from "motion/react";
+import { useRef } from "react";
+
+export function Manifesto() {
+  const ref = useRef<HTMLDivElement>(null);
+  const { scrollYProgress } = useScroll({ target: ref, offset: ["start end", "end start"] });
+  const y = useTransform(scrollYProgress, [0, 1], ["15%", "-15%"]);
+  const opacity = useTransform(scrollYProgress, [0, 0.25, 0.75, 1], [0.25, 1, 1, 0.25]);
+
+  const words = "A new era of sound. Built in the dark, delivered to the world.".split(" ");
+
+  return (
+    <section id="manifesto" ref={ref} className="relative overflow-hidden px-6 py-44 md:px-10 border-t border-white/5">
+      {/* Gigantic backing 1017 watermark */}
+      <motion.div
+        style={{ y }}
+        className="pointer-events-none absolute inset-0 -z-10 flex items-center justify-center select-none"
+      >
+        <span className="font-display text-[26vw] uppercase leading-none text-white/[0.015] font-black tracking-tighter">
+          1017
+        </span>
+      </motion.div>
+
+      {/* Cyber ambient glows */}
+      <div className="pointer-events-none absolute left-1/2 top-1/2 -z-10 h-[60vmin] w-[60vmin] -translate-x-1/2 -translate-y-1/2 glow-gold opacity-[0.02]" />
+
+      <motion.div
+        style={{ opacity }}
+        className="mx-auto max-w-[1400px] relative z-10"
+      >
+        <div className="mb-8 inline-flex items-center gap-2 border border-white/5 bg-white/5 px-3 py-1 rounded-full text-[9px] font-mono uppercase tracking-[0.35em] text-accent">
+          <span className="h-1.5 w-1.5 rounded-full bg-accent animate-pulse shadow-[0_0_8px_var(--color-accent)]" />
+          CORE OBJECTIVE // MANIFESTO
+        </div>
+        
+        <p className="font-display text-4xl uppercase leading-[1.0] text-foreground sm:text-5xl md:text-6xl lg:text-7xl xl:text-8xl tracking-tight text-balance">
+          {words.map((w, i) => (
+            <motion.span
+              key={i}
+              initial={{ opacity: 0.15, filter: "blur(4px)" }}
+              whileInView={{ opacity: 1, filter: "blur(0px)" }}
+              viewport={{ once: false, amount: 0.6 }}
+              transition={{ duration: 0.7, delay: i * 0.05, ease: "easeOut" }}
+              className="mr-4 inline-block hover:text-gradient-gold transition-all duration-300 hover:scale-[1.02] cursor-default"
+            >
+              {w}
+            </motion.span>
+          ))}
+        </p>
+      </motion.div>
+    </section>
+  );
+}

@@ -1,0 +1,821 @@
+import { createServerFn } from "@tanstack/react-start";
+import { z } from "zod";
+import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
+import { assertAdmin, getAdminClient } from "./admin.server";
+
+type Json = string | number | boolean | null | { [k: string]: Json } | Json[];
+
+const ArtistSchema = z.object({
+  id: z.string().uuid().optional(),
+  name: z.string().min(1).max(120),
+  role: z.string().max(120).nullable().optional(),
+  tag: z.string().max(20).nullable().optional(),
+  bio: z.string().max(2000).nullable().optional(),
+  image_url: z.string().url().nullable().optional(),
+  spotify_url: z.string().url().nullable().optional(),
+  apple_url: z.string().url().nullable().optional(),
+  youtube_url: z.string().url().nullable().optional(),
+  instagram_url: z.string().url().nullable().optional(),
+  twitter_url: z.string().url().nullable().optional(),
+  website_url: z.string().url().nullable().optional(),
+  sort_order: z.number().int().min(0).max(9999).default(0),
+  published: z.boolean().default(true),
+});
+
+// Public reads (no auth) in-memory caches
+let publicArtistsCache: { artists: any[] } | null = null;
+let publicSettingsCache: { settings: Record<string, Json> } | null = null;
+
+export function clearPublicCaches() {
+  console.log("⚡ [Server Cache] Clearing public artists and settings caches!");
+  publicArtistsCache = null;
+  publicSettingsCache = null;
+}
+
+export const listPublicArtists = createServerFn({ method: "GET" }).handler(async () => {
+  if (publicArtistsCache) {
+    console.log("⚡ [Server Cache] Serving public artists list from in-memory cache!");
+    return publicArtistsCache;
+  }
+  const admin = getAdminClient();
+  const { data, error } = await admin
+    .from("artists")
+    .select("id,name,role,tag,bio,image_url,spotify_url,apple_url,youtube_url,instagram_url,twitter_url,website_url,sort_order")
+    .eq("published", true)
+    .order("sort_order", { ascending: true })
+    .order("created_at", { ascending: true });
+  if (error) throw new Error(error.message);
+  publicArtistsCache = { artists: data ?? [] };
+  return publicArtistsCache;
+});
+
+export const getPublicSettings = createServerFn({ method: "GET" }).handler(async () => {
+  if (publicSettingsCache) {
+    console.log("⚡ [Server Cache] Serving public settings from in-memory cache!");
+    return publicSettingsCache;
+  }
+  const admin = getAdminClient();
+  const { data, error } = await admin.from("site_settings").select("key,value");
+  if (error) throw new Error(error.message);
+  const map: Record<string, Json> = {};
+  for (const row of data ?? []) map[row.key] = row.value as Json;
+  publicSettingsCache = { settings: map };
+  return publicSettingsCache;
+});
+
+export function slugify(text: string): string {
+  return text
+    .toString()
+    .toLowerCase()
+    .trim()
+    .replace(/\s+/g, "-")
+    .replace(/[^\w\-]+/g, "")
+    .replace(/\-\-+/g, "-")
+    .replace(/^-+/, "")
+    .replace(/-+$/, "");
+}
+
+export const getPublicArtistBySlug = createServerFn({ method: "GET" })
+  .inputValidator((input: unknown) => z.object({ name: z.string() }).parse(input))
+  .handler(async ({ data }) => {
+    const res = await listPublicArtists();
+    const artist = res.artists.find((a) => slugify(a.name) === data.name);
+    return { artist: artist ?? null };
+  });
+
+export const getPublicReleaseBySlug = createServerFn({ method: "GET" })
+  .inputValidator((input: unknown) => z.object({ name: z.string() }).parse(input))
+  .handler(async ({ data }) => {
+    const res = await getPublicSettings();
+    const releases = (res.settings?.releases as any[] | undefined) ?? [];
+    const release = releases.find((r) => slugify(r.title) === data.name);
+    return { release: release ?? null };
+  });
+
+export const subscribeNewsletter = createServerFn({ method: "POST" })
+  .inputValidator((input: unknown) => z.object({ email: z.string().email().max(255) }).parse(input))
+  .handler(async ({ data }) => {
+    const admin = getAdminClient();
+    const { error } = await admin.from("newsletter_subscribers").insert({ email: data.email });
+    if (error && !error.message.toLowerCase().includes("duplicate")) {
+      throw new Error(error.message);
+    }
+    return { ok: true };
+  });
+
+// Admin: artists
+export const adminListArtists = createServerFn({ method: "GET" })
+  .middleware([requireSupabaseAuth])
+  .handler(async ({ context }) => {
+    const admin = await assertAdmin(context.userId, context.supabase);
+    const { data, error } = await admin.from("artists").select("*").order("sort_order").order("created_at");
+    if (error) throw new Error(error.message);
+    return { artists: data ?? [] };
+  });
+
+export const adminUpsertArtist = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((input: unknown) => ArtistSchema.parse(input))
+  .handler(async ({ data, context }) => {
+    const admin = await assertAdmin(context.userId, context.supabase);
+    if (data.id) {
+      const { id, ...rest } = data;
+      const { error } = await admin.from("artists").update(rest).eq("id", id);
+      if (error) throw new Error(error.message);
+      clearPublicCaches();
+      return { id };
+    } else {
+      const { id: _ignore, ...rest } = data;
+      const { data: row, error } = await admin.from("artists").insert(rest).select("id").single();
+      if (error) throw new Error(error.message);
+      clearPublicCaches();
+      return { id: row.id };
+    }
+  });
+
+export const adminDeleteArtist = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((input: unknown) => z.object({ id: z.string().uuid() }).parse(input))
+  .handler(async ({ data, context }) => {
+    const admin = await assertAdmin(context.userId, context.supabase);
+    const { error } = await admin.from("artists").delete().eq("id", data.id);
+    if (error) throw new Error(error.message);
+    clearPublicCaches();
+    return { ok: true };
+  });
+
+// Admin: settings
+export const adminGetSettings = createServerFn({ method: "GET" })
+  .middleware([requireSupabaseAuth])
+  .handler(async ({ context }) => {
+    const admin = await assertAdmin(context.userId, context.supabase);
+    const { data, error } = await admin.from("site_settings").select("key,value");
+    if (error) throw new Error(error.message);
+    const map: Record<string, Json> = {};
+    for (const row of data ?? []) map[row.key] = row.value as Json;
+    return { settings: map };
+  });
+
+export const adminSetSetting = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((input: unknown) =>
+    z.object({
+      key: z.string().min(1).max(80).regex(/^[a-z0-9_]+$/),
+      value: z.unknown(),
+    }).parse(input),
+  )
+  .handler(async ({ data, context }) => {
+    const admin = await assertAdmin(context.userId, context.supabase);
+    const { error } = await admin
+      .from("site_settings")
+      .upsert({ key: data.key, value: data.value as Json }, { onConflict: "key" });
+    if (error) throw new Error(error.message);
+    clearPublicCaches();
+    return { ok: true };
+  });
+
+// Admin: subscribers
+export const adminListSubscribers = createServerFn({ method: "GET" })
+  .middleware([requireSupabaseAuth])
+  .handler(async ({ context }) => {
+    const admin = await assertAdmin(context.userId, context.supabase);
+    const { data, error } = await admin
+      .from("newsletter_subscribers")
+      .select("*")
+      .order("created_at", { ascending: false });
+    if (error) throw new Error(error.message);
+    return { subscribers: data ?? [] };
+  });
+
+export const adminDeleteSubscriber = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((input: unknown) => z.object({ id: z.string().uuid() }).parse(input))
+  .handler(async ({ data, context }) => {
+    const admin = await assertAdmin(context.userId, context.supabase);
+    const { error } = await admin.from("newsletter_subscribers").delete().eq("id", data.id);
+    if (error) throw new Error(error.message);
+    return { ok: true };
+  });
+
+// Helper: recursively list all files in a Supabase storage bucket
+async function listAllStorageFilesRecursive(
+  adminClient: any,
+  bucket: string,
+  folderPath: string = ""
+): Promise<Array<{ name: string; url: string; size: number; created_at: string | null }>> {
+  const { data, error } = await adminClient.storage.from(bucket).list(folderPath, {
+    limit: 100,
+  });
+  if (error) {
+    console.error(`[Storage Recursive List Error] Directory: ${folderPath || "root"}:`, error.message);
+    return [];
+  }
+
+  let results: Array<{ name: string; url: string; size: number; created_at: string | null }> = [];
+  const url = process.env.SUPABASE_URL!;
+
+  for (const item of (data ?? [])) {
+    if (item.id === null && item.metadata === null) {
+      // It is a directory, recurse into it!
+      const subPath = folderPath ? `${folderPath}/${item.name}` : item.name;
+      const subFiles = await listAllStorageFilesRecursive(adminClient, bucket, subPath);
+      results = results.concat(subFiles);
+    } else if (item.name && !item.name.startsWith(".")) {
+      // It is a file!
+      const fullPath = folderPath ? `${folderPath}/${item.name}` : item.name;
+      results.push({
+        name: fullPath,
+        url: `${url}/storage/v1/object/public/${bucket}/${fullPath}`,
+        size: item.metadata?.size ?? 0,
+        created_at: item.created_at ?? null,
+      });
+    }
+  }
+
+  return results;
+}
+
+// Admin: media (list + delete via service role; uploads go through browser supabase client with auth)
+export const adminListMedia = createServerFn({ method: "GET" })
+  .middleware([requireSupabaseAuth])
+  .handler(async ({ context }) => {
+    const admin = await assertAdmin(context.userId, context.supabase);
+    const files = await listAllStorageFilesRecursive(admin, "media");
+    
+    // Sort files by created_at desc (newest first)
+    files.sort((a, b) => {
+      const dateA = a.created_at ? new Date(a.created_at).getTime() : 0;
+      const dateB = b.created_at ? new Date(b.created_at).getTime() : 0;
+      return dateB - dateA;
+    });
+
+    return { files };
+  });
+
+export const adminDeleteMedia = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((input: unknown) => z.object({ name: z.string().min(1).max(255) }).parse(input))
+  .handler(async ({ data, context }) => {
+    const admin = await assertAdmin(context.userId, context.supabase);
+    const { error } = await admin.storage.from("media").remove([data.name]);
+    if (error) throw new Error(error.message);
+    return { ok: true };
+  });
+
+export const checkIsAdmin = createServerFn({ method: "GET" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((input: unknown) => 
+    z.object({ token: z.string().optional() }).parse(input)
+  )
+  .handler(async ({ data, context }) => {
+    try {
+      const isDev = process.env.NODE_ENV === "development" || import.meta.env.DEV;
+      if (process.env.BYPASS_ADMIN === "true" || import.meta.env.VITE_BYPASS_ADMIN === "true" || isDev) {
+        return { isAdmin: true };
+      }
+
+      let userId = context?.userId;
+      let client: any = null;
+
+      if (data?.token) {
+        const { createClient } = await import("@supabase/supabase-js");
+        const url = import.meta.env.VITE_SUPABASE_URL || process.env.SUPABASE_URL;
+        const key = import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY || import.meta.env.VITE_SUPABASE_ANON_KEY || process.env.SUPABASE_PUBLISHABLE_KEY;
+        client = createClient(url!, key!);
+        const { data: userData, error: userError } = await client.auth.getUser(data.token);
+        if (!userError && userData?.user) {
+          userId = userData.user.id;
+        }
+      }
+
+      if (!userId) {
+        throw new Error("Unauthorized: No user ID found");
+      }
+
+      await assertAdmin(userId, client || context?.supabase);
+      return { isAdmin: true };
+    } catch (err) {
+      console.error("[checkIsAdmin Error]:", err);
+      return { isAdmin: false };
+    }
+  });
+
+// Admin: analytics aggregation
+type ArtistLite = { id: string; name: string; image_url: string | null };
+type ViewRow = { artist_id: string; created_at: string };
+type ClickRow = { artist_id: string; link_type: string; created_at: string };
+
+export const adminGetAnalytics = createServerFn({ method: "GET" })
+  .middleware([requireSupabaseAuth])
+  .handler(async ({ context }) => {
+    const admin = await assertAdmin(context.userId, context.supabase);
+    const now = Date.now();
+    const since30 = new Date(now - 30 * 24 * 60 * 60 * 1000).toISOString();
+    const since7 = new Date(now - 7 * 24 * 60 * 60 * 1000).toISOString();
+    const since14 = new Date(now - 14 * 24 * 60 * 60 * 1000).toISOString();
+
+    const [artistsRes, viewsRes, clicksRes, sessionsRes] = await Promise.all([
+      admin.from("artists").select("id,name,image_url").eq("published", true),
+      admin.from("artist_views").select("artist_id,created_at").gte("created_at", since30),
+      admin.from("artist_clicks").select("artist_id,link_type,created_at").gte("created_at", since30),
+      admin.from("artist_sessions").select("id,last_seen", { count: "exact", head: false }).gte("last_seen", since30),
+    ]);
+
+    if (artistsRes.error) throw new Error(artistsRes.error.message);
+    if (viewsRes.error) throw new Error(viewsRes.error.message);
+    if (clicksRes.error) throw new Error(clicksRes.error.message);
+    if (sessionsRes.error) throw new Error(sessionsRes.error.message);
+
+    const artists = (artistsRes.data ?? []) as ArtistLite[];
+    const views = (viewsRes.data ?? []) as ViewRow[];
+    const clicks = (clicksRes.data ?? []) as ClickRow[];
+
+    const artistMap = new Map<string, ArtistLite>();
+    for (const a of artists) artistMap.set(a.id, a);
+
+    // Per-artist aggregates
+    type Agg = {
+      id: string;
+      name: string;
+      image_url: string | null;
+      views_30d: number;
+      clicks_30d: number;
+      views_7d: number;
+      views_prev_7d: number;
+      clicks_7d: number;
+      engagement: number;
+      growth_pct: number | null;
+    };
+    const map = new Map<string, Agg>();
+    const ensure = (id: string): Agg | null => {
+      if (map.has(id)) return map.get(id)!;
+      const a = artistMap.get(id);
+      if (!a) return null;
+      const agg: Agg = {
+        id,
+        name: a.name,
+        image_url: a.image_url,
+        views_30d: 0,
+        clicks_30d: 0,
+        views_7d: 0,
+        views_prev_7d: 0,
+        clicks_7d: 0,
+        engagement: 0,
+        growth_pct: null,
+      };
+      map.set(id, agg);
+      return agg;
+    };
+
+    for (const v of views) {
+      const a = ensure(v.artist_id);
+      if (!a) continue;
+      a.views_30d += 1;
+      if (v.created_at >= since7) a.views_7d += 1;
+      else if (v.created_at >= since14) a.views_prev_7d += 1;
+    }
+    for (const c of clicks) {
+      const a = ensure(c.artist_id);
+      if (!a) continue;
+      a.clicks_30d += 1;
+      if (c.created_at >= since7) a.clicks_7d += 1;
+    }
+    for (const a of map.values()) {
+      a.engagement = a.views_30d + a.clicks_30d * 3;
+      if (a.views_prev_7d > 0) {
+        a.growth_pct = Math.round(((a.views_7d - a.views_prev_7d) / a.views_prev_7d) * 100);
+      } else if (a.views_7d > 0) {
+        a.growth_pct = 100;
+      } else {
+        a.growth_pct = 0;
+      }
+    }
+
+    // Ensure every published artist appears even with zero data
+    for (const a of artists) ensure(a.id);
+
+    const aggList = Array.from(map.values());
+    const leaderboard = [...aggList].sort((a, b) => b.engagement - a.engagement).slice(0, 10);
+    const trending = [...aggList]
+      .filter((a) => a.views_7d > 0)
+      .sort((a, b) => (b.growth_pct ?? 0) - (a.growth_pct ?? 0))
+      .slice(0, 5);
+
+    // Daily time series (last 30 days)
+    const days: { date: string; views: number; clicks: number }[] = [];
+    const byDay = new Map<string, { views: number; clicks: number }>();
+    for (let i = 29; i >= 0; i--) {
+      const d = new Date(now - i * 24 * 60 * 60 * 1000);
+      const key = d.toISOString().slice(0, 10);
+      byDay.set(key, { views: 0, clicks: 0 });
+    }
+    for (const v of views) {
+      const k = v.created_at.slice(0, 10);
+      const e = byDay.get(k);
+      if (e) e.views += 1;
+    }
+    for (const c of clicks) {
+      const k = c.created_at.slice(0, 10);
+      const e = byDay.get(k);
+      if (e) e.clicks += 1;
+    }
+    for (const [date, v] of byDay) days.push({ date, ...v });
+
+    // Click breakdown by link_type
+    const breakdownMap = new Map<string, number>();
+    for (const c of clicks) {
+      breakdownMap.set(c.link_type, (breakdownMap.get(c.link_type) ?? 0) + 1);
+    }
+    const click_breakdown = Array.from(breakdownMap.entries())
+      .map(([type, count]) => ({ type, count }))
+      .sort((a, b) => b.count - a.count);
+
+    const totals = {
+      views_30d: views.length,
+      clicks_30d: clicks.length,
+      sessions_30d: sessionsRes.count ?? 0,
+      artists: artists.length,
+      views_7d: views.filter((v) => v.created_at >= since7).length,
+      clicks_7d: clicks.filter((c) => c.created_at >= since7).length,
+    };
+
+    return {
+      totals,
+      leaderboard,
+      trending,
+      days,
+      click_breakdown,
+      most_viewed: leaderboard[0] ?? null,
+    };
+  });
+
+// Helper: Ensure required Supabase storage buckets exist and are public
+async function ensureBucketsExist() {
+  const admin = getAdminClient();
+  try {
+    const { data: buckets, error } = await admin.storage.listBuckets();
+    if (error) throw error;
+    
+    const existing = buckets?.map(b => b.name) ?? [];
+    
+    if (!existing.includes("artist-photos")) {
+      const { error: err } = await admin.storage.createBucket("artist-photos", { public: true });
+      if (err) console.error("Error creating bucket artist-photos:", err.message);
+    }
+    
+    if (!existing.includes("artist-portfolios")) {
+      const { error: err } = await admin.storage.createBucket("artist-portfolios", { public: true });
+      if (err) console.error("Error creating bucket artist-portfolios:", err.message);
+    }
+  } catch (err: any) {
+    console.error("Bucket auto-initializer warning:", err.message);
+  }
+}
+
+// Public: submit artist application
+export const submitArtistApplication = createServerFn({ method: "POST" })
+  .inputValidator((input: unknown) =>
+    z.object({
+      fullName: z.string().min(1, "Name is required").max(120),
+      email: z.string().email("Invalid email format").max(120),
+      artistName: z.string().min(1, "Artist name is required").max(120),
+      spotifyLink: z.string().max(1000).optional().nullable(),
+      campaignDetails: z.string().max(2000).optional().nullable(),
+      artistPhotoUrl: z.string().url().optional().nullable(),
+      epkUrl: z.string().url().optional().nullable(),
+    }).parse(input)
+  )
+  .handler(async ({ data }) => {
+    // Dynamically ensure required storage buckets exist
+    await ensureBucketsExist();
+
+    // Sanitize inputs
+    const sanitized = {
+      full_name: data.fullName.trim(),
+      email: data.email.trim().toLowerCase(),
+      artist_name: data.artistName.trim(),
+      spotify_link: data.spotifyLink ? data.spotifyLink.trim() : null,
+      campaign_details: data.campaignDetails ? data.campaignDetails.trim() : null,
+      artist_photo_url: data.artistPhotoUrl ? data.artistPhotoUrl.trim() : null,
+      epk_url: data.epkUrl ? data.epkUrl.trim() : null,
+      status: "Pending",
+    };
+
+    // Validate Spotify URL format if provided
+    if (sanitized.spotify_link && !/^https?:\/\//i.test(sanitized.spotify_link)) {
+      throw new Error("Invalid Spotify URL format");
+    }
+
+    const admin = getAdminClient();
+    const { error } = await admin.from("artist_applications").insert(sanitized);
+    if (error) {
+      throw new Error(error.message);
+    }
+    return { ok: true };
+  });
+
+// Admin: list artist applications
+export const adminListApplications = createServerFn({ method: "GET" })
+  .middleware([requireSupabaseAuth])
+  .handler(async ({ context }) => {
+    const admin = await assertAdmin(context.userId, context.supabase);
+    const { data, error } = await admin
+      .from("artist_applications")
+      .select("*")
+      .order("submitted_at", { ascending: false });
+    if (error) throw new Error(error.message);
+    return { applications: data ?? [] };
+  });
+
+// Admin: update application status
+export const adminUpdateApplicationStatus = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((input: unknown) =>
+    z.object({
+      id: z.string().uuid(),
+      status: z.enum(["Pending", "Reviewed", "Approved", "Rejected"]),
+    }).parse(input)
+  )
+  .handler(async ({ data, context }) => {
+    const admin = await assertAdmin(context.userId, context.supabase);
+    const { error } = await admin
+      .from("artist_applications")
+      .update({ status: data.status })
+      .eq("id", data.id);
+    if (error) throw new Error(error.message);
+    return { ok: true };
+  });
+
+// Helper: Extract storage path from Supabase public URL
+function extractStoragePath(url: string | null, bucket: string): string | null {
+  if (!url) return null;
+  try {
+    const searchStr = `/storage/v1/object/public/${bucket}/`;
+    const index = url.indexOf(searchStr);
+    if (index !== -1) {
+      return url.substring(index + searchStr.length);
+    }
+    const parts = url.split(`/${bucket}/`);
+    if (parts.length > 1) {
+      return parts[1];
+    }
+  } catch (e) {
+    console.error("Error parsing storage path:", e);
+  }
+  return null;
+}
+
+// Admin: delete application (with synchronized storage cleanup)
+export const adminDeleteApplication = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((input: unknown) => z.object({ id: z.string().uuid() }).parse(input))
+  .handler(async ({ data, context }) => {
+    const admin = await assertAdmin(context.userId, context.supabase);
+    
+    // 1. Retrieve application record before deletion to locate storage paths
+    const { data: record, error: getError } = await admin
+      .from("artist_applications")
+      .select("artist_photo_url, epk_url")
+      .eq("id", data.id)
+      .single();
+      
+    if (getError && getError.code !== "PGRST116") {
+      throw new Error(getError.message);
+    }
+
+    // 2. Perform physical storage deletion if URLs exist
+    if (record) {
+      if (record.artist_photo_url) {
+        const path = extractStoragePath(record.artist_photo_url, "artist-photos");
+        if (path) {
+          const { error: delPhotoError } = await admin.storage.from("artist-photos").remove([path]);
+          if (delPhotoError) {
+            console.error("Storage clean warning (photo):", delPhotoError.message);
+          }
+        }
+      }
+      if (record.epk_url) {
+        const path = extractStoragePath(record.epk_url, "artist-portfolios");
+        if (path) {
+          const { error: delEpkError } = await admin.storage.from("artist-portfolios").remove([path]);
+          if (delEpkError) {
+            console.error("Storage clean warning (EPK):", delEpkError.message);
+          }
+        }
+      }
+    }
+
+    // 3. Delete database record
+    const { error: deleteDbError } = await admin.from("artist_applications").delete().eq("id", data.id);
+    if (deleteDbError) throw new Error(deleteDbError.message);
+    
+    return { ok: true };
+  });
+
+// Founder Spotlight Schema
+const FounderSpotlightSchema = z.object({
+  id: z.string().uuid().optional(),
+  founder_name: z.string().min(1),
+  founder_title: z.string().min(1),
+  founder_badge: z.string().min(1),
+  founder_description: z.string().min(1),
+  stat_1_label: z.string().min(1),
+  stat_1_value: z.string().min(1),
+  stat_2_label: z.string().min(1),
+  stat_2_value: z.string().min(1),
+  stat_3_label: z.string().min(1),
+  stat_3_value: z.string().min(1),
+  founder_image_url: z.string().nullable().optional(),
+  founder_image_alt: z.string().min(1),
+  is_visible: z.boolean().default(true),
+});
+
+export const DEFAULT_SPOTLIGHT = {
+  founder_name: "Gucci Mane",
+  founder_title: "Gucci Mane",
+  founder_badge: "1017 FOUNDER // A&R CHIEF",
+  founder_description: "Gucci Mane is the visionary architect of modern trap music. By establishing 1017 Records, he built an elite talent incubator that pioneered soundwaves and launched global careers. With deep instinctual expertise, he continues to identify, sign, and launch independent artists onto the world stage, making the 1017 Records network the ultimate launchpad.",
+  stat_1_label: "Signed Alumni",
+  stat_1_value: "12+",
+  stat_2_label: "Streams Built",
+  stat_2_value: "5B+",
+  stat_3_label: "Careers Run",
+  stat_3_value: "PLATINUM",
+  founder_image_url: "https://vveslmalxlprmlfcdjae.supabase.co/storage/v1/object/public/media/founder/spotlight-1780301297380.jpg",
+  founder_image_alt: "Gucci Mane Founder Showcase",
+  is_visible: true,
+};
+
+export function sanitizeSpotlightData(data: any): any {
+  if (!data || typeof data !== "object") return DEFAULT_SPOTLIGHT;
+  return {
+    id: data.id || undefined,
+    founder_name: data.founder_name || DEFAULT_SPOTLIGHT.founder_name,
+    founder_title: data.founder_title || DEFAULT_SPOTLIGHT.founder_title,
+    founder_badge: data.founder_badge || DEFAULT_SPOTLIGHT.founder_badge,
+    founder_description: data.founder_description || DEFAULT_SPOTLIGHT.founder_description,
+    stat_1_label: data.stat_1_label || DEFAULT_SPOTLIGHT.stat_1_label,
+    stat_1_value: data.stat_1_value || DEFAULT_SPOTLIGHT.stat_1_value,
+    stat_2_label: data.stat_2_label || DEFAULT_SPOTLIGHT.stat_2_label,
+    stat_2_value: data.stat_2_value || DEFAULT_SPOTLIGHT.stat_2_value,
+    stat_3_label: data.stat_3_label || DEFAULT_SPOTLIGHT.stat_3_label,
+    stat_3_value: data.stat_3_value || DEFAULT_SPOTLIGHT.stat_3_value,
+    founder_image_url: data.founder_image_url || DEFAULT_SPOTLIGHT.founder_image_url,
+    founder_image_alt: data.founder_image_alt || DEFAULT_SPOTLIGHT.founder_image_alt,
+    is_visible: data.is_visible !== false,
+  };
+}
+
+async function getOrCreateFounderSpotlight(admin: any) {
+  try {
+    const { data, error } = await admin.from("founder_spotlight").select("*").maybeSingle();
+    if (!error && data) {
+      return sanitizeSpotlightData(data);
+    }
+    if (!error && !data) {
+      const { data: inserted, error: insertError } = await admin
+        .from("founder_spotlight")
+        .insert({
+          id: "d18d4d9b-d805-4c07-b0b2-0be724c9657b",
+          ...DEFAULT_SPOTLIGHT
+        })
+        .select()
+        .maybeSingle();
+      if (!insertError && inserted) {
+        return sanitizeSpotlightData(inserted);
+      }
+    }
+    if (error) {
+      console.warn("⚠️ [founder_spotlight table select error]:", error.message);
+    }
+  } catch (err: any) {
+    console.warn("⚠️ [founder_spotlight table exception]:", err.message);
+  }
+
+  // Fallback to site_settings
+  try {
+    const { data: settingsRow, error: settingsError } = await admin
+      .from("site_settings")
+      .select("value")
+      .eq("key", "founder_spotlight")
+      .maybeSingle();
+    if (!settingsError && settingsRow?.value) {
+      return sanitizeSpotlightData(settingsRow.value);
+    }
+    const { error: upsertError } = await admin
+      .from("site_settings")
+      .upsert({ key: "founder_spotlight", value: DEFAULT_SPOTLIGHT }, { onConflict: "key" });
+    if (!upsertError) {
+      return DEFAULT_SPOTLIGHT;
+    }
+  } catch (err: any) {
+    console.warn("⚠️ [site_settings fallback exception]:", err.message);
+  }
+
+  return DEFAULT_SPOTLIGHT;
+}
+
+export const adminGetFounderSpotlight = createServerFn({ method: "GET" })
+  .middleware([requireSupabaseAuth])
+  .handler(async ({ context }) => {
+    const admin = await assertAdmin(context.userId, context.supabase);
+    const data = await getOrCreateFounderSpotlight(admin);
+    return { data };
+  });
+
+export const adminSaveFounderSpotlight = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((input: unknown) => {
+    if (!input || typeof input !== "object") {
+      throw new Error("Invalid payload: expected an object");
+    }
+    return FounderSpotlightSchema.parse(input);
+  })
+  .handler(async ({ data, context }) => {
+    const admin = await assertAdmin(context.userId, context.supabase);
+    const sanitized = sanitizeSpotlightData(data);
+    try {
+      if (sanitized.id) {
+        const { id, ...rest } = sanitized;
+        const { error } = await admin.from("founder_spotlight").update(rest).eq("id", id);
+        if (error) throw error;
+      } else {
+        const { error } = await admin.from("founder_spotlight").insert(sanitized);
+        if (error) throw error;
+      }
+      clearPublicCaches();
+      return { ok: true };
+    } catch (err: any) {
+      console.warn("⚠️ [founder_spotlight save fallback]:", err.message);
+      const { error: settingsError } = await admin
+        .from("site_settings")
+        .upsert({ key: "founder_spotlight", value: sanitized }, { onConflict: "key" });
+      if (settingsError) throw new Error(settingsError.message);
+      clearPublicCaches();
+      return { ok: true };
+    }
+  });
+
+export const getPublicFounderSpotlight = createServerFn({ method: "GET" })
+  .handler(async () => {
+    const admin = getAdminClient();
+    const data = await getOrCreateFounderSpotlight(admin);
+    return { data };
+  });
+
+// Media Gallery schemas & Server Functions
+const GalleryImageSchema = z.object({
+  id: z.string().uuid().optional(),
+  artist_id: z.string().uuid(),
+  image_url: z.string(),
+  caption: z.string().max(500).nullable().optional().default(""),
+  credit: z.string().max(200).nullable().optional().default(""),
+  category: z.enum(["Press Photo", "Performance", "Studio Session", "Behind The Scenes", "Lifestyle"]).default("Press Photo"),
+  sort_order: z.number().int().min(0).max(9999).default(0),
+  featured: z.boolean().default(false),
+});
+
+export const getArtistMediaGallery = createServerFn({ method: "GET" })
+  .inputValidator((input: unknown) => z.object({ artistId: z.string().uuid() }).parse(input))
+  .handler(async ({ data }) => {
+    const admin = getAdminClient();
+    const { data: gallery, error } = await admin
+      .from("media_gallery")
+      .select("*")
+      .eq("artist_id", data.artistId)
+      .order("sort_order", { ascending: true })
+      .order("created_at", { ascending: true });
+    if (error) {
+      console.warn("⚠️ [getArtistMediaGallery error]:", error.message);
+      return { gallery: [] };
+    }
+    return { gallery: gallery ?? [] };
+  });
+
+export const adminUpsertGalleryImage = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((input: unknown) => GalleryImageSchema.parse(input))
+  .handler(async ({ data, context }) => {
+    const admin = await assertAdmin(context.userId, context.supabase);
+    if (data.id) {
+      const { id, ...rest } = data;
+      const { error } = await admin.from("media_gallery").update(rest).eq("id", id);
+      if (error) throw new Error(error.message);
+      return { id };
+    } else {
+      const { id: _ignore, ...rest } = data;
+      const { data: row, error } = await admin.from("media_gallery").insert(rest).select("id").single();
+      if (error) throw new Error(error.message);
+      return { id: row.id };
+    }
+  });
+
+export const adminDeleteGalleryImage = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((input: unknown) => z.object({ id: z.string().uuid() }).parse(input))
+  .handler(async ({ data, context }) => {
+    const admin = await assertAdmin(context.userId, context.supabase);
+    const { error } = await admin.from("media_gallery").delete().eq("id", data.id);
+    if (error) throw new Error(error.message);
+    return { ok: true };
+  });
