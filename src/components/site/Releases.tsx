@@ -462,7 +462,7 @@ export function Releases() {
   };
 
   return (
-    <section id="releases" className="relative border-y border-white/5 bg-white/[0.01] px-6 py-32 md:px-10 cyber-grid-dots">
+    <section id="releases" className="relative border-t border-white/5 bg-[#000000] px-6 py-32 md:px-10 cyber-grid-dots">
       <div className="pointer-events-none absolute left-1/4 bottom-0 -z-10 h-[50vmin] w-[50vmin] glow-red opacity-10" />
 
       <div className="mx-auto max-w-[1600px] relative">
@@ -521,12 +521,10 @@ export function Releases() {
                   whileInView={{ opacity: 1, y: 0 }}
                   viewport={{ once: true, amount: 0.1 }}
                   transition={{ duration: 1, ease: [0.22, 1, 0.36, 1] }}
-                  className="col-span-1 sm:col-span-2 lg:col-span-4 group relative rounded-3xl border border-white/5 bg-gradient-to-br from-zinc-950 via-[#0a0c10] to-black p-6 md:p-8 flex flex-col md:flex-row items-stretch gap-6 md:gap-10 shadow-[0_20px_50px_rgba(0,0,0,0.8)] hover:border-white/12 transition-all duration-700 hover:-translate-y-1.5 overflow-hidden"
+                  className="col-span-1 sm:col-span-2 lg:col-span-4 group relative bg-transparent py-8 flex flex-col md:flex-row items-stretch gap-6 md:gap-10 border-b border-white/5 transition-all duration-700 overflow-hidden"
                 >
-                  <div className="absolute inset-x-0 top-0 h-[1px] bg-gradient-to-r from-transparent via-white/12 to-transparent z-10 pointer-events-none" />
-
                   {/* Left Column: Cover Artwork (Primary Focus) */}
-                  <div className="w-full md:w-[38%] aspect-square shrink-0 rounded-2xl overflow-hidden border border-white/5 relative shadow-[0_25px_60px_rgba(0,0,0,0.85)] group-hover:shadow-[0_30px_70px_rgba(0,0,0,0.95)] transition-all duration-700">
+                  <div className="w-full md:w-[38%] aspect-square shrink-0 rounded-none overflow-hidden border border-white/5 relative transition-all duration-700">
                     {r.cover_url ? (
                       <PremiumImage
                         src={r.cover_url}
@@ -553,7 +551,7 @@ export function Releases() {
                         {activeBadges.map((badge) => (
                           <div
                             key={badge.id}
-                            className={`inline-flex items-center gap-2 px-3.5 py-2.5 rounded-xl text-xs md:text-[13px] tracking-[0.06em] transition-all duration-300 border border-zinc-800/80 border-l-[3.5px] ${
+                            className={`inline-flex items-center gap-2 px-3.5 py-2.5 rounded-none text-xs md:text-[13px] tracking-[0.06em] transition-all duration-300 border border-zinc-800/80 border-l-[3.5px] ${
                               badge.theme === "red" 
                                 ? "bg-[#090a0c]/95 border-l-red-500 text-white" 
                                 : badge.theme === "gold" 
@@ -656,12 +654,10 @@ export function Releases() {
                   whileInView={{ opacity: 1, y: 0 }}
                   viewport={{ once: true, amount: 0.15 }}
                   transition={{ duration: 0.8, delay: i * 0.08, ease: [0.22, 1, 0.36, 1] }}
-                  className="flex flex-col text-left relative bg-gradient-to-b from-white/[0.03] via-[#08090b] to-[#020304] border border-white/5 group-hover:border-white/12 p-3 rounded-2xl transition-all duration-700 shadow-[0_15px_35px_rgba(0,0,0,0.7)] group-hover:shadow-[0_25px_50px_rgba(0,0,0,0.9)] hover:-translate-y-2 overflow-hidden"
+                  className="flex flex-col text-left relative bg-transparent border-none p-0 transition-all duration-700 overflow-hidden"
                 >
-                  <div className="absolute inset-x-0 top-0 h-[1px] bg-gradient-to-r from-transparent via-white/12 to-transparent z-10 pointer-events-none" />
-
                   {/* Artwork (Primary Focus - occupying 80% visual attention) */}
-                  <div className="relative aspect-square w-full overflow-hidden rounded-xl bg-black/50 z-10 flex items-center justify-center border border-white/5">
+                  <div className="relative aspect-square w-full overflow-hidden rounded-none bg-black/50 z-10 flex items-center justify-center border border-white/5">
                     
                     {/* Outer gradient shadow */}
                     <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/20 to-transparent opacity-85 z-20" />
@@ -691,7 +687,7 @@ export function Releases() {
                         {activeBadges.map((badge) => (
                           <div
                             key={badge.id}
-                            className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-[9px] font-sans font-bold uppercase tracking-[0.08em] shadow-lg border border-zinc-800/80 border-l-[3.5px] ${
+                            className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-none text-[9px] font-sans font-bold uppercase tracking-[0.08em] shadow-lg border border-zinc-800/80 border-l-[3.5px] ${
                               badge.theme === "red" 
                                 ? "bg-[#090a0c]/95 border-l-red-500 text-white" 
                                 : badge.theme === "gold" 
@@ -728,7 +724,7 @@ export function Releases() {
                   </div>
 
                   {/* Info & Data specifications */}
-                  <div className="mt-4 px-1.5 flex flex-col gap-2.5 relative z-10">
+                  <div className="mt-4 flex flex-col gap-2.5 relative z-10">
                     <div className="space-y-1">
                       <div className="flex items-center justify-between gap-2.5">
                         <h3 className="font-display text-2xl uppercase tracking-tight text-white group-hover:text-[#d4af37] transition-colors duration-500 truncate" title={r.title}>

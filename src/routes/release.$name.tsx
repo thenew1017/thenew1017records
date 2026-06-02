@@ -579,16 +579,16 @@ function ReleaseDetailPage() {
                 ref={cardRef}
                 onMouseMove={handleMouseMove}
                 onMouseLeave={handleMouseLeave}
-                className="relative aspect-square w-full rounded-2xl overflow-hidden bg-black/40 border border-white/10 shadow-[0_30px_70px_rgba(0,0,0,0.85)] transform-gpu transition-transform duration-200 ease-out"
+                className="relative aspect-square w-full rounded-none overflow-hidden bg-black/40 border border-white/5 transform-gpu transition-transform duration-200 ease-out"
                 style={{
-                  transform: `perspective(1000px) rotateX(${rotateX}deg) rotateY(${rotateY}deg) scale3d(1.02, 1.02, 1.02)`,
+                  transform: `perspective(1000px) rotateX(${rotateX}deg) rotateY(${rotateY}deg) scale3d(1, 1, 1)`,
                 }}
               >
                 {/* Outer gradient shadow */}
                 <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/30 to-transparent opacity-85 z-20" />
 
                 {/* Sub-pixel rim lighting (Anodized Metal Highlight) */}
-                <div className="absolute inset-0 z-30 pointer-events-none rounded-2xl border border-white/5" style={{ boxShadow: "inset 0 1px 0px rgba(255,255,255,0.08)" }} />
+                <div className="absolute inset-0 z-30 pointer-events-none rounded-none border border-white/5" style={{ boxShadow: "inset 0 1px 0px rgba(255,255,255,0.08)" }} />
 
                 {release.cover_url ? (
                   <PremiumImage
@@ -621,10 +621,9 @@ function ReleaseDetailPage() {
 
           {/* RIGHT: Release specifications & metadata */}
           <div className="lg:col-span-7 space-y-8">
-            <div className="inline-flex items-center gap-3 border border-white/5 bg-white/5 px-3 py-1 rounded-full text-[9px] font-bold uppercase tracking-[0.35em] text-accent backdrop-blur-md">
-              <span className="h-1.5 w-1.5 rounded-full bg-accent animate-pulse shadow-[0_0_8px_var(--color-accent)]" />
-              ACTIVE RELEASE SIGNATURE // CORE CAT-1017
-            </div>
+            <span className="text-[10px] font-mono tracking-[0.35em] text-[#E5D5C0] block font-bold">
+              CAT-1017 // OFFICIAL RELEASE SIGNATURE
+            </span>
 
             <div className="space-y-3">
               <span className="text-[10px] font-mono uppercase tracking-[0.4em] text-white/50 block">
@@ -639,51 +638,68 @@ function ReleaseDetailPage() {
               </p>
             </div>
 
-            {/* Certifications Plaquette Stickers */}
+            {/* Certifications Luxury Editorial-style status chips */}
             {activeBadges.length > 0 && (
-              <div className="flex flex-wrap gap-3 pt-2">
+              <div className="flex flex-wrap gap-4 pt-3">
                 {activeBadges.map((badge) => (
                   <div
                     key={badge.id}
-                    className={`inline-flex items-center gap-2.5 px-4.5 py-2.5 rounded-xl text-xs tracking-[0.06em] shadow-lg ${getThemeClasses(badge.theme)}`}
-                    style={{
-                      boxShadow: "0 8px 16px rgba(0,0,0,0.6), inset 0 1px 0px rgba(255,255,255,0.04)"
-                    }}
+                    className="inline-flex items-center gap-2 px-4.5 py-2 border border-[#E5D5C0]/25 bg-transparent text-[9px] font-bold tracking-[0.2em] text-[#E5D5C0] font-sans rounded-full uppercase"
                   >
-                    <span className="shrink-0">{getBadgeIcon(badge.theme, "h-4.5 w-4.5")}</span>
-                    <span className="leading-none">{badge.title}</span>
+                    <span className="h-1.5 w-1.5 rounded-full bg-[#E5D5C0] shadow-[0_0_8px_rgba(229,213,192,0.5)] animate-pulse" />
+                    {badge.title}
                   </div>
                 ))}
               </div>
             )}
 
-            {/* Specifications Details Dossier */}
-            <div className="border border-white/5 bg-white/[0.01] p-6 rounded-2xl space-y-4 backdrop-blur-sm">
-              <p className="text-[9px] font-mono uppercase tracking-widest text-white/40 border-b border-white/5 pb-2">
-                TECHNICAL CAMPAIGN METRIC LOG
-              </p>
-              
-              <div className="grid grid-cols-2 gap-4 text-xs font-mono uppercase text-muted-foreground">
-                <div>
-                  <span className="text-white/30 block text-[9px] tracking-widest">RELEASE DATE</span>
-                  <span className="text-white font-bold">{release.release_date || "2026-05-31"}</span>
-                </div>
-                <div>
-                  <span className="text-white/30 block text-[9px] tracking-widest">FORMAT SIGNATURE</span>
-                  <span className="text-white font-bold">{release.format}</span>
-                </div>
-                <div>
-                  <span className="text-white/30 block text-[9px] tracking-widest">PRIMARY GENRE</span>
-                  <span className="text-white font-bold text-accent">{release.genre || "TRAP"}</span>
-                </div>
-                <div>
-                  <span className="text-white/30 block text-[9px] tracking-widest">ACTIVE STATUS</span>
-                  <span className="text-green-400 font-bold flex items-center gap-1.5">
+            {/* Editorial Information Panel */}
+            <div className="w-full border-t border-white/[0.08] pt-8 mt-12 space-y-6">
+              <div className="grid grid-cols-2 sm:grid-cols-4 gap-8">
+                
+                {/* Release Status */}
+                <div className="space-y-2">
+                  <span className="block font-display text-[9px] tracking-[0.3em] text-[#E5D5C0]/60 uppercase font-black">
+                    RELEASE STATUS
+                  </span>
+                  <span className="block font-sans text-xs sm:text-sm font-bold uppercase tracking-wider text-green-400 flex items-center gap-1.5">
                     <span className="h-1.5 w-1.5 rounded-full bg-green-500 animate-pulse shadow-[0_0_6px_rgba(34,197,94,0.8)]" />
-                    LIVE DSP STREAM
+                    LIVE DISTRIBUTION
                   </span>
                 </div>
+
+                {/* Release Year */}
+                <div className="space-y-2">
+                  <span className="block font-display text-[9px] tracking-[0.3em] text-[#E5D5C0]/60 uppercase font-black">
+                    RELEASE YEAR
+                  </span>
+                  <span className="block font-sans text-xs sm:text-sm font-bold uppercase tracking-wider text-white">
+                    {release.release_date ? new Date(release.release_date).getFullYear() : "2026"}
+                  </span>
+                </div>
+
+                {/* Genre */}
+                <div className="space-y-2">
+                  <span className="block font-display text-[9px] tracking-[0.3em] text-[#E5D5C0]/60 uppercase font-black">
+                    GENRE
+                  </span>
+                  <span className="block font-sans text-xs sm:text-sm font-bold uppercase tracking-wider text-white">
+                    {release.genre ? release.genre.toUpperCase() : "TRAP / HIP-HOP"}
+                  </span>
+                </div>
+
+                {/* Certification */}
+                <div className="space-y-2">
+                  <span className="block font-display text-[9px] tracking-[0.3em] text-[#E5D5C0]/60 uppercase font-black">
+                    CERTIFICATION
+                  </span>
+                  <span className="block font-sans text-xs sm:text-sm font-bold uppercase tracking-wider text-accent">
+                    {release.platinum_record ? "PLATINUM" : release.gold_record ? "GOLD" : release.verified_hit ? "HIT RECORD" : "OFFICIAL"}
+                  </span>
+                </div>
+
               </div>
+              <div className="w-full border-b border-white/[0.08] pb-6" />
             </div>
 
             {/* Description */}
@@ -767,13 +783,13 @@ function ReleaseDetailPage() {
                 const relImage = r.cover_url || r1;
                 const relYear = r.release_date ? new Date(r.release_date).getFullYear().toString() : "2026";
                 return (
-                  <Link
+                   <Link
                     key={r.id || r.title}
                     to="/release/$name"
                     params={{ name: slugify(r.title) }}
-                    className="group relative flex flex-col text-left outline-none bg-[#090a0c] p-3 rounded-2xl border border-white/5 hover:border-white/15 transition-all duration-500 hover:-translate-y-1 hover:shadow-2xl"
+                    className="group relative flex flex-col text-left outline-none bg-transparent p-0 border-none transition-all duration-500"
                   >
-                    <div className="relative aspect-square w-full overflow-hidden rounded-xl bg-black/50 border border-white/5">
+                    <div className="relative aspect-square w-full overflow-hidden rounded-none bg-black/50 border border-white/5">
                       <div className="absolute inset-0 bg-gradient-to-t from-black/85 via-black/10 to-transparent opacity-80 z-20" />
                       <PremiumImage
                         src={relImage}

@@ -2,18 +2,29 @@ import { createFileRoute } from "@tanstack/react-router";
 import { Nav } from "@/components/site/Nav";
 import { Hero } from "@/components/site/Hero";
 import { Marquee } from "@/components/site/Marquee";
-import { Newsletter } from "@/components/site/Newsletter";
+import { ArtistCTA } from "@/components/site/ArtistCTA";
 import { Footer } from "@/components/site/Footer";
 import { Artists } from "@/components/site/Artists";
 import { Releases } from "@/components/site/Releases";
-import { Tour } from "@/components/site/Tour";
+import { ArtistDiscovery } from "@/components/site/ArtistDiscovery";
 import { Manifesto } from "@/components/site/Manifesto";
 import { Showcase } from "@/components/site/Showcase";
+
+import { listPublicArtists } from "@/lib/cms.functions";
 
 export const Route = createFileRoute("/")({
   component: Index,
   errorComponent: HomepageErrorComponent,
   pendingComponent: HomepagePendingComponent,
+  loader: async () => {
+    try {
+      const { artists } = await listPublicArtists();
+      return { artists };
+    } catch (err) {
+      console.error("Homepage SSR loader error:", err);
+      return { artists: [] };
+    }
+  },
   head: () => ({
     meta: [
       { title: "The New 1017 Records — A New Era of Sound" },
@@ -62,17 +73,18 @@ function HomepagePendingComponent() {
 }
 
 function Index() {
+  const loaderData = Route.useLoaderData();
   return (
     <main id="top" className="relative min-h-screen bg-background text-foreground grain-overlay">
       <Nav />
       <Hero />
       <Marquee />
-      <Artists />
+      <Artists initialArtists={loaderData?.artists} />
       <Showcase />
       <Manifesto />
       <Releases />
-      <Tour />
-      <Newsletter />
+      <ArtistDiscovery />
+      <ArtistCTA />
       <Footer />
     </main>
   );

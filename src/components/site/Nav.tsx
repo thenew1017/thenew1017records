@@ -5,11 +5,10 @@ import { Link, useLocation } from "@tanstack/react-router";
 import { TransitionLink } from "@/components/ui/PageTransition";
 
 const links = [
-  { label: "Roster", href: "/#artists", hash: "#artists" },
-  { label: "Releases", href: "/#releases", hash: "#releases" },
-  { label: "Media", href: "/#music", hash: "#music" },
-  { label: "Tour", href: "/#tour", hash: "#tour" },
+  { label: "Artists", href: "/#artists", hash: "#artists" },
+  { label: "Discovery", href: "/#discovery", hash: "#discovery" },
   { label: "Manifesto", href: "/#manifesto", hash: "#manifesto" },
+  { label: "Media", href: "/#music", hash: "#music" },
   { label: "Contact", href: "/#contact", hash: "#contact" }
 ];
 
@@ -54,6 +53,35 @@ export function Nav() {
   const [hidden, setHidden] = useState(false);
   const [scrolled, setScrolled] = useState(false);
   const [open, setOpen] = useState(false);
+
+  // Prevent body scrolling when mobile menu is open
+  useEffect(() => {
+    if (open) {
+      document.body.style.overflow = "hidden";
+    } else {
+      document.body.style.overflow = "";
+    }
+    return () => {
+      document.body.style.overflow = "";
+    };
+  }, [open]);
+
+  const handleContactClick = (e: React.MouseEvent) => {
+    e.preventDefault();
+    const username = "1017___.records";
+    const isMobile = /Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
+    if (isMobile) {
+      // Attempt direct app deep link
+      window.location.href = `instagram://user?username=${username}`;
+      // Fallback web url opening
+      setTimeout(() => {
+        window.open(`https://instagram.com/${username}`, "_blank");
+      }, 800);
+    } else {
+      window.open(`https://instagram.com/${username}`, "_blank");
+    }
+  };
+
   const [last, setLast] = useState(0);
   const [activeSection, setActiveSection] = useState("");
   const [mousePos, setMousePos] = useState({ x: 0, y: 0 });
@@ -86,7 +114,7 @@ export function Nav() {
       { rootMargin: "-30% 0px -60% 0px" }
     );
 
-    const ids = ["artists", "releases", "music", "tour", "manifesto", "contact"];
+    const ids = ["artists", "discovery", "manifesto", "music"];
     ids.forEach((id) => {
       const el = document.getElementById(id);
       if (el) observer.observe(el);
@@ -120,7 +148,7 @@ export function Nav() {
         <div 
           ref={headerRef}
           onMouseMove={handleHeaderMouseMove}
-          className={`group mx-auto flex items-center justify-between transition-all duration-500 transform-gpu relative overflow-hidden pointer-events-auto ${
+          className={`group mx-auto flex flex-row-reverse items-center justify-between transition-all duration-500 transform-gpu relative overflow-hidden pointer-events-auto ${
             scrolled 
               ? "max-w-[1360px] h-14 px-6 rounded-full bg-black/50 border border-white/10 shadow-[0_20px_50px_rgba(0,0,0,0.8),0_0_2px_rgba(255,255,255,0.05)_inset] backdrop-blur-xl" 
               : "max-w-[1600px] h-20 px-8 rounded-2xl bg-white/[0.01] border border-white/[0.04] backdrop-blur-md"
@@ -139,7 +167,7 @@ export function Nav() {
 
           {/* LEFT - Logo Area (Staggered Mount) */}
           <motion.div
-            initial={{ opacity: 0, x: -20 }}
+            initial={{ opacity: 0, x: 20 }}
             animate={{ opacity: 1, x: 0 }}
             transition={{ type: "spring", stiffness: 100, damping: 15 }}
           >
@@ -161,7 +189,17 @@ export function Nav() {
           >
             {links.map((l) => {
               const isActive = activeSection ? l.hash === `#${activeSection}` : false;
-              const linkContent = (
+              const isContact = l.label === "Contact";
+              const linkContent = isContact ? (
+                <a
+                  key={l.href}
+                  onClick={handleContactClick}
+                  className="relative py-2 text-[11px] font-bold uppercase tracking-[0.25em] text-white/45 hover:text-white transition-colors duration-300 select-none cursor-pointer"
+                >
+                  {l.label}
+                  <span className="absolute bottom-0 left-1/2 h-[2px] -translate-x-1/2 bg-lux-gold transition-all duration-300 ease-out shadow-[0_0_8px_rgba(229,213,192,0.6)] w-0 opacity-0 group-hover:w-full group-hover:opacity-100" />
+                </a>
+              ) : (
                 <a
                   key={l.href}
                   href={l.href}
@@ -199,7 +237,7 @@ export function Nav() {
             initial="hidden"
             animate="show"
             variants={{
-              hidden: { opacity: 0, x: 20 },
+              hidden: { opacity: 0, x: -20 },
               show: { opacity: 1, x: 0, transition: { type: "spring", stiffness: 100, damping: 15, delay: 0.2 } }
             }}
             className="hidden items-center gap-5 lg:flex"
@@ -213,20 +251,20 @@ export function Nav() {
               <span className="text-white/60">LIVE NETWORK</span>
             </div>
             
-            {/* Outline Secondary CTA (Secure Channel) */}
+            {/* Outline Secondary CTA (Inner Circle) */}
             <a
-              href="#newsletter"
+              href="#artist-cta"
               className="inline-flex items-center justify-center border border-white/10 hover:border-lux-gold bg-white/5 hover:bg-white/[0.08] text-white/80 hover:text-white px-5 py-2.5 text-[9px] font-bold uppercase tracking-[0.25em] transition-all duration-300 active:scale-[0.98] rounded-full"
             >
-              Secure Channel
+              Inner Circle
             </a>
 
-            {/* Premium Gold Gradient Primary CTA (Artist Portal) */}
+            {/* Premium Gold Gradient Primary CTA (Apply for Review) */}
             <TransitionLink
               to="/about-1017"
               className="relative overflow-hidden inline-flex items-center justify-center bg-gradient-to-r from-[#E5D5C0] via-[#F1E5D1] to-[#C9B9A5] text-black px-6 py-2.5 text-[9px] font-black uppercase tracking-[0.25em] transition-all duration-300 hover:scale-[1.03] active:scale-[0.98] hover:shadow-[0_0_20px_rgba(229,213,192,0.35)] rounded-full"
             >
-              Artist Portal
+              Apply for Review
             </TransitionLink>
           </motion.div>
 
@@ -234,10 +272,10 @@ export function Nav() {
           <button
             aria-label="Toggle menu"
             onClick={() => setOpen((v) => !v)}
-            className="relative z-10 flex h-10 w-10 flex-col items-center justify-center gap-1.5 lg:hidden select-none cursor-pointer focus:outline-none"
+            className={`relative z-55 flex h-10 w-10 flex-col items-center justify-center gap-1.5 lg:hidden select-none cursor-pointer focus:outline-none transition-opacity duration-300 ${open ? "opacity-0 pointer-events-none" : "opacity-100"}`}
           >
-            <span className={`h-[2px] w-5 bg-white transition-all duration-300 ${open ? "translate-y-[4px] rotate-45" : ""}`} />
-            <span className={`h-[2px] w-5 bg-white transition-all duration-300 ${open ? "-translate-y-[4px] -rotate-45" : ""}`} />
+            <span className="h-[2px] w-5 bg-white" />
+            <span className="h-[2px] w-5 bg-white" />
           </button>
         </div>
       </motion.header>
@@ -250,30 +288,53 @@ export function Nav() {
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             transition={{ duration: 0.4, ease: [0.16, 1, 0.3, 1] }}
-            className="fixed inset-0 z-40 flex flex-col justify-between bg-black/95 backdrop-blur-2xl px-8 pb-12 pt-32 lg:hidden"
+            className="fixed inset-0 z-50 flex flex-col justify-between bg-black/98 backdrop-blur-3xl px-8 pb-12 pt-32 sm:px-16 lg:hidden"
           >
-            {/* Subtle floating gold background light block */}
-            <div aria-hidden className="absolute left-1/2 top-1/3 h-[70vw] w-[70vw] -translate-x-1/2 -translate-y-1/2 rounded-full bg-lux-gold/5 blur-[120px] pointer-events-none" />
-            
+            {/* Dedicated Top-Right Close Button inside overlay */}
+            <button
+              aria-label="Close menu"
+              onClick={() => setOpen(false)}
+              className="absolute top-6 right-6 sm:top-8 sm:right-10 z-55 flex h-10 w-10 flex-col items-center justify-center gap-1.5 cursor-pointer focus:outline-none group"
+            >
+              <span className="h-[2px] w-5 bg-white rotate-45 translate-y-[2.5px] group-hover:bg-[#D4AF37] transition-colors duration-300" />
+              <span className="h-[2px] w-5 bg-white -rotate-45 -translate-y-[2.5px] group-hover:bg-[#D4AF37] transition-colors duration-300" />
+            </button>
             {/* Centered Large Editorial Navigation Menu */}
-            <div className="flex flex-col gap-6 relative z-10 w-full">
-              {links.map((l, i) => (
-                <motion.a
-                  key={l.href}
-                  href={l.href}
-                  onClick={() => setOpen(false)}
-                  initial={{ opacity: 0, y: 30 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  exit={{ opacity: 0, y: 20 }}
-                  transition={{ delay: i * 0.05, duration: 0.5, ease: [0.16, 1, 0.3, 1] }}
-                  className="group flex items-center justify-between border-b border-white/5 pb-3 font-display text-4xl uppercase tracking-tighter text-white/60 hover:text-white transition-colors duration-300"
-                >
-                  <span>{l.label}</span>
-                  <span className="text-xs font-sans font-bold tracking-[0.2em] text-lux-gold opacity-0 group-hover:opacity-100 transition-opacity duration-300">
-                    // VIEW 0{i + 1}
-                  </span>
-                </motion.a>
-              ))}
+            <div className="flex flex-col gap-6 relative z-10 w-full max-w-4xl mx-auto justify-center flex-grow">
+              {links.map((l, i) => {
+                const isActive = activeSection ? l.hash === `#${activeSection}` : false;
+                const isContact = l.label === "Contact";
+
+                return (
+                   <motion.div
+                     key={l.href}
+                     initial={{ opacity: 0, scale: 0.95, y: 30 }}
+                     animate={{ opacity: 1, scale: 1, y: 0 }}
+                     exit={{ opacity: 0, scale: 0.95, y: 20 }}
+                     transition={{ delay: i * 0.04, duration: 0.6, ease: [0.16, 1, 0.3, 1] }}
+                   >
+                     <a
+                       href={isContact ? undefined : l.href}
+                       onClick={(e) => {
+                         if (isContact) {
+                           handleContactClick(e);
+                         }
+                         setOpen(false);
+                       }}
+                       className={`group flex items-baseline justify-between border-b border-white/5 pb-4 font-display text-4xl sm:text-6xl uppercase tracking-tighter transition-all duration-500 cursor-pointer select-none ${
+                         isActive ? "text-[#D4AF37]" : "text-white/45 hover:text-white"
+                       }`}
+                     >
+                       <span>{l.label}</span>
+                       <span className={`font-mono text-xs sm:text-sm tracking-widest transition-opacity duration-300 ${
+                         isActive ? "text-[#D4AF37] opacity-100" : "text-lux-gold opacity-0 group-hover:opacity-100"
+                       }`}>
+                         // 0{i + 1}
+                       </span>
+                     </a>
+                   </motion.div>
+                );
+              })}
             </div>
 
             {/* Bottom Actions Area */}
@@ -281,8 +342,8 @@ export function Nav() {
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0 }}
-              transition={{ delay: 0.3, duration: 0.5 }}
-              className="w-full flex flex-col gap-4 relative z-10 border-t border-white/5 pt-6"
+              transition={{ delay: 0.25, duration: 0.6, ease: [0.16, 1, 0.3, 1] }}
+              className="w-full flex flex-col gap-4 relative z-10 border-t border-white/5 pt-8 max-w-4xl mx-auto"
             >
               {/* Real-time pulse node */}
               <div className="flex items-center gap-2 text-[9px] font-bold uppercase tracking-[0.25em] text-white/45 mb-2">
@@ -295,19 +356,19 @@ export function Nav() {
               
               <div className="grid grid-cols-2 gap-4">
                 <a
-                  href="#newsletter"
+                  href="#artist-cta"
                   onClick={() => setOpen(false)}
-                  className="text-center border border-white/10 hover:border-lux-gold bg-white/5 py-3.5 text-[9px] font-bold uppercase tracking-[0.25em] text-white rounded-full transition-all"
+                  className="text-center border border-white/10 hover:border-lux-gold bg-white/5 py-4 text-[9px] font-bold uppercase tracking-[0.25em] text-white rounded-full transition-all duration-300"
                 >
-                  Secure Channel
+                  Inner Circle
                 </a>
                 
                 <TransitionLink
                   to="/about-1017"
                   onClick={() => setOpen(false)}
-                  className="text-center bg-gradient-to-r from-[#E5D5C0] via-[#F1E5D1] to-[#C9B9A5] py-3.5 text-[9px] font-black uppercase tracking-[0.25em] text-black rounded-full"
+                  className="text-center bg-gradient-to-r from-[#E5D5C0] via-[#F1E5D1] to-[#C9B9A5] py-4 text-[9px] font-black uppercase tracking-[0.25em] text-black rounded-full transition-all duration-300"
                 >
-                  Artist Portal
+                  Apply for Review
                 </TransitionLink>
               </div>
             </motion.div>

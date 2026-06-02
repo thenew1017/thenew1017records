@@ -9,10 +9,7 @@ import { Instagram, Twitter, Youtube, Music2, Apple, Globe } from "lucide-react"
 import { trackClick, trackHover, ensureSession } from "@/lib/analytics";
 import { PremiumImage } from "@/components/ui/PremiumImage";
 import { SocialLinkButton } from "@/components/ui/SocialLinks";
-import a1 from "@/assets/artist-1.jpg";
-import a2 from "@/assets/artist-2.jpg";
-import a3 from "@/assets/artist-3.jpg";
-import a4 from "@/assets/artist-4.jpg";
+
 
 type Artist = {
   id?: string;
@@ -29,52 +26,7 @@ type Artist = {
   website_url?: string | null;
 };
 
-const fallback: Artist[] = [
-  {
-    name: "Pooh Shiesty",
-    role: "Flagship Artist",
-    image_url: a1,
-    tag: "01|5",
-    bio: "The Memphis-born breakout star of 1017 Records. With a raw signature flow and triple-platinum hits like 'Back in Blood', Pooh Shiesty defines the sound of modern trap.",
-    spotify_url: "https://open.spotify.com/artist/5P24nlsyZ6Hk117eJ37QvS",
-    apple_url: "https://music.apple.com/us/artist/pooh-shiesty/1487212001",
-    youtube_url: "https://www.youtube.com/channel/UCyNqYc9lT59nZc-kI8pIhIg",
-    instagram_url: "https://www.instagram.com/poohshiesty/",
-  },
-  {
-    name: "Foogiano",
-    role: "1017 MC",
-    image_url: a2,
-    tag: "02|5",
-    bio: "Known as the 'Mayor of Greensboro' and first artist signed to the new 1017 Records. Bringing unyielding Southern energy, rapid-fire flows, and hard-hitting street anthems.",
-    spotify_url: "https://open.spotify.com/artist/2L4dE2QeI2k3220p9x72Vd",
-    apple_url: "https://music.apple.com/us/artist/foogiano/1486518151",
-    youtube_url: "https://www.youtube.com/channel/UC0dI32599723l84h031239",
-    instagram_url: "https://www.instagram.com/foogiano/",
-  },
-  {
-    name: "Big Scarr",
-    role: "The Frozone",
-    image_url: a3,
-    tag: "03|5",
-    bio: "The late Memphis legend who electrified the hip-hop world. His signature calm delivery, razor-sharp lyricism, and platinum records leave behind an everlasting legacy.",
-    spotify_url: "https://open.spotify.com/artist/6P24nlsyZ6Hk117eJ37QvS",
-    apple_url: "https://music.apple.com/us/artist/big-scarr/1497212001",
-    youtube_url: "https://www.youtube.com/channel/UCy9283723",
-    instagram_url: "https://www.instagram.com/bigscarr/",
-  },
-  {
-    name: "Enchanting",
-    role: "The R&B Queen",
-    image_url: a4,
-    tag: "04|5",
-    bio: "The late 1017 siren who seamlessly blended ethereal R&B vocals with razor-sharp trap verses. Her angelic delivery and bold songwriting paved a unique lane in modern hip-hop.",
-    spotify_url: "https://open.spotify.com/artist/1487212001",
-    apple_url: "https://music.apple.com/us/artist/enchanting/1497212001",
-    youtube_url: "https://www.youtube.com/channel/UCy14872",
-    instagram_url: "https://www.instagram.com/luvenchanting/",
-  },
-];
+
 
 const socialDefs: { key: keyof Artist; label: string; Icon: React.ComponentType<{ className?: string }> }[] = [
   { key: "spotify_url", label: "Spotify", Icon: Music2 },
@@ -124,10 +76,12 @@ function getPremiumBadge(role?: string | null): string {
 export function CinematicArtistImage({ 
   src, 
   alt, 
+  logoSrc,
   aspect = "aspect-[3/4]" 
 }: { 
   src: string; 
   alt: string; 
+  logoSrc?: string | null;
   aspect?: string; 
 }) {
   const cardRef = useRef<HTMLDivElement>(null);
@@ -208,6 +162,17 @@ export function CinematicArtistImage({
           }}
         />
 
+        {/* Dynamic Custom Logo Overlay */}
+        {logoSrc && (
+          <div className="absolute top-4 right-4 z-20 h-10 w-16 pointer-events-none select-none flex items-center justify-end">
+            <img 
+              src={logoSrc} 
+              alt="Artist Logo" 
+              className="max-h-full max-w-full object-contain filter invert opacity-80 group-hover:opacity-100 group-hover:scale-105 transition-all duration-500"
+            />
+          </div>
+        )}
+
         {/* Ambient Dark Cinematic Shading */}
         <div 
           className="absolute inset-0 bg-gradient-to-t from-black via-black/25 to-transparent pointer-events-none transition-opacity duration-500"
@@ -235,10 +200,14 @@ export function CinematicArtistImage({
   );
 }
 
-export function Artists() {
+export function Artists({ initialArtists }: { initialArtists?: any[] }) {
   const fetchArtists = useServerFn(listPublicArtists);
   const qc = useQueryClient();
-  const { data } = useQuery({ queryKey: ["public-artists"], queryFn: () => fetchArtists() });
+  const { data } = useQuery({ 
+    queryKey: ["public-artists"], 
+    queryFn: () => fetchArtists(),
+    initialData: initialArtists ? { artists: initialArtists } : undefined
+  });
 
   useEffect(() => {
     void ensureSession();
@@ -253,17 +222,41 @@ export function Artists() {
     };
   }, [qc]);
 
-  const artists: (Artist & { rating?: number })[] = (data?.artists.length ?? 0) > 0
+  const artists: (Artist & { rating?: number; logo_url?: string | null })[] = (data?.artists.length ?? 0) > 0
     ? (data!.artists as Artist[]).map((a, i) => {
         const [tagVal, ratingVal] = (a.tag || "").split("|");
         return {
           ...a,
-          image_url: a.image_url || fallback[i % fallback.length].image_url,
+          image_url: a.image_url || null,
+          logo_url: a.logo_url || null,
           tag: tagVal || String(i + 1).padStart(2, "0"),
           rating: ratingVal ? parseInt(ratingVal) : 5,
         };
       })
-    : fallback.map((a) => ({ ...a, rating: 5 }));
+    : [];
+
+  // Public Hydration Logs verifying photo & logo fields fetched from Supabase
+  if (typeof window !== "undefined") {
+    console.log("=== 1017 PUBLIC ROSTER HYDRATION AUDIT ===");
+    console.log("⚡ [Supabase Client Query] Fetching public roster via listPublicArtists server function.");
+    console.log("⚡ [Supabase Client Query Definition] SELECT id, name, role, tag, bio, image_url, logo_url, spotify_url, apple_url, youtube_url, instagram_url, twitter_url, website_url, sort_order FROM artists WHERE published = true ORDER BY sort_order ASC, created_at ASC");
+    if (data?.artists) {
+      console.log("✅ [Supabase Client Response] Full database payload received:", data.artists);
+    } else {
+      console.log("❌ [Supabase Client Response] No payload or empty array received. SSR initialData may be pending.");
+    }
+    
+    if (artists.length > 0) {
+      artists.forEach((app) => {
+        console.log(`Artist Card: ${app.name}`);
+        console.log(` - image_url: ${app.image_url || "NONE"}`);
+        console.log(` - logo_url: ${app.logo_url || "NONE"}`);
+      });
+    } else {
+      console.log("ℹ️ [Supabase Client Response] Roster is empty.");
+    }
+    console.log("==========================================");
+  }
 
   return (
     <section id="artists" className="relative px-6 py-32 md:px-10 border-t border-white/5">
@@ -303,38 +296,32 @@ export function Artists() {
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true, amount: 0.1 }}
               transition={{ duration: 0.8, delay: i * 0.08, ease: [0.22, 1, 0.36, 1] }}
-              className="group relative flex flex-col text-left outline-none focus-visible:ring-2 focus-visible:ring-accent glass p-3 rounded-xl border border-white/5 hover:border-white/20 transition-all duration-[250ms] ease-in-out hover:-translate-y-2 hover:scale-[1.02] hover:shadow-[0_20px_40px_rgba(0,0,0,0.85),0_0_30px_rgba(255,255,255,0.03)] cursor-pointer select-none transform-gpu"
+              className="group relative flex flex-col text-left outline-none focus-visible:ring-2 focus-visible:ring-accent bg-transparent p-0 border-none transition-all duration-[250ms] ease-in-out cursor-pointer select-none transform-gpu"
             >
-              {/* Top: Premium Artist Status Badge & Live Pulse Indicator */}
-              <div className="flex items-center justify-between w-full mb-3 select-none">
-                {/* Status Badge */}
-                <div className="h-8 px-3.5 rounded-full bg-white/5 border border-white/10 backdrop-blur-md flex items-center justify-center shadow-[0_0_12px_rgba(255,255,255,0.02)] group-hover:bg-white/10 group-hover:border-white/20 group-hover:shadow-[0_0_20px_rgba(255,255,255,0.08)] transition-all duration-[250ms] ease-in-out">
-                  <span className="font-sans text-[10px] font-semibold tracking-wider text-white/90">
-                    {getPremiumBadge(a.role)}
-                  </span>
-                </div>
-                
-                {/* Live Pulse Beacon */}
-                <div className="flex items-center gap-1.5 px-3 h-8 rounded-full bg-red-500/10 border border-red-500/20 backdrop-blur-sm shadow-[0_0_10px_rgba(239,68,68,0.05)] group-hover:shadow-[0_0_15px_rgba(239,68,68,0.15)] group-hover:bg-red-500/15 transition-all duration-[250ms] ease-in-out">
-                  <span className="h-1.5 w-1.5 rounded-full bg-red-500 animate-pulse shadow-[0_0_8px_rgba(239,68,68,0.8)]" />
-                  <span className="font-sans text-[9px] font-bold tracking-widest text-red-400">LIVE</span>
-                </div>
-              </div>
-
               {/* Middle: Cinematic Standalone Artist Image */}
               <CinematicArtistImage
                 src={a.image_url ?? ""}
                 alt={a.name}
+                logoSrc={a.logo_url}
               />
 
               {/* Bottom: Artist Name, Bio & Platform Icons */}
-              <div className="pt-4 px-1 relative w-full flex flex-col flex-grow">
-                <h3 className="font-display text-2xl uppercase tracking-tight text-foreground group-hover:text-gradient-gold group-hover:[text-shadow:0_0_12px_rgba(212,175,55,0.25)] transition-all duration-[250ms] ease-in-out">
+              <div className="pt-5 relative w-full flex flex-col flex-grow">
+                {/* Flat Typographic Roster Badges */}
+                <div className="flex items-center justify-between gap-3 mb-2 font-mono text-[9px] uppercase tracking-[0.2em] text-zinc-500">
+                  <span>{getPremiumBadge(a.role)}</span>
+                  <span className="flex items-center gap-1">
+                    <span className="h-1.5 w-1.5 rounded-full bg-red-500" />
+                    LIVE
+                  </span>
+                </div>
+
+                <h3 className="font-display text-2xl uppercase tracking-tight text-white group-hover:text-[#E5D5C0] transition-colors duration-[250ms] ease-in-out">
                   {a.name}
                 </h3>
                 
                 {a.bio && (
-                  <p className="mt-2.5 line-clamp-2 text-xs leading-relaxed text-muted-foreground font-light font-sans">
+                  <p className="mt-2 text-xs leading-relaxed text-zinc-400 font-light font-sans line-clamp-2">
                     {a.bio}
                   </p>
                 )}

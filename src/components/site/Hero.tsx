@@ -84,7 +84,7 @@ export function Hero() {
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             transition={{ delay: 0.3, duration: 0.9 }}
-            className="mt-8 grid grid-cols-3 gap-6 font-mono text-[9px] uppercase tracking-[0.2em] text-zinc-400 bg-white/[0.01] border border-white/[0.04] p-4 rounded-xl w-full max-w-xl backdrop-blur-sm text-left"
+            className="mt-8 grid grid-cols-3 gap-6 font-mono text-[9px] uppercase tracking-[0.2em] text-zinc-500 border-t border-b border-white/5 py-4 w-full max-w-xl text-left bg-transparent rounded-none backdrop-blur-none"
           >
             <div>
               <span className="block text-zinc-600 mb-1 font-bold">ROSTER</span>
@@ -108,20 +108,20 @@ export function Hero() {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.4, duration: 0.9 }}
-            className="mt-10 flex flex-col sm:flex-row items-center gap-5 w-full sm:w-auto"
+            className="mt-14 lg:mt-16 flex flex-col sm:flex-row items-center justify-center lg:justify-start gap-5 w-full sm:w-auto"
           >
-            {/* Primary APPLY NOW Button */}
+            {/* Primary APPLY FOR REVIEW Button */}
             <TransitionLink
               to="/about-1017"
-              className="relative w-full sm:w-auto overflow-hidden inline-flex items-center justify-center bg-gradient-to-r from-[#E5D5C0] via-[#F1E5D1] to-[#C9B9A5] hover:from-[#F1E5D1] hover:via-[#FBF5ED] hover:to-[#D5C5B0] text-black px-10 py-4.5 text-[10px] font-black uppercase tracking-[0.25em] transition-all duration-300 hover:scale-[1.03] active:scale-[0.98] hover:shadow-[0_0_30px_rgba(229,213,192,0.35)] rounded-full text-center"
+              className="relative w-full sm:w-auto overflow-hidden inline-flex items-center justify-center bg-[#E5D5C0] hover:bg-[#F1E5D1] text-black px-10 py-4.5 text-[10px] sm:text-xs font-bold uppercase tracking-[0.3em] transition-all duration-500 hover:scale-[1.01] active:scale-[0.99] hover:shadow-[0_12px_30px_rgba(229,213,192,0.12)] rounded-[32px] text-center border border-[#E5D5C0]/20"
             >
-              APPLY NOW
+              APPLY FOR REVIEW
             </TransitionLink>
 
             {/* Secondary VIEW ROSTER Button */}
             <a
               href="#artists"
-              className="w-full sm:w-auto text-center inline-flex items-center justify-center border border-white/10 hover:border-[#E5D5C0] bg-white/5 hover:bg-white/[0.08] text-white px-10 py-4.5 text-[10px] font-bold uppercase tracking-[0.25em] transition-all duration-300 active:scale-[0.98] rounded-full"
+              className="w-full sm:w-auto text-center inline-flex items-center justify-center border border-white/10 hover:border-[#E5D5C0]/40 bg-transparent hover:bg-white/[0.02] text-white hover:text-[#E5D5C0] px-10 py-4.5 text-[10px] sm:text-xs font-bold uppercase tracking-[0.3em] transition-all duration-500 hover:scale-[1.01] active:scale-[0.99] rounded-[32px]"
             >
               VIEW ROSTER
             </a>

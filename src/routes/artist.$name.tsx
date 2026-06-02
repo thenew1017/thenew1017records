@@ -9,16 +9,12 @@ import { CinematicArtistImage } from "@/components/site/Artists";
 import { motion } from "motion/react";
 import { ArrowLeft, Music2, Apple, Youtube, Instagram, Twitter, Globe, ArrowRight, Play } from "lucide-react";
 import { SocialLinksRow } from "@/components/ui/SocialLinks";
-import a1 from "@/assets/artist-1.jpg";
-import a2 from "@/assets/artist-2.jpg";
-import a3 from "@/assets/artist-3.jpg";
-import a4 from "@/assets/artist-4.jpg";
 import r1 from "@/assets/release-1.jpg";
 import r2 from "@/assets/release-2.jpg";
 import r3 from "@/assets/release-3.jpg";
 import r4 from "@/assets/release-4.jpg";
 
-const fallbacks = [a1, a2, a3, a4];
+const fallbacks: string[] = [];
 
 export const Route = createFileRoute("/artist/$name")({
   component: ArtistDetailPage,
@@ -110,7 +106,7 @@ function getArtistDetailExtras(artistName: string) {
         { title: "Back in Blood (feat. Lil Durk)", year: "2020", type: "Single", cover: r4, spotify: "https://open.spotify.com/track/7rr8rWw8aU2Z22Yt25V0bJ" }
       ],
       story: "Born and raised in Memphis, Tennessee, Pooh Shiesty emerged as the undisputed crown jewel of the new 1017 Records roster under the direct guidance of Gucci Mane. Known for his signature whispering flow, calm delivery, and sharp trap realism, he captured the ears of the hip-hop world with his breakout anthem 'Back in Blood'.\n\nHis debut mixtape, 'Shiesty Season', went certified platinum, scoring triple-platinum tracks and securing his position as a flagship giant of Southern trap music. With over 2.4 billion global streams and heavy collaborations across the elite of modern rap, he continues to dictate the sonic aesthetics of modern street narrative.",
-      gallery: [a1, r1, a2, r2]
+      gallery: [r1, r1, r2, r2]
     };
   }
   
@@ -132,7 +128,7 @@ function getArtistDetailExtras(artistName: string) {
         { title: "Molly (feat. DaBaby)", year: "2020", type: "Single", cover: r1 }
       ],
       story: "Hailing from Greensboro, Georgia, Foogiano—the 'Mayor of Greensboro'—was the first artist signed to Gucci Mane's revamped 1017 roster, instantly bringing a dynamic, rapid-fire flow and high-voltage Southern charisma. His raw street anthems and uncompromising bars represent the unyielding pulse of modern trap.\n\nHis debut project, 'Gutta Baby', solidified his place in the industry, showing a versatile artist capable of executing both hard-hitting trap records and highly melodic Southern anthems. Backed by massive club anthems and a solid regional backing, Foogiano is the heart and soul of the 1017 street roster.",
-      gallery: [a2, r2, a3, r3]
+      gallery: [r2, r2, r3, r3]
     };
   }
 
@@ -154,7 +150,7 @@ function getArtistDetailExtras(artistName: string) {
         { title: "MJ (feat. Quezz Ruthless)", year: "2021", type: "Single", cover: r2 }
       ],
       story: "The late Memphis legend Big Scarr brought a cool, calm, and incredibly clinical energy to the trap genre. Famously known as 'The Frozone' due to his icy demeanor and razor-sharp, effortless delivery, he stood as one of the most commercially successful breakouts from the 1017 family.\n\nHis certified platinum project 'Big Grim Reaper' was highly praised for its unvarnished lyricism and innovative beat selections, charting highly on the Billboard 200. Big Scarr's legacy remains as a primary force that reshaped the Memphis rap soundscape for a generation.",
-      gallery: [a3, r3, a4, r4]
+      gallery: [r3, r3, r4, r4]
     };
   }
 
@@ -176,7 +172,7 @@ function getArtistDetailExtras(artistName: string) {
         { title: "Angel Dust", year: "2023", type: "Single", cover: r3 }
       ],
       story: "The late 1017 siren Enchanting stood at the premium intersection of ethereal R&B vocals and gritty, hard-hitting trap beats. Her unique style—blending angelic vocal harmonies with rapid trap flows—paved a highly specialized path that set her apart from all contemporaries.\n\nHer albums 'No Luv' and 'Luv Enchanting' proved her versatility as both a vocalist and a songwriter, earning massive digital streaming counts and national acclaim. Her bold artistic vision continues to inspire and define the modern melodic trap subgenre.",
-      gallery: [a4, r4, a1, r1]
+      gallery: [r4, r4, r1, r1]
     };
   }
 
@@ -196,7 +192,7 @@ function getArtistDetailExtras(artistName: string) {
       { title: "1017 Compilation Vol. 1", year: "2025", type: "Compilation", cover: r3 }
     ],
     story: `As an official member of the revamped 1017 Records roster, this artist represents the brand-new creative direction under the guidance of Gucci Mane. Fusing traditional trap drums with modern digital melodic styles, they represent the continuing evolution of Atlanta's iconic label.\n\nTheir releases are paving the way for heavy collaborations, extensive DSP support, and global tour appearances, ensuring the legacy of the 1017 sound system remains fresh, relevant, and dominant on the global rap charts.`,
-    gallery: [a1, r1, a2, r2]
+    gallery: [r1, r1, r2, r2]
   };
 }
 
@@ -254,8 +250,16 @@ function ArtistDetailPage() {
   const [tagVal, ratingVal] = (artist.tag || "").split("|");
   const rating = ratingVal ? parseInt(ratingVal) : 5;
   const tag = tagVal || "01";
-  const artistImage = artist.image_url || fallbacks[0];
+  const artistImage = artist.image_url || "";
   const extras = getArtistDetailExtras(artist.name);
+
+  // Verification Logging for artist details
+  if (typeof window !== "undefined" && artist) {
+    console.log(`=== 1017 ARTIST DETAILS HYDRATION AUDIT (${artist.name}) ===`);
+    console.log(` - image_url: ${artist.image_url || "NONE"}`);
+    console.log(` - logo_url: ${artist.logo_url || "NONE"}`);
+    console.log("=============================================================");
+  }
 
   return (
     <main className="relative min-h-screen bg-background text-foreground grain-overlay overflow-x-hidden">
@@ -295,6 +299,7 @@ function ArtistDetailPage() {
               <CinematicArtistImage
                 src={artistImage}
                 alt={artist.name}
+                logoSrc={artist.logo_url}
               />
             </motion.div>
           </div>
@@ -319,10 +324,21 @@ function ArtistDetailPage() {
               <span>{extras.totalStreams}</span>
             </div>
 
-            {/* Artist Name */}
-            <h1 className="font-display text-5xl uppercase leading-[0.85] text-foreground sm:text-6xl md:text-7xl lg:text-8xl xl:text-[96px] tracking-tighter">
-              {artist.name}
-            </h1>
+            {/* Artist Name & Optional Logo */}
+            <div className="flex flex-wrap items-center gap-6">
+              <h1 className="font-display text-5xl uppercase leading-[0.85] text-foreground sm:text-6xl md:text-7xl lg:text-8xl xl:text-[96px] tracking-tighter">
+                {artist.name}
+              </h1>
+              {artist.logo_url && (
+                <div className="h-16 w-28 flex items-center justify-start pointer-events-none mt-2">
+                  <img 
+                    src={artist.logo_url} 
+                    alt={`${artist.name} Logo`} 
+                    className="max-h-full max-w-full object-contain filter invert opacity-90 group-hover:opacity-100 transition-opacity duration-300" 
+                  />
+                </div>
+              )}
+            </div>
 
             {/* Short Bio Block */}
             <p className="text-base md:text-lg leading-relaxed text-muted-foreground font-light font-sans max-w-xl">
@@ -358,10 +374,10 @@ function ArtistDetailPage() {
                 href={rel.spotify || "https://open.spotify.com"}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="group relative flex flex-col text-left outline-none glass p-3.5 rounded-2xl border border-white/5 hover:border-white/15 transition-all duration-[300ms] ease-in-out hover:-translate-y-2 hover:scale-[1.02] hover:shadow-[0_20px_40px_rgba(0,0,0,0.85)] cursor-pointer select-none transform-gpu"
+                className="group relative flex flex-col text-left outline-none bg-transparent p-0 border-none transition-all duration-[300ms] ease-in-out cursor-pointer select-none transform-gpu"
               >
                 {/* Cover Art Wrapper */}
-                <div className="relative aspect-square w-full rounded-xl overflow-hidden bg-black/40 shadow-md">
+                <div className="relative aspect-square w-full rounded-none overflow-hidden bg-black/40 border border-white/5">
                   <img
                     src={rel.cover}
                     alt={rel.title}
@@ -400,21 +416,25 @@ function ArtistDetailPage() {
             </p>
           </div>
 
-          <div className="grid grid-cols-2 gap-4 lg:grid-cols-4">
+          <div className="w-full border-t border-white/[0.08] mt-8">
             {extras.stats.map((stat, idx) => (
               <div
                 key={idx}
-                className="group relative glass p-6 md:p-8 rounded-2xl border border-white/5 hover:border-white/10 transition-all duration-300 hover:shadow-[0_15px_30px_rgba(0,0,0,0.4)] flex flex-col justify-between overflow-hidden"
+                className="group py-8 sm:py-10 md:py-12 border-b border-white/[0.08] flex flex-col items-start justify-start w-full select-none"
               >
-                {/* Soft backdrop glow flare */}
-                <div className="absolute -right-10 -bottom-10 h-24 w-24 rounded-full bg-white/5 blur-2xl group-hover:bg-white/10 transition-all duration-500 pointer-events-none" />
-
-                <div className="font-display text-3xl sm:text-4xl lg:text-5xl font-black text-white group-hover:text-[#D4AF37] transition-all tracking-tight leading-none">
+                <span
+                  className="block font-display text-[clamp(1.8rem,5.5vw,4.5rem)] font-black text-white group-hover:text-[#D4AF37] transition-all duration-500 tracking-tighter leading-none uppercase"
+                  style={{
+                    whiteSpace: "nowrap",
+                    wordBreak: "keep-all",
+                    overflowWrap: "normal",
+                  }}
+                >
                   {stat.value}
-                </div>
-                <div className="mt-4 font-sans text-[10px] md:text-xs font-bold tracking-widest text-white/40 uppercase">
+                </span>
+                <span className="block font-sans text-xs sm:text-sm font-bold tracking-[0.35em] text-[#E5D5C0]/65 uppercase mt-3 sm:mt-4 group-hover:text-[#E5D5C0] transition-colors duration-500">
                   {stat.label}
-                </div>
+                </span>
               </div>
             ))}
           </div>
@@ -463,7 +483,7 @@ function ArtistDetailPage() {
                 return (
                   <div
                     key={img.id || idx}
-                    className={`group relative ${aspect} w-full rounded-2xl overflow-hidden bg-black/40 border border-white/5 hover:border-white/15 transition-all duration-500 shadow-md transform-gpu`}
+                    className="group relative w-full aspect-square rounded-none overflow-hidden bg-black/40 border border-white/5 hover:border-white/15 transition-all duration-500 transform-gpu"
                   >
                     <img
                       src={img.image_url}
@@ -487,7 +507,7 @@ function ArtistDetailPage() {
                     </div>
 
                     {/* Subtle hover bezel glow */}
-                    <div className="absolute inset-0 border border-white/5 rounded-2xl pointer-events-none group-hover:border-white/15 transition-all duration-300" />
+                    <div className="absolute inset-0 border border-white/5 rounded-none pointer-events-none group-hover:border-white/15 transition-all duration-300" />
                   </div>
                 );
               })}
@@ -509,25 +529,15 @@ function ArtistDetailPage() {
 
             <div className="grid grid-cols-1 gap-6 sm:grid-cols-3">
               {related.map((a, i) => {
-                const relImage = a.image_url || fallbacks[(i + 1) % fallbacks.length];
+                const relImage = a.image_url || "";
                 const relExtras = getArtistDetailExtras(a.name);
                 return (
                   <Link
                     key={a.id || a.name}
                     to="/artist/$name"
                     params={{ name: slugify(a.name) }}
-                    className="group relative flex flex-col text-left outline-none glass p-3.5 rounded-2xl border border-white/5 hover:border-white/20 transition-all duration-[250ms] ease-in-out hover:-translate-y-2 hover:scale-[1.02] hover:shadow-[0_20px_40px_rgba(0,0,0,0.85),0_0_30px_rgba(255,255,255,0.03)] cursor-pointer select-none transform-gpu"
+                    className="group relative flex flex-col text-left outline-none bg-transparent p-0 border-none transition-all duration-[250ms] ease-in-out cursor-pointer select-none transform-gpu"
                   >
-                    {/* Top: Status Badge & Icon */}
-                    <div className="flex items-center justify-between w-full mb-3 select-none">
-                      <div className="h-8 px-3.5 rounded-full bg-white/5 border border-white/10 backdrop-blur-md flex items-center justify-center">
-                        <span className="font-sans text-[10px] font-semibold tracking-wider text-white/90">
-                          {relExtras.verifiedRole}
-                        </span>
-                      </div>
-                      <ArrowRight className="h-4 w-4 text-muted-foreground group-hover:text-[#D4AF37] group-hover:translate-x-1 transition-all" />
-                    </div>
-
                     {/* Middle: Cinematic Image */}
                     <CinematicArtistImage
                       src={relImage}
@@ -536,8 +546,12 @@ function ArtistDetailPage() {
                     />
 
                     {/* Bottom: Name & Bio */}
-                    <div className="pt-4 px-1 flex flex-col flex-grow">
-                      <h3 className="font-display text-xl uppercase tracking-tight text-white group-hover:text-gradient-gold group-hover:[text-shadow:0_0_12px_rgba(212,175,55,0.25)] transition-all leading-tight">
+                    <div className="pt-4 flex flex-col flex-grow">
+                      <div className="flex items-center justify-between gap-3 mb-2 font-mono text-[9px] uppercase tracking-[0.2em] text-zinc-500 select-none">
+                        <span>{relExtras.verifiedRole}</span>
+                        <ArrowRight className="h-3.5 w-3.5 text-zinc-500 group-hover:text-[#E5D5C0] group-hover:translate-x-1 transition-all" />
+                      </div>
+                      <h3 className="font-display text-xl uppercase tracking-tight text-white group-hover:text-[#E5D5C0] transition-colors leading-tight">
                         {a.name}
                       </h3>
                       {a.bio && (

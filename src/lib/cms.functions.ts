@@ -1,7 +1,9 @@
 import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
-import { assertAdmin, getAdminClient } from "./admin.server";
+import { assertAdmin, getAdminClient, getClientIp, logActivity } from "./admin.server";
+import { rateLimit } from "./rate-limit";
+import { supabase } from "@/integrations/supabase/client";
 
 type Json = string | number | boolean | null | { [k: string]: Json } | Json[];
 
@@ -12,6 +14,7 @@ const ArtistSchema = z.object({
   tag: z.string().max(20).nullable().optional(),
   bio: z.string().max(2000).nullable().optional(),
   image_url: z.string().url().nullable().optional(),
+  logo_url: z.string().url().nullable().optional(),
   spotify_url: z.string().url().nullable().optional(),
   apple_url: z.string().url().nullable().optional(),
   youtube_url: z.string().url().nullable().optional(),
@@ -37,14 +40,53 @@ export const listPublicArtists = createServerFn({ method: "GET" }).handler(async
     console.log("⚡ [Server Cache] Serving public artists list from in-memory cache!");
     return publicArtistsCache;
   }
-  const admin = getAdminClient();
-  const { data, error } = await admin
+  
+  const resolvedUrl = process.env.SUPABASE_URL || import.meta.env.VITE_SUPABASE_URL;
+  const resolvedKey = process.env.SUPABASE_PUBLISHABLE_KEY || import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY || import.meta.env.VITE_SUPABASE_ANON_KEY;
+  console.log("=== SUPABASE SERVER CONFIGURATION AUDIT ===");
+  console.log(` - Resolved URL: ${resolvedUrl}`);
+  console.log(` - Resolved Key (anon): ${resolvedKey ? resolvedKey.substring(0, 20) + "..." : "MISSING"}`);
+  console.log("==========================================");
+  
+  const queryColumns = "id,name,role,tag,bio,image_url,logo_url,spotify_url,apple_url,youtube_url,instagram_url,twitter_url,website_url,sort_order";
+  console.log("⚡ [Supabase Server Roster Query] Executing:", `supabase.from("artists").select("${queryColumns}")`);
+  console.log("⚡ [SQL Equivalent]:", `SELECT ${queryColumns} FROM public.artists WHERE published = true ORDER BY sort_order ASC, created_at ASC;`);
+  
+  const { supabase } = await import("@/integrations/supabase/client");
+  let { data, error } = await supabase
     .from("artists")
-    .select("id,name,role,tag,bio,image_url,spotify_url,apple_url,youtube_url,instagram_url,twitter_url,website_url,sort_order")
+    .select(queryColumns)
     .eq("published", true)
     .order("sort_order", { ascending: true })
     .order("created_at", { ascending: true });
-  if (error) throw new Error(error.message);
+    
+  if (error && error.message.includes("logo_url")) {
+    console.warn("⚠️ [Supabase Roster Query Fallback] 'logo_url' column does not exist in public.artists yet. Retrying query without logo_url.");
+    const queryColumnsFallback = "id,name,role,tag,bio,image_url,spotify_url,apple_url,youtube_url,instagram_url,twitter_url,website_url,sort_order";
+    console.log("⚡ [Supabase Server Roster Query Fallback] Executing:", `supabase.from("artists").select("${queryColumnsFallback}")`);
+    
+    const fallbackRes = await supabase
+      .from("artists")
+      .select(queryColumnsFallback)
+      .eq("published", true)
+      .order("sort_order", { ascending: true })
+      .order("created_at", { ascending: true });
+      
+    if (fallbackRes.error) {
+      console.error("❌ [Supabase Roster Query Fallback Failure] Error:", fallbackRes.error.message);
+      throw new Error(fallbackRes.error.message);
+    }
+    
+    // Polyfill logo_url as null
+    data = (fallbackRes.data ?? []).map(row => ({ ...row, logo_url: null }));
+  } else if (error) {
+    console.error("❌ [Supabase Server Roster Query Failure] Error:", error.message);
+    throw new Error(error.message);
+  }
+  
+  console.log(`✅ [Supabase Server Roster Query Success] Fetched ${data?.length ?? 0} artists from database:`);
+  console.dir(data, { depth: null });
+  
   publicArtistsCache = { artists: data ?? [] };
   return publicArtistsCache;
 });
@@ -54,9 +96,14 @@ export const getPublicSettings = createServerFn({ method: "GET" }).handler(async
     console.log("⚡ [Server Cache] Serving public settings from in-memory cache!");
     return publicSettingsCache;
   }
-  const admin = getAdminClient();
-  const { data, error } = await admin.from("site_settings").select("key,value");
-  if (error) throw new Error(error.message);
+  console.log("⚡ [Supabase Server Settings Query] Executing: supabase.from('site_settings').select('key,value')");
+  const { supabase } = await import("@/integrations/supabase/client");
+  const { data, error } = await supabase.from("site_settings").select("key,value");
+  if (error) {
+    console.error("❌ [Supabase Server Settings Query Failure] Error:", error.message);
+    throw new Error(error.message);
+  }
+  console.log(`✅ [Supabase Server Settings Query Success] Fetched ${data?.length ?? 0} settings keys.`);
   const map: Record<string, Json> = {};
   for (const row of data ?? []) map[row.key] = row.value as Json;
   publicSettingsCache = { settings: map };
@@ -95,11 +142,19 @@ export const getPublicReleaseBySlug = createServerFn({ method: "GET" })
 export const subscribeNewsletter = createServerFn({ method: "POST" })
   .inputValidator((input: unknown) => z.object({ email: z.string().email().max(255) }).parse(input))
   .handler(async ({ data }) => {
+    const ip = getClientIp();
+    const allowed = rateLimit(ip, "subscribe_newsletter", 5, 3600);
+    if (!allowed) {
+      throw new Error("Too many subscription requests from this IP. Please try again in an hour.");
+    }
+    
     const admin = getAdminClient();
     const { error } = await admin.from("newsletter_subscribers").insert({ email: data.email });
     if (error && !error.message.toLowerCase().includes("duplicate")) {
       throw new Error(error.message);
     }
+    
+    await logActivity(null, "public_newsletter_subscribed", { email: data.email });
     return { ok: true };
   });
 
@@ -123,12 +178,14 @@ export const adminUpsertArtist = createServerFn({ method: "POST" })
       const { error } = await admin.from("artists").update(rest).eq("id", id);
       if (error) throw new Error(error.message);
       clearPublicCaches();
+      await logActivity(context.userId, "admin_update_artist", { id, name: data.name });
       return { id };
     } else {
       const { id: _ignore, ...rest } = data;
       const { data: row, error } = await admin.from("artists").insert(rest).select("id").single();
       if (error) throw new Error(error.message);
       clearPublicCaches();
+      await logActivity(context.userId, "admin_create_artist", { id: row.id, name: data.name });
       return { id: row.id };
     }
   });
@@ -141,6 +198,7 @@ export const adminDeleteArtist = createServerFn({ method: "POST" })
     const { error } = await admin.from("artists").delete().eq("id", data.id);
     if (error) throw new Error(error.message);
     clearPublicCaches();
+    await logActivity(context.userId, "admin_delete_artist", { id: data.id });
     return { ok: true };
   });
 
@@ -171,6 +229,7 @@ export const adminSetSetting = createServerFn({ method: "POST" })
       .upsert({ key: data.key, value: data.value as Json }, { onConflict: "key" });
     if (error) throw new Error(error.message);
     clearPublicCaches();
+    await logActivity(context.userId, "admin_set_setting", { key: data.key });
     return { ok: true };
   });
 
@@ -194,6 +253,7 @@ export const adminDeleteSubscriber = createServerFn({ method: "POST" })
     const admin = await assertAdmin(context.userId, context.supabase);
     const { error } = await admin.from("newsletter_subscribers").delete().eq("id", data.id);
     if (error) throw new Error(error.message);
+    await logActivity(context.userId, "admin_delete_subscriber", { id: data.id });
     return { ok: true };
   });
 
@@ -259,6 +319,7 @@ export const adminDeleteMedia = createServerFn({ method: "POST" })
     const admin = await assertAdmin(context.userId, context.supabase);
     const { error } = await admin.storage.from("media").remove([data.name]);
     if (error) throw new Error(error.message);
+    await logActivity(context.userId, "admin_delete_media", { name: data.name });
     return { ok: true };
   });
 
@@ -486,6 +547,12 @@ export const submitArtistApplication = createServerFn({ method: "POST" })
     }).parse(input)
   )
   .handler(async ({ data }) => {
+    const ip = getClientIp();
+    const allowed = rateLimit(ip, "submit_application", 3, 3600);
+    if (!allowed) {
+      throw new Error("Artist application rate limit exceeded (max 3 submissions per hour). Please try again later.");
+    }
+    
     // Dynamically ensure required storage buckets exist
     await ensureBucketsExist();
 
@@ -511,6 +578,8 @@ export const submitArtistApplication = createServerFn({ method: "POST" })
     if (error) {
       throw new Error(error.message);
     }
+    
+    await logActivity(null, "public_application_submitted", { email: sanitized.email, artist_name: sanitized.artist_name });
     return { ok: true };
   });
 
@@ -533,7 +602,7 @@ export const adminUpdateApplicationStatus = createServerFn({ method: "POST" })
   .inputValidator((input: unknown) =>
     z.object({
       id: z.string().uuid(),
-      status: z.enum(["Pending", "Reviewed", "Approved", "Rejected"]),
+      status: z.enum(["Pending", "Reviewed", "Reviewing", "Approved", "Rejected", "Archived"]),
     }).parse(input)
   )
   .handler(async ({ data, context }) => {
@@ -543,6 +612,7 @@ export const adminUpdateApplicationStatus = createServerFn({ method: "POST" })
       .update({ status: data.status })
       .eq("id", data.id);
     if (error) throw new Error(error.message);
+    await logActivity(context.userId, "admin_update_application_status", { id: data.id, status: data.status });
     return { ok: true };
   });
 
@@ -609,6 +679,7 @@ export const adminDeleteApplication = createServerFn({ method: "POST" })
     const { error: deleteDbError } = await admin.from("artist_applications").delete().eq("id", data.id);
     if (deleteDbError) throw new Error(deleteDbError.message);
     
+    await logActivity(context.userId, "admin_delete_application_permanent", { id: data.id });
     return { ok: true };
   });
 
@@ -778,8 +849,8 @@ const GalleryImageSchema = z.object({
 export const getArtistMediaGallery = createServerFn({ method: "GET" })
   .inputValidator((input: unknown) => z.object({ artistId: z.string().uuid() }).parse(input))
   .handler(async ({ data }) => {
-    const admin = getAdminClient();
-    const { data: gallery, error } = await admin
+    const { supabase } = await import("@/integrations/supabase/client");
+    const { data: gallery, error } = await supabase
       .from("media_gallery")
       .select("*")
       .eq("artist_id", data.artistId)

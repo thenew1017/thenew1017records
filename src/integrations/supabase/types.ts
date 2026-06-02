@@ -121,6 +121,7 @@ export type Database = {
           created_at: string
           id: string
           image_url: string | null
+          logo_url: string | null
           instagram_url: string | null
           name: string
           published: boolean
@@ -139,6 +140,7 @@ export type Database = {
           created_at?: string
           id?: string
           image_url?: string | null
+          logo_url?: string | null
           instagram_url?: string | null
           name: string
           published?: boolean
@@ -157,6 +159,7 @@ export type Database = {
           created_at?: string
           id?: string
           image_url?: string | null
+          logo_url?: string | null
           instagram_url?: string | null
           name?: string
           published?: boolean

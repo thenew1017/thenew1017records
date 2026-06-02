@@ -8,7 +8,7 @@ import {
   adminUpdateApplicationStatus,
   adminDeleteApplication
 } from "@/lib/cms.functions";
-import { Trash2, Eye, Search, Filter, RefreshCw, X, ArrowUpRight } from "lucide-react";
+import { Trash2, Eye, Search, Filter, RefreshCw, X, ArrowUpRight, Archive, RotateCcw } from "lucide-react";
 
 export const Route = createFileRoute("/admin/applications")({
   component: ApplicationsAdmin,
@@ -22,7 +22,7 @@ type Application = {
   artist_name: string;
   spotify_link: string | null;
   campaign_details: string | null;
-  status: "Pending" | "Reviewed" | "Approved" | "Rejected";
+  status: "Pending" | "Reviewed" | "Reviewing" | "Approved" | "Rejected" | "Archived";
   submitted_at: string;
   artist_photo_url: string | null;
   epk_url: string | null;
@@ -45,6 +45,9 @@ function ApplicationsAdmin() {
   const [updatingId, setUpdatingId] = useState<string | null>(null);
   const [downloadingPhotoId, setDownloadingPhotoId] = useState<string | null>(null);
   const [downloadingPdfId, setDownloadingPdfId] = useState<string | null>(null);
+  
+  // Custom states for A&R Archive System
+  const [viewTab, setViewTab] = useState<"active" | "archived">("active");
 
   // Trigger direct file download locally as blob to avoid tab redirecting
   const triggerFileDownload = async (url: string, filename: string, type: "photo" | "pdf", id: string) => {
@@ -71,7 +74,7 @@ function ApplicationsAdmin() {
     }
   };
 
-  const handleStatusChange = async (id: string, status: "Pending" | "Reviewed" | "Approved" | "Rejected") => {
+  const handleStatusChange = async (id: string, status: "Pending" | "Reviewed" | "Reviewing" | "Approved" | "Rejected") => {
     setUpdatingId(id);
     try {
       await updateStatusFn({ data: { id, status } });
@@ -87,8 +90,34 @@ function ApplicationsAdmin() {
     }
   };
 
+  const handleArchive = async (id: string) => {
+    try {
+      await updateStatusFn({ data: { id, status: "Archived" } });
+      qc.invalidateQueries({ queryKey: ["adm-applications"] });
+      if (selectedApp && selectedApp.id === id) {
+        setSelectedApp({ ...selectedApp, status: "Archived" });
+      }
+    } catch (err) {
+      console.error(err);
+      alert("Failed to archive application.");
+    }
+  };
+
+  const handleRestore = async (id: string) => {
+    try {
+      await updateStatusFn({ data: { id, status: "Pending" } });
+      qc.invalidateQueries({ queryKey: ["adm-applications"] });
+      if (selectedApp && selectedApp.id === id) {
+        setSelectedApp({ ...selectedApp, status: "Pending" });
+      }
+    } catch (err) {
+      console.error(err);
+      alert("Failed to restore application.");
+    }
+  };
+
   const handleRemove = async (id: string) => {
-    if (!confirm("Are you sure you want to permanently delete this application?")) return;
+    if (!confirm("Are you sure? This action cannot be undone.")) return;
     try {
       await deleteFn({ data: { id } });
       qc.invalidateQueries({ queryKey: ["adm-applications"] });
@@ -97,12 +126,20 @@ function ApplicationsAdmin() {
       }
     } catch (err) {
       console.error(err);
-      alert("Failed to delete application.");
+      alert("Failed to permanently delete application.");
     }
   };
 
   // Filter and search logic
   const applications = (data?.applications ?? []) as Application[];
+
+  // Dynamic real-time status counters for both Active and Archived dossiers
+  const countPending = applications.filter(a => a.status === "Pending").length;
+  const countReviewed = applications.filter(a => a.status === "Reviewed" || a.status === "Reviewing").length;
+  const countApproved = applications.filter(a => a.status === "Approved").length;
+  const countRejected = applications.filter(a => a.status === "Rejected").length;
+  const countArchived = applications.filter(a => a.status === "Archived").length;
+  const countActive = applications.filter(a => a.status !== "Archived").length;
 
   // Debug Logging for Supabase Integration Audit
   if (typeof window !== "undefined" && applications.length > 0) {
@@ -115,14 +152,28 @@ function ApplicationsAdmin() {
     });
     console.log("==============================================================");
   }
+
   const filtered = applications.filter((app) => {
+    // 1. Partition based on viewTab
+    if (viewTab === "active" && app.status === "Archived") return false;
+    if (viewTab === "archived" && app.status !== "Archived") return false;
+
+    // 2. Search query matches
     const matchesSearch =
       app.full_name.toLowerCase().includes(search.toLowerCase()) ||
       app.email.toLowerCase().includes(search.toLowerCase()) ||
       app.artist_name.toLowerCase().includes(search.toLowerCase()) ||
       (app.campaign_details || "").toLowerCase().includes(search.toLowerCase());
 
-    const matchesStatus = statusFilter === "All" || app.status === statusFilter;
+    // 3. Category status filter matches
+    let matchesStatus = true;
+    if (statusFilter !== "All" && statusFilter !== "Archived") {
+      if (statusFilter === "Reviewing" || statusFilter === "Reviewed") {
+        matchesStatus = app.status === "Reviewed" || app.status === "Reviewing";
+      } else {
+        matchesStatus = app.status === statusFilter;
+      }
+    }
 
     return matchesSearch && matchesStatus;
   });
@@ -134,7 +185,10 @@ function ApplicationsAdmin() {
       case "Rejected":
         return "text-red-400 bg-red-500/10 border-red-500/20";
       case "Reviewed":
+      case "Reviewing":
         return "text-blue-400 bg-blue-500/10 border-blue-500/20";
+      case "Archived":
+        return "text-zinc-400 bg-zinc-500/10 border-zinc-500/20";
       default:
         return "text-amber-400 bg-amber-500/10 border-amber-500/20";
     }
@@ -144,7 +198,7 @@ function ApplicationsAdmin() {
     <AdminShell title="Artist Applications">
       
       {/* Search and Filters Header */}
-      <div className="flex flex-col md:flex-row gap-4 justify-between items-start md:items-center mb-8">
+      <div className="flex flex-col md:flex-row gap-4 justify-between items-start md:items-center mb-6">
         <div className="flex flex-col sm:flex-row gap-3 w-full md:w-auto">
           {/* Search Input */}
           <div className="relative flex-1 sm:w-80">
@@ -161,31 +215,37 @@ function ApplicationsAdmin() {
           </div>
 
           {/* Status Filter */}
-          <div className="relative sm:w-48">
+          <div className="relative sm:w-56">
             <span className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-muted-foreground">
               <Filter className="h-4 w-4" />
             </span>
             <select
               value={statusFilter}
               onChange={(e) => setStatusFilter(e.target.value)}
-              className="w-full bg-black/60 border border-white/10 rounded-md pl-9 pr-4 py-2 text-xs focus:outline-none focus:border-[#FFD700] text-white font-mono appearance-none cursor-pointer"
+              className="w-full bg-black/60 border border-white/10 rounded-md pl-9 pr-8 py-2 text-xs focus:outline-none focus:border-[#FFD700] text-white font-mono appearance-none cursor-pointer"
             >
-              <option value="All">All Statuses</option>
-              <option value="Pending">Pending</option>
-              <option value="Reviewed">Reviewed</option>
-              <option value="Approved">Approved</option>
-              <option value="Rejected">Rejected</option>
+              {viewTab === "active" ? (
+                <>
+                  <option value="All">All Active ({countActive})</option>
+                  <option value="Pending">Pending ({countPending})</option>
+                  <option value="Reviewing">Reviewing ({countReviewed})</option>
+                  <option value="Approved">Approved ({countApproved})</option>
+                  <option value="Rejected">Rejected ({countRejected})</option>
+                </>
+              ) : (
+                <option value="Archived">Archived ({countArchived})</option>
+              )}
             </select>
           </div>
         </div>
 
         <div className="flex items-center gap-3">
           <span className="text-xs font-mono text-muted-foreground">
-            {filtered.length} of {applications.length} results
+            {filtered.length} of {viewTab === "active" ? countActive : countArchived} filtered
           </span>
           <button
             onClick={() => refetch()}
-            className="p-2 border border-white/10 hover:border-accent hover:text-accent rounded-md transition-colors bg-black/40 text-muted-foreground"
+            className="p-2 border border-white/10 hover:border-accent hover:text-accent rounded-md transition-colors bg-black/40 text-muted-foreground cursor-pointer"
             title="Refresh Data"
           >
             <RefreshCw className="h-4 w-4" />
@@ -193,8 +253,32 @@ function ApplicationsAdmin() {
         </div>
       </div>
 
+      {/* Luxury A&R Sub-Navigation Tabs */}
+      <div className="flex border-b border-white/5 mb-8 font-mono text-xs relative z-10">
+        <button
+          onClick={() => { setViewTab("active"); setStatusFilter("All"); }}
+          className={`px-6 py-3 border-b-2 transition-all cursor-pointer uppercase tracking-widest ${
+            viewTab === "active"
+              ? "border-[#FFD700] text-white font-semibold"
+              : "border-transparent text-muted-foreground hover:text-white"
+          }`}
+        >
+          Active Queue ({countActive})
+        </button>
+        <button
+          onClick={() => { setViewTab("archived"); setStatusFilter("Archived"); }}
+          className={`px-6 py-3 border-b-2 transition-all cursor-pointer uppercase tracking-widest ${
+            viewTab === "archived"
+              ? "border-[#FFD700] text-white font-semibold"
+              : "border-transparent text-muted-foreground hover:text-white"
+          }`}
+        >
+          Archived Dossiers ({countArchived})
+        </button>
+      </div>
+
       {/* Main Grid: Table (Left) + Selected application details panel (Right) */}
-      <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start relative z-10">
         
         {/* Left Column: Applications Table */}
         <div className={`glass rounded-xl overflow-hidden shadow-2xl border border-white/5 ${selectedApp ? "lg:col-span-8" : "lg:col-span-12"}`}>
@@ -263,18 +347,37 @@ function ApplicationsAdmin() {
                       <td className="px-5 py-4 text-right space-x-2">
                         <button
                           onClick={() => setSelectedApp(app)}
-                          className="text-white hover:text-accent hover:bg-white/5 p-2 rounded transition-colors"
+                          className="text-white hover:text-accent hover:bg-white/5 p-2 rounded transition-colors cursor-pointer"
                           title="View Details"
                         >
                           <Eye className="h-4 w-4" />
                         </button>
-                        <button
-                          onClick={() => handleRemove(app.id)}
-                          className="text-destructive hover:bg-destructive/10 p-2 rounded transition-colors"
-                          title="Delete Application"
-                        >
-                          <Trash2 className="h-4 w-4" />
-                        </button>
+                        {viewTab === "active" ? (
+                          <button
+                            onClick={() => handleArchive(app.id)}
+                            className="text-[#FFD700]/70 hover:text-[#FFD700] hover:bg-white/5 p-2 rounded transition-colors cursor-pointer"
+                            title="Archive Submission"
+                          >
+                            <Archive className="h-4 w-4" />
+                          </button>
+                        ) : (
+                          <>
+                            <button
+                              onClick={() => handleRestore(app.id)}
+                              className="text-green-400/70 hover:text-green-400 hover:bg-white/5 p-2 rounded transition-colors cursor-pointer"
+                              title="Restore Submission"
+                            >
+                              <RotateCcw className="h-4 w-4" />
+                            </button>
+                            <button
+                              onClick={() => handleRemove(app.id)}
+                              className="text-red-500/70 hover:text-red-500 hover:bg-white/5 p-2 rounded transition-colors cursor-pointer"
+                              title="Permanently Delete"
+                            >
+                              <Trash2 className="h-4 w-4" />
+                            </button>
+                          </>
+                        )}
                       </td>
                     </tr>
                   ))}
@@ -306,7 +409,7 @@ function ApplicationsAdmin() {
               <span>DOSSIER DETECTOR // FULL INFO</span>
               <button
                 onClick={() => setSelectedApp(null)}
-                className="text-muted-foreground hover:text-accent p-1 hover:bg-white/5 rounded"
+                className="text-muted-foreground hover:text-accent p-1 hover:bg-white/5 rounded cursor-pointer"
               >
                 <X className="h-4 w-4" />
               </button>
@@ -395,26 +498,28 @@ function ApplicationsAdmin() {
             </div>
 
             {/* Administration Directives (Status Select) */}
-            <div className="space-y-3 pt-4 border-t border-white/5">
-              <h4 className="font-mono text-[9px] uppercase tracking-widest text-white/30">ADMINISTRATION STATUS ACTION</h4>
-              
-              <div className="grid grid-cols-2 gap-2 font-mono text-[9px]">
-                {["Pending", "Reviewed", "Approved", "Rejected"].map((st) => (
-                  <button
-                    key={st}
-                    disabled={updatingId !== null}
-                    onClick={() => handleStatusChange(selectedApp.id, st as any)}
-                    className={`px-3 py-2 border rounded-md uppercase tracking-wider text-center cursor-pointer transition-all ${
-                      selectedApp.status === st
-                        ? "bg-[#FFD700] text-black border-[#FFD700] font-semibold"
-                        : "bg-black/40 border-white/10 text-muted-foreground hover:border-white/20 hover:text-white"
-                    }`}
-                  >
-                    {updatingId === selectedApp.id && selectedApp.status === st ? "Saving..." : st}
-                  </button>
-                ))}
+            {viewTab === "active" && (
+              <div className="space-y-3 pt-4 border-t border-white/5">
+                <h4 className="font-mono text-[9px] uppercase tracking-widest text-white/30">ADMINISTRATION STATUS ACTION</h4>
+                
+                <div className="grid grid-cols-2 gap-2 font-mono text-[9px]">
+                  {["Pending", "Reviewed", "Approved", "Rejected"].map((st) => (
+                    <button
+                      key={st}
+                      disabled={updatingId !== null}
+                      onClick={() => handleStatusChange(selectedApp.id, st as any)}
+                      className={`px-3 py-2 border rounded-md uppercase tracking-wider text-center cursor-pointer transition-all ${
+                        selectedApp.status === st
+                          ? "bg-[#FFD700] text-black border-[#FFD700] font-semibold"
+                          : "bg-black/40 border-white/10 text-muted-foreground hover:border-white/20 hover:text-white"
+                      }`}
+                    >
+                      {updatingId === selectedApp.id && selectedApp.status === st ? "Saving..." : (st === "Reviewed" ? "Reviewing" : st)}
+                    </button>
+                  ))}
+                </div>
               </div>
-            </div>
+            )}
 
             {/* Dossier Media Packages & Action Directives */}
             <div className="space-y-3 pt-4 border-t border-white/5">
@@ -429,7 +534,7 @@ function ApplicationsAdmin() {
                       selectedApp.id
                     )}
                     disabled={downloadingPhotoId !== null}
-                    className="w-full flex items-center justify-center gap-2 border border-white/10 hover:border-accent/40 bg-black/40 hover:bg-accent/5 text-white hover:text-accent py-2.5 text-[9px] font-mono uppercase tracking-widest rounded-md transition-all cursor-pointer"
+                    className="w-full flex items-center justify-center gap-2 border border-white/10 hover:border-[#FFD700]/40 bg-black/40 hover:bg-[#FFD700]/5 text-white hover:text-[#FFD700] py-2.5 text-[9px] font-mono uppercase tracking-widest rounded-md transition-all cursor-pointer"
                   >
                     <span>{downloadingPhotoId === selectedApp.id ? "DOWNLOADING..." : "📥 DOWNLOAD PHOTO"}</span>
                   </button>
@@ -444,18 +549,37 @@ function ApplicationsAdmin() {
                       selectedApp.id
                     )}
                     disabled={downloadingPdfId !== null}
-                    className="w-full flex items-center justify-center gap-2 border border-white/10 hover:border-accent/40 bg-black/40 hover:bg-accent/5 text-white hover:text-accent py-2.5 text-[9px] font-mono uppercase tracking-widest rounded-md transition-all cursor-pointer"
+                    className="w-full flex items-center justify-center gap-2 border border-white/10 hover:border-[#FFD700]/40 bg-black/40 hover:bg-[#FFD700]/5 text-white hover:text-[#FFD700] py-2.5 text-[9px] font-mono uppercase tracking-widest rounded-md transition-all cursor-pointer"
                   >
                     <span>{downloadingPdfId === selectedApp.id ? "DOWNLOADING..." : "📥 DOWNLOAD EPK PDF"}</span>
                   </button>
                 )}
 
-                <button
-                  onClick={() => handleRemove(selectedApp.id)}
-                  className="w-full flex items-center justify-center gap-2 border border-red-500/20 bg-red-500/5 hover:bg-red-500/10 text-red-400 py-2.5 text-[9px] font-mono uppercase tracking-widest rounded-md transition-all cursor-pointer"
-                >
-                  <span>🗑 DELETE SUBMISSION</span>
-                </button>
+                {viewTab === "active" ? (
+                  <button
+                    onClick={() => handleArchive(selectedApp.id)}
+                    className="w-full flex items-center justify-center gap-2 border border-[#FFD700]/20 bg-[#FFD700]/5 hover:bg-[#FFD700]/10 text-[#FFD700] py-2.5 text-[9px] font-mono uppercase tracking-widest rounded-md transition-all cursor-pointer"
+                  >
+                    <Archive className="h-3 w-3" />
+                    <span>📁 ARCHIVE SUBMISSION</span>
+                  </button>
+                ) : (
+                  <>
+                    <button
+                      onClick={() => handleRestore(selectedApp.id)}
+                      className="w-full flex items-center justify-center gap-2 border border-green-500/20 bg-green-500/5 hover:bg-green-500/10 text-green-400 py-2.5 text-[9px] font-mono uppercase tracking-widest rounded-md transition-all cursor-pointer"
+                    >
+                      <RotateCcw className="h-3 w-3" />
+                      <span>🔄 RESTORE TO ACTIVE</span>
+                    </button>
+                    <button
+                      onClick={() => handleRemove(selectedApp.id)}
+                      className="w-full flex items-center justify-center gap-2 border border-red-500/20 bg-red-500/5 hover:bg-red-500/10 text-red-400 py-2.5 text-[9px] font-mono uppercase tracking-widest rounded-md transition-all cursor-pointer"
+                    >
+                      <span>🗑 PERMANENTLY DELETE</span>
+                    </button>
+                  </>
+                )}
               </div>
             </div>
 

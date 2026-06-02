@@ -60,7 +60,7 @@ export function Showcase() {
           style={{ scale, y }}
           width={1920}
           height={1080}
-          className="absolute inset-0 h-full w-full object-cover"
+          className="absolute inset-0 h-full w-full object-cover object-[30%_center] md:object-center"
           loading="lazy"
         />
         <div className="absolute inset-0 bg-gradient-to-t from-background via-background/40 to-background/70" />
@@ -81,7 +81,7 @@ export function Showcase() {
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true, amount: 0.4 }}
             transition={{ duration: 1, ease: [0.22, 1, 0.36, 1] }}
-            className="font-display text-5xl leading-[0.8] md:text-7xl lg:text-[7.5rem] tracking-tighter"
+            className="font-display text-4xl sm:text-5xl leading-[0.95] md:text-7xl lg:text-[7.5rem] tracking-tighter"
           >
             <span 
               className="block text-white font-black uppercase"
@@ -148,8 +148,8 @@ export function Showcase() {
         </div>
       </div>
 
-      <div className="border-y border-border bg-background">
-        <div className="mx-auto grid max-w-[1600px] grid-cols-2 divide-x divide-border md:grid-cols-4">
+      <div className="border-y border-white/5 bg-[#000000]">
+        <div className="mx-auto grid max-w-[1600px] grid-cols-2 divide-x divide-white/5 md:grid-cols-4">
           {[
             { k: "2017", v: "Established" },
             { k: "13+", v: "Artists Signed" },

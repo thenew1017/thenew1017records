@@ -92,7 +92,7 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
       { charSet: "utf-8" },
       { name: "viewport", content: "width=device-width, initial-scale=1" },
       { title: "The New 1017 Records" },
-      { name: "description", content: "Official home of The New 1017 Records — artists, releases, tour dates and the official store." },
+      { name: "description", content: "Official home of The New 1017 Records — artists, releases, artist discovery system and the official store." },
       { name: "author", content: "The New 1017 Records" },
       { name: "theme-color", content: "#000000" },
       { property: "og:title", content: "The New 1017 Records" },
@@ -112,7 +112,7 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
       },
       {
         rel: "stylesheet",
-        href: "https://fonts.googleapis.com/css2?family=Inter:wght@100..900&family=Unbounded:wght@800;900&family=Space+Grotesk:wght@700&family=Syne:wght@800&display=swap",
+        href: "https://fonts.googleapis.com/css2?family=Inter:wght@100..900&family=Unbounded:wght@800;900&family=Space+Grotesk:wght@700&family=Syne:wght@800&family=Bebas+Neue&display=swap",
       },
       {
         rel: "stylesheet",
