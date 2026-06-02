@@ -14,6 +14,24 @@ export const Route = createFileRoute("/about-1017")({
   component: AboutPage,
   errorComponent: AboutErrorComponent,
   pendingComponent: AboutPendingComponent,
+  loader: async () => {
+    try {
+      console.log("📥 [Founder Loader] Fetching founder spotlight directly from Supabase...");
+      const { data } = await getPublicFounderSpotlight();
+      if (!data) {
+        throw new Error("No founder spotlight data returned from Supabase");
+      }
+      if (!data.founder_image_url) {
+        console.error("❌ [Founder Loader Warning] Image URL is missing in the retrieved founder spotlight object:", data);
+      } else {
+        console.log("✅ [Founder Loader Success] Successfully loaded founder spotlight image URL:", data.founder_image_url);
+      }
+      return { spotlight: data };
+    } catch (err: any) {
+      console.error("❌ [Founder Loader Error] Failed to fetch founder spotlight from Supabase:", err?.message || err);
+      return { spotlight: null, error: err?.message || String(err) };
+    }
+  },
   head: () => ({
     meta: [
       { title: "Artist Recruitment Portal — The New 1017 Records" },
@@ -101,12 +119,14 @@ const valueProps = [
 ];
 
 function AboutPage() {
+  const loaderData = Route.useLoaderData();
   const fetchFounder = useServerFn(getPublicFounderSpotlight);
   
-  const { data: spotlightQuery } = useQuery({
+  const { data: spotlightQuery, isLoading, isError, error } = useQuery({
     queryKey: ["public-founder-spotlight"],
     queryFn: () => fetchFounder(),
-    staleTime: 30_000,
+    initialData: loaderData?.spotlight ? { data: loaderData.spotlight } : undefined,
+    staleTime: 0, // Bypass caches to query directly from Supabase every time
   });
 
   const [activeSection, setActiveSection] = useState("");
@@ -164,7 +184,7 @@ function AboutPage() {
     }
   };
 
-  const spotlight = spotlightQuery?.data || {
+  const spotlight = spotlightQuery?.data || loaderData?.spotlight || {
     is_visible: true,
     founder_name: "Gucci Mane",
     founder_title: "1017 RECORDS FOUNDER // A&R CHIEF",
@@ -179,6 +199,21 @@ function AboutPage() {
     stat_3_value: "150M+",
     stat_3_label: "Worldwide Fanbase"
   };
+
+  // Perform robust error logging to console
+  useEffect(() => {
+    if (isError) {
+      console.error("❌ [Founder Page Error] Failed to fetch founder spotlight from Supabase via query:", error);
+    }
+    if (spotlight && !spotlight.founder_image_url) {
+      console.error("❌ [Founder Page Error] Founder image URL is empty/missing in the retrieved data:", spotlight);
+    }
+  }, [isError, error, spotlight]);
+
+  // Prevent rendering if the image URL is not yet available and show proper loading state
+  if (isLoading && !spotlight?.founder_image_url) {
+    return <AboutPendingComponent />;
+  }
 
   return (
     <main className="relative min-h-screen bg-[#000000] text-foreground grain-overlay overflow-x-hidden">

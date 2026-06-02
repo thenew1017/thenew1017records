@@ -23,6 +23,7 @@ export function PremiumImage({
 }: PremiumImageProps) {
   const [loaded, setLoaded] = useState(false);
   const [error, setError] = useState(false);
+  const imgRef = React.useRef<HTMLImageElement>(null);
 
   // Preload critical images above the fold
   useEffect(() => {
@@ -32,11 +33,19 @@ export function PremiumImage({
     }
   }, [src, loading, fetchPriority]);
 
+  // Sync complete state if image is already cached/loaded before hydration
+  useEffect(() => {
+    if (imgRef.current && imgRef.current.complete) {
+      setLoaded(true);
+    }
+  }, [src]);
+
   const handleLoad = () => {
     setLoaded(true);
   };
 
   const handleError = () => {
+    console.error(`❌ [PremiumImage Error] Failed to load image from URL: "${src}" (Alt: "${alt}")`);
     setError(true);
   };
 
@@ -54,6 +63,7 @@ export function PremiumImage({
       {/* Actual Image */}
       {finalSrc && (
         <img
+          ref={imgRef}
           src={finalSrc}
           alt={alt}
           loading={loading}
