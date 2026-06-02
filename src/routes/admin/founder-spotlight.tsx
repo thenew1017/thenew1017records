@@ -40,7 +40,7 @@ const DEFAULT_SPOTLIGHT: FounderSpotlightData = {
   stat_2_value: "5B+",
   stat_3_label: "Careers Run",
   stat_3_value: "PLATINUM",
-  founder_image_url: "/src/assets/showcase.jpg",
+  founder_image_url: "",
   founder_image_alt: "Gucci Mane Founder Showcase",
   is_visible: true,
 };

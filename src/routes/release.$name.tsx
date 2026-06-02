@@ -9,10 +9,6 @@ import { motion, AnimatePresence } from "motion/react";
 import { ArrowLeft, ArrowRight, Music2, Apple, Youtube, Globe, Heart, Share2, Star, Download, Play, Disc } from "lucide-react";
 import { PremiumImage } from "@/components/ui/PremiumImage";
 import { getPlatformFromUrl, getPlatformLabel, SocialIconSVG, SocialLinkButton } from "@/components/ui/SocialLinks";
-import r1 from "@/assets/release-1.jpg";
-import r2 from "@/assets/release-2.jpg";
-import r3 from "@/assets/release-3.jpg";
-import r4 from "@/assets/release-4.jpg";
 
 type ReleaseSetting = {
   id: string;
@@ -69,7 +65,7 @@ const FALLBACK_RELEASES: ReleaseSetting[] = [
     title: "Golden Hour",
     artist: "Shadow Era",
     release_date: "2026-01-01",
-    cover_url: r1,
+    cover_url: "",
     format: "Single",
     genre: "Hip Hop",
     description: "The flagship single defining the cinematic transition of Shadow Era. A luxurious blend of high-end bass vectors and street poetry.",
@@ -98,7 +94,7 @@ const FALLBACK_RELEASES: ReleaseSetting[] = [
     title: "Run It Back",
     artist: "Gold Chain",
     release_date: "2026-02-01",
-    cover_url: r2,
+    cover_url: "",
     format: "Single",
     genre: "Trap",
     description: "Gold Chain returns with a high-energy trap anthem that merges heavy sub-bass structures with crystal clean modular synthesis.",
@@ -122,7 +118,7 @@ const FALLBACK_RELEASES: ReleaseSetting[] = [
     title: "Neon Saint EP",
     artist: "Neon Saint",
     release_date: "2025-11-01",
-    cover_url: r3,
+    cover_url: "",
     format: "EP",
     genre: "Electronic",
     description: "A futuristic voyage into the cyberpunk districts of Atlanta. Neon Saint layers vintage analogue warmth under driving industrial grooves.",
@@ -146,7 +142,7 @@ const FALLBACK_RELEASES: ReleaseSetting[] = [
     title: "City Lights",
     artist: "Amber Glow",
     release_date: "2025-08-01",
-    cover_url: r4,
+    cover_url: "",
     format: "Mixtape",
     genre: "R&B",
     description: "Late night reflections and smooth ambient melodies. Amber Glow curates an elegant soundtrack for nocturnal city drives.",
@@ -600,8 +596,15 @@ function ReleaseDetailPage() {
                     className="transition-transform duration-1000"
                   />
                 ) : (
-                  <div className="absolute inset-0 bg-secondary/35 flex items-center justify-center">
-                    <Disc className="w-16 h-16 text-muted-foreground/30 animate-spin" />
+                  <div className="absolute inset-0 bg-gradient-to-br from-[#0c0d10] to-[#040405] flex flex-col items-center justify-center p-12 border border-white/5 relative overflow-hidden">
+                    <div className="absolute inset-0 bg-gradient-to-r from-transparent via-[#E5D5C0]/[0.04] to-transparent -translate-x-full animate-shimmer pointer-events-none" />
+                    <svg className="w-20 h-20 text-zinc-700 animate-spin" style={{ animationDuration: '8s' }} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.25}>
+                      <circle cx="12" cy="12" r="10" />
+                      <circle cx="12" cy="12" r="7.5" strokeDasharray="2 2" />
+                      <circle cx="12" cy="12" r="4" />
+                      <circle cx="12" cy="12" r="1.5" />
+                    </svg>
+                    <span className="font-mono text-[10px] font-black uppercase tracking-[0.3em] text-[#E5D5C0]/50 mt-6 animate-pulse select-none">1017 SIGNATURE DISK</span>
                   </div>
                 )}
 
@@ -780,7 +783,7 @@ function ReleaseDetailPage() {
 
             <div className="grid grid-cols-1 gap-6 sm:grid-cols-3">
               {related.map((r, i) => {
-                const relImage = r.cover_url || r1;
+                const relImage = r.cover_url || "";
                 const relYear = r.release_date ? new Date(r.release_date).getFullYear().toString() : "2026";
                 return (
                    <Link
@@ -789,15 +792,27 @@ function ReleaseDetailPage() {
                     params={{ name: slugify(r.title) }}
                     className="group relative flex flex-col text-left outline-none bg-transparent p-0 border-none transition-all duration-500"
                   >
-                    <div className="relative aspect-square w-full overflow-hidden rounded-none bg-black/50 border border-white/5">
+                    <div className="relative aspect-square w-full overflow-hidden rounded-none bg-black/50 border border-white/5 flex items-center justify-center">
                       <div className="absolute inset-0 bg-gradient-to-t from-black/85 via-black/10 to-transparent opacity-80 z-20" />
-                      <PremiumImage
-                        src={relImage}
-                        alt={r.title}
-                        aspectRatioClass="aspect-square"
-                        loading="lazy"
-                        className="transition-transform duration-1000 group-hover:scale-[1.05]"
-                      />
+                      {relImage ? (
+                        <PremiumImage
+                          src={relImage}
+                          alt={r.title}
+                          aspectRatioClass="aspect-square"
+                          loading="lazy"
+                          className="transition-transform duration-1000 group-hover:scale-[1.05]"
+                        />
+                      ) : (
+                        <div className="absolute inset-0 bg-gradient-to-br from-[#0c0d10] to-[#040405] flex flex-col items-center justify-center p-6 relative overflow-hidden">
+                          <div className="absolute inset-0 bg-gradient-to-r from-transparent via-[#E5D5C0]/[0.03] to-transparent -translate-x-full animate-shimmer pointer-events-none" />
+                          <svg className="w-10 h-10 text-zinc-700 animate-spin" style={{ animationDuration: '6s' }} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.25}>
+                            <circle cx="12" cy="12" r="10" />
+                            <circle cx="12" cy="12" r="7.5" strokeDasharray="2 2" />
+                            <circle cx="12" cy="12" r="4" />
+                            <circle cx="12" cy="12" r="1.5" />
+                          </svg>
+                        </div>
+                      )}
                       <div className="absolute inset-0 bg-gradient-to-tr from-transparent via-white/10 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-1000 ease-out z-20 pointer-events-none" />
                     </div>
 

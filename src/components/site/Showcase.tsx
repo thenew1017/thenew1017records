@@ -2,7 +2,6 @@ import { motion, useScroll, useTransform } from "motion/react";
 import { useRef } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { getPublicSettings } from "@/lib/cms.functions";
-import showcase from "@/assets/showcase.jpg";
 import { Link } from "@tanstack/react-router";
 import { TransitionLink } from "@/components/ui/PageTransition";
 
@@ -43,10 +42,10 @@ export function Showcase() {
     ...((data?.settings?.showcase as ShowcaseSetting | undefined) ?? {}),
   };
 
-  // Resolve custom uploaded banner or the visual default fallback
+  // Resolve custom uploaded banner
   const displayImage = showcaseSettings.enabled && showcaseSettings.image_url 
     ? showcaseSettings.image_url 
-    : showcase;
+    : "";
 
   const isExternalLink = !!showcaseSettings.button_url && /^https?:\/\//i.test(showcaseSettings.button_url);
   const isHashLink = !!showcaseSettings.button_url && showcaseSettings.button_url.startsWith("#");
@@ -54,15 +53,22 @@ export function Showcase() {
   return (
     <section id="music" ref={ref} className="relative overflow-hidden">
       <div className="relative h-[90vh] min-h-[640px] w-full overflow-hidden">
-        <motion.img
-          src={displayImage}
-          alt={showcaseSettings.title}
-          style={{ scale, y }}
-          width={1920}
-          height={1080}
-          className="absolute inset-0 h-full w-full object-cover object-[30%_center] md:object-center"
-          loading="lazy"
-        />
+        {displayImage ? (
+          <motion.img
+            src={displayImage}
+            alt={showcaseSettings.title}
+            style={{ scale, y }}
+            width={1920}
+            height={1080}
+            className="absolute inset-0 h-full w-full object-cover object-[30%_center] md:object-center"
+            loading="lazy"
+          />
+        ) : (
+          <div className="absolute inset-0 bg-[#020202]">
+            <div className="absolute top-1/4 left-1/4 h-[80vmin] w-[80vmin] bg-[#E5D5C0]/[0.02] rounded-full blur-[80px] animate-pulse pointer-events-none" style={{ animationDuration: '8s' }} />
+            <div className="absolute bottom-1/4 right-1/4 h-[80vmin] w-[80vmin] bg-[#E5D5C0]/[0.015] rounded-full blur-[100px] animate-pulse pointer-events-none" style={{ animationDuration: '12s' }} />
+          </div>
+        )}
         <div className="absolute inset-0 bg-gradient-to-t from-background via-background/40 to-background/70" />
         <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,transparent_0%,oklch(0.04_0_0/0.6)_100%)]" />
 

@@ -7,12 +7,8 @@ import { Nav } from "@/components/site/Nav";
 import { Footer } from "@/components/site/Footer";
 import { CinematicArtistImage } from "@/components/site/Artists";
 import { motion } from "motion/react";
-import { ArrowLeft, Music2, Apple, Youtube, Instagram, Twitter, Globe, ArrowRight, Play } from "lucide-react";
+import { ArrowLeft, Music2, Apple, Youtube, Instagram, Twitter, Globe, ArrowRight, Play, Camera } from "lucide-react";
 import { SocialLinksRow } from "@/components/ui/SocialLinks";
-import r1 from "@/assets/release-1.jpg";
-import r2 from "@/assets/release-2.jpg";
-import r3 from "@/assets/release-3.jpg";
-import r4 from "@/assets/release-4.jpg";
 
 const fallbacks: string[] = [];
 
@@ -100,13 +96,13 @@ function getArtistDetailExtras(artistName: string) {
         { value: "1017 Leader", label: "Roster Influence" }
       ],
       releases: [
-        { title: "Shiesty Season", year: "2021", type: "Mixtape", cover: r1, spotify: "https://open.spotify.com/album/43Y81gM4tI1f05Y3Z2S0bJ" },
-        { title: "Shiesty Season: Certified", year: "2022", type: "Deluxe Mixtape", cover: r2, spotify: "https://open.spotify.com/album/43Y81gM4tI1f05Y3Z2S0bJ" },
-        { title: "Federal Contraband", year: "2022", type: "Single", cover: r3, spotify: "https://open.spotify.com/track/43Y81gM4tI1f05Y3Z2S0bJ" },
-        { title: "Back in Blood (feat. Lil Durk)", year: "2020", type: "Single", cover: r4, spotify: "https://open.spotify.com/track/7rr8rWw8aU2Z22Yt25V0bJ" }
+        { title: "Shiesty Season", year: "2021", type: "Mixtape", cover: "", spotify: "https://open.spotify.com/album/43Y81gM4tI1f05Y3Z2S0bJ" },
+        { title: "Shiesty Season: Certified", year: "2022", type: "Deluxe Mixtape", cover: "", spotify: "https://open.spotify.com/album/43Y81gM4tI1f05Y3Z2S0bJ" },
+        { title: "Federal Contraband", year: "2022", type: "Single", cover: "", spotify: "https://open.spotify.com/track/43Y81gM4tI1f05Y3Z2S0bJ" },
+        { title: "Back in Blood (feat. Lil Durk)", year: "2020", type: "Single", cover: "", spotify: "https://open.spotify.com/track/7rr8rWw8aU2Z22Yt25V0bJ" }
       ],
       story: "Born and raised in Memphis, Tennessee, Pooh Shiesty emerged as the undisputed crown jewel of the new 1017 Records roster under the direct guidance of Gucci Mane. Known for his signature whispering flow, calm delivery, and sharp trap realism, he captured the ears of the hip-hop world with his breakout anthem 'Back in Blood'.\n\nHis debut mixtape, 'Shiesty Season', went certified platinum, scoring triple-platinum tracks and securing his position as a flagship giant of Southern trap music. With over 2.4 billion global streams and heavy collaborations across the elite of modern rap, he continues to dictate the sonic aesthetics of modern street narrative.",
-      gallery: [r1, r1, r2, r2]
+      gallery: ["", "", "", ""]
     };
   }
   
@@ -122,13 +118,13 @@ function getArtistDetailExtras(artistName: string) {
         { value: "Atlanta's Voice", label: "Regional Dominance" }
       ],
       releases: [
-        { title: "Gutta Baby", year: "2020", type: "Album", cover: r2 },
-        { title: "Soicy Boyz (with Gucci Mane)", year: "2021", type: "Compilation", cover: r3 },
-        { title: "First Class", year: "2020", type: "Single", cover: r4 },
-        { title: "Molly (feat. DaBaby)", year: "2020", type: "Single", cover: r1 }
+        { title: "Gutta Baby", year: "2020", type: "Album", cover: "" },
+        { title: "Soicy Boyz (with Gucci Mane)", year: "2021", type: "Compilation", cover: "" },
+        { title: "First Class", year: "2020", type: "Single", cover: "" },
+        { title: "Molly (feat. DaBaby)", year: "2020", type: "Single", cover: "" }
       ],
       story: "Hailing from Greensboro, Georgia, Foogiano—the 'Mayor of Greensboro'—was the first artist signed to Gucci Mane's revamped 1017 roster, instantly bringing a dynamic, rapid-fire flow and high-voltage Southern charisma. His raw street anthems and uncompromising bars represent the unyielding pulse of modern trap.\n\nHis debut project, 'Gutta Baby', solidified his place in the industry, showing a versatile artist capable of executing both hard-hitting trap records and highly melodic Southern anthems. Backed by massive club anthems and a solid regional backing, Foogiano is the heart and soul of the 1017 street roster.",
-      gallery: [r2, r2, r3, r3]
+      gallery: ["", "", "", ""]
     };
   }
 
@@ -144,13 +140,13 @@ function getArtistDetailExtras(artistName: string) {
         { value: "Everlasting", label: "Legacy Score" }
       ],
       releases: [
-        { title: "Big Grim Reaper", year: "2021", type: "Mixtape", cover: r3 },
-        { title: "Big Grim Reaper: The Return", year: "2022", type: "Deluxe Mixtape", cover: r4 },
-        { title: "Frozone Flow", year: "2020", type: "Single", cover: r1 },
-        { title: "MJ (feat. Quezz Ruthless)", year: "2021", type: "Single", cover: r2 }
+        { title: "Big Grim Reaper", year: "2021", type: "Mixtape", cover: "" },
+        { title: "Big Grim Reaper: The Return", year: "2022", type: "Deluxe Mixtape", cover: "" },
+        { title: "Frozone Flow", year: "2020", type: "Single", cover: "" },
+        { title: "MJ (feat. Quezz Ruthless)", year: "2021", type: "Single", cover: "" }
       ],
       story: "The late Memphis legend Big Scarr brought a cool, calm, and incredibly clinical energy to the trap genre. Famously known as 'The Frozone' due to his icy demeanor and razor-sharp, effortless delivery, he stood as one of the most commercially successful breakouts from the 1017 family.\n\nHis certified platinum project 'Big Grim Reaper' was highly praised for its unvarnished lyricism and innovative beat selections, charting highly on the Billboard 200. Big Scarr's legacy remains as a primary force that reshaped the Memphis rap soundscape for a generation.",
-      gallery: [r3, r3, r4, r4]
+      gallery: ["", "", "", ""]
     };
   }
 
@@ -166,13 +162,13 @@ function getArtistDetailExtras(artistName: string) {
         { value: "Trendsetter", label: "Genre Fusion" }
       ],
       releases: [
-        { title: "No Luv", year: "2022", type: "Album", cover: r4 },
-        { title: "Luv Enchanting", year: "2020", type: "Mixtape", cover: r1 },
-        { title: "Track & Field (feat. Coi Leray)", year: "2021", type: "Single", cover: r2 },
-        { title: "Angel Dust", year: "2023", type: "Single", cover: r3 }
+        { title: "No Luv", year: "2022", type: "Album", cover: "" },
+        { title: "Luv Enchanting", year: "2020", type: "Mixtape", cover: "" },
+        { title: "Track & Field (feat. Coi Leray)", year: "2021", type: "Single", cover: "" },
+        { title: "Angel Dust", year: "2023", type: "Single", cover: "" }
       ],
       story: "The late 1017 siren Enchanting stood at the premium intersection of ethereal R&B vocals and gritty, hard-hitting trap beats. Her unique style—blending angelic vocal harmonies with rapid trap flows—paved a highly specialized path that set her apart from all contemporaries.\n\nHer albums 'No Luv' and 'Luv Enchanting' proved her versatility as both a vocalist and a songwriter, earning massive digital streaming counts and national acclaim. Her bold artistic vision continues to inspire and define the modern melodic trap subgenre.",
-      gallery: [r4, r4, r1, r1]
+      gallery: ["", "", "", ""]
     };
   }
 
@@ -187,12 +183,12 @@ function getArtistDetailExtras(artistName: string) {
       { value: "Rising Star", label: "Career Vector" }
     ],
     releases: [
-      { title: "Official Roster Debut", year: "2024", type: "Album", cover: r1 },
-      { title: "So Icey Campaign", year: "2024", type: "Single", cover: r2 },
-      { title: "1017 Compilation Vol. 1", year: "2025", type: "Compilation", cover: r3 }
+      { title: "Official Roster Debut", year: "2024", type: "Album", cover: "" },
+      { title: "So Icey Campaign", year: "2024", type: "Single", cover: "" },
+      { title: "1017 Compilation Vol. 1", year: "2025", type: "Compilation", cover: "" }
     ],
     story: `As an official member of the revamped 1017 Records roster, this artist represents the brand-new creative direction under the guidance of Gucci Mane. Fusing traditional trap drums with modern digital melodic styles, they represent the continuing evolution of Atlanta's iconic label.\n\nTheir releases are paving the way for heavy collaborations, extensive DSP support, and global tour appearances, ensuring the legacy of the 1017 sound system remains fresh, relevant, and dominant on the global rap charts.`,
-    gallery: [r1, r1, r2, r2]
+    gallery: ["", "", "", ""]
   };
 }
 
@@ -377,12 +373,20 @@ function ArtistDetailPage() {
                 className="group relative flex flex-col text-left outline-none bg-transparent p-0 border-none transition-all duration-[300ms] ease-in-out cursor-pointer select-none transform-gpu"
               >
                 {/* Cover Art Wrapper */}
-                <div className="relative aspect-square w-full rounded-none overflow-hidden bg-black/40 border border-white/5">
-                  <img
-                    src={rel.cover}
-                    alt={rel.title}
-                    className="w-full h-full object-cover transition-transform duration-[600ms] ease-out group-hover:scale-105"
-                  />
+                <div className="relative aspect-square w-full rounded-none overflow-hidden bg-black/40 border border-white/5 flex items-center justify-center">
+                  {rel.cover ? (
+                    <img
+                      src={rel.cover}
+                      alt={rel.title}
+                      className="w-full h-full object-cover transition-transform duration-[600ms] ease-out group-hover:scale-105"
+                    />
+                  ) : (
+                    <div className="absolute inset-0 bg-gradient-to-br from-[#0c0d10] to-[#040405] flex flex-col items-center justify-center p-6 relative overflow-hidden">
+                      <div className="absolute inset-0 bg-gradient-to-r from-transparent via-[#E5D5C0]/[0.03] to-transparent -translate-x-full animate-shimmer" />
+                      <Music2 className="w-10 h-10 text-zinc-700 animate-pulse" />
+                      <span className="font-mono text-[8px] uppercase tracking-[0.25em] text-[#E5D5C0]/40 mt-3">AUDIO DOSSIER</span>
+                    </div>
+                  )}
                   {/* Glass Play Overlay */}
                   <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center">
                     <div className="h-12 w-12 rounded-full bg-white/10 border border-white/20 backdrop-blur-md flex items-center justify-center shadow-lg group-hover:scale-110 group-hover:bg-white/20 transition-all duration-300">
@@ -485,11 +489,19 @@ function ArtistDetailPage() {
                     key={img.id || idx}
                     className="group relative w-full aspect-square rounded-none overflow-hidden bg-black/40 border border-white/5 hover:border-white/15 transition-all duration-500 transform-gpu"
                   >
-                    <img
-                      src={img.image_url}
-                      alt={img.caption || "Gallery photo"}
-                      className="w-full h-full object-cover transition-transform duration-[700ms] ease-out group-hover:scale-[1.03]"
-                    />
+                    {img.image_url ? (
+                      <img
+                        src={img.image_url}
+                        alt={img.caption || "Gallery photo"}
+                        className="w-full h-full object-cover transition-transform duration-[700ms] ease-out group-hover:scale-[1.03]"
+                      />
+                    ) : (
+                      <div className="absolute inset-0 bg-gradient-to-br from-[#0c0d10] to-[#020203] flex flex-col items-center justify-center p-4 relative overflow-hidden">
+                        <div className="absolute inset-0 bg-gradient-to-r from-transparent via-[#E5D5C0]/[0.02] to-transparent -translate-x-full animate-shimmer pointer-events-none" />
+                        <Camera className="w-8 h-8 text-zinc-700 animate-pulse" />
+                        <span className="font-mono text-[8px] uppercase tracking-[0.2em] text-[#E5D5C0]/35 mt-2">Dossier Visual</span>
+                      </div>
+                    )}
                     
                     {/* Apple Music Style Captions & Credits Hover Overlay */}
                     <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-black via-black/70 to-transparent p-4 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex flex-col justify-end text-left select-none">

@@ -214,20 +214,28 @@ function AboutPage() {
             <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 lg:gap-16 items-center bg-transparent relative overflow-hidden text-left py-12 border-t border-white/5">
               
               {/* Premium Portrait Frame */}
-              <div className="lg:col-span-5 w-full max-w-[420px] aspect-[3/4] overflow-hidden rounded-none border border-[#E5D5C0]/20 mx-auto lg:mx-0 group">
-                <div className="relative w-full h-full overflow-hidden border border-white/5">
-                  <PremiumImage
-                    src={spotlight.founder_image_url || ""}
-                    alt={spotlight.founder_image_alt || spotlight.founder_name}
-                    aspectRatioClass="aspect-[3/4]"
-                    loading="eager"
-                    fetchPriority="high"
-                    className="transition-transform duration-700 ease-out transform-gpu group-hover:scale-103"
-                    style={{
-                      filter: "contrast(1.05) saturate(1.04) brightness(0.98)",
-                    }}
-                  />
-                </div>
+              <div className="lg:col-span-5 w-full max-w-[420px] aspect-[3/4] overflow-hidden rounded-none border border-[#E5D5C0]/20 mx-auto lg:mx-0 group flex items-center justify-center relative bg-gradient-to-br from-[#0a0a0d] to-[#020203]">
+                {spotlight.founder_image_url ? (
+                  <div className="relative w-full h-full overflow-hidden border border-white/5">
+                    <PremiumImage
+                      src={spotlight.founder_image_url}
+                      alt={spotlight.founder_image_alt || spotlight.founder_name}
+                      aspectRatioClass="aspect-[3/4]"
+                      loading="eager"
+                      fetchPriority="high"
+                      className="transition-transform duration-700 ease-out transform-gpu group-hover:scale-103"
+                      style={{
+                        filter: "contrast(1.05) saturate(1.04) brightness(0.98)",
+                      }}
+                    />
+                  </div>
+                ) : (
+                  <div className="absolute inset-0 flex flex-col items-center justify-center p-8 text-center relative overflow-hidden">
+                    <div className="absolute inset-0 bg-gradient-to-r from-transparent via-[#E5D5C0]/[0.03] to-transparent -translate-x-full animate-shimmer pointer-events-none" />
+                    <Users className="w-16 h-16 text-zinc-700 animate-pulse" />
+                    <span className="font-mono text-[9px] uppercase tracking-[0.35em] text-[#E5D5C0]/50 mt-5 leading-none select-none">EXECUTIVE PORTRAIT SIGNATURE</span>
+                  </div>
+                )}
               </div>
 
               {/* Biography & Achievements Editorial Description */}

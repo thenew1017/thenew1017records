@@ -5,10 +5,6 @@ import { getPublicSettings, slugify } from "@/lib/cms.functions";
 import { ExternalLink } from "lucide-react";
 import { PremiumImage } from "@/components/ui/PremiumImage";
 import { SocialLinksRow } from "@/components/ui/SocialLinks";
-import r1 from "@/assets/release-1.jpg";
-import r2 from "@/assets/release-2.jpg";
-import r3 from "@/assets/release-3.jpg";
-import r4 from "@/assets/release-4.jpg";
 
 type BadgeTemplate = {
   id: "verified_hit" | "gold_record" | "platinum_record";
@@ -166,7 +162,7 @@ const FALLBACK_RELEASES: ReleaseSetting[] = [
     title: "Golden Hour",
     artist: "Shadow Era",
     release_date: "2026-01-01",
-    cover_url: r1,
+    cover_url: "",
     format: "Single",
     genre: "Hip Hop",
     description: "The flagship single defining the cinematic transition of Shadow Era. A luxurious blend of high-end bass vectors and street poetry.",
@@ -195,7 +191,7 @@ const FALLBACK_RELEASES: ReleaseSetting[] = [
     title: "Run It Back",
     artist: "Gold Chain",
     release_date: "2026-02-01",
-    cover_url: r2,
+    cover_url: "",
     format: "Single",
     genre: "Trap",
     description: "Gold Chain returns with a high-energy trap anthem that merges heavy sub-bass structures with crystal clean modular synthesis.",
@@ -219,7 +215,7 @@ const FALLBACK_RELEASES: ReleaseSetting[] = [
     title: "Neon Saint EP",
     artist: "Neon Saint",
     release_date: "2025-11-01",
-    cover_url: r3,
+    cover_url: "",
     format: "EP",
     genre: "Electronic",
     description: "A futuristic voyage into the cyberpunk districts of Atlanta. Neon Saint layers vintage analogue warmth under driving industrial grooves.",
@@ -243,7 +239,7 @@ const FALLBACK_RELEASES: ReleaseSetting[] = [
     title: "City Lights",
     artist: "Amber Glow",
     release_date: "2025-08-01",
-    cover_url: r4,
+    cover_url: "",
     format: "Mixtape",
     genre: "R&B",
     description: "Late night reflections and smooth ambient melodies. Amber Glow curates an elegant soundtrack for nocturnal city drives.",
@@ -534,16 +530,18 @@ export function Releases() {
                         className="transition-transform duration-[1000ms] ease-out group-hover:scale-[1.04]"
                       />
                     ) : (
-                      <div className="absolute inset-0 bg-secondary/35 flex items-center justify-center">
-                        <svg className="w-12 h-12 text-muted-foreground/30" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9 19V6l12-3v13M9 19c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zm12-3c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zM9 10l12-3" />
+                      <div className="absolute inset-0 bg-gradient-to-br from-[#0c0d10] to-[#040405] flex flex-col items-center justify-center p-6 border border-white/5 relative overflow-hidden">
+                        <div className="absolute inset-0 bg-gradient-to-r from-transparent via-[#E5D5C0]/[0.03] to-transparent -translate-x-full animate-shimmer" />
+                        <svg className="w-12 h-12 text-zinc-700 animate-spin animate-vinyl-spin" style={{ animationDuration: '6s' }} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.25}>
+                          <circle cx="12" cy="12" r="10" />
+                          <circle cx="12" cy="12" r="7.5" strokeDasharray="2 2" />
+                          <circle cx="12" cy="12" r="4" />
+                          <circle cx="12" cy="12" r="1.5" />
                         </svg>
+                        <span className="font-mono text-[9px] uppercase tracking-[0.3em] text-[#E5D5C0]/50 mt-4 leading-none select-none">1017 SIGNATURE DISK</span>
                       </div>
                     )}
                     <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/20 to-transparent opacity-85 z-20" />
-
-                    {/* Cinematic Gloss Shine Sweep */}
-                    <div className="absolute inset-0 bg-gradient-to-tr from-transparent via-white/10 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-[1200ms] ease-out z-20 pointer-events-none" />
 
                     {/* Integrated Certification Badges inside Cover Frame */}
                     {activeBadges.length > 0 && (
@@ -671,15 +669,17 @@ export function Releases() {
                         className="transition-transform duration-[1000ms] ease-out group-hover:scale-[1.04]"
                       />
                     ) : (
-                      <div className="absolute inset-0 bg-secondary/35 flex items-center justify-center">
-                        <svg className="w-10 h-10 text-muted-foreground/30" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9 19V6l12-3v13M9 19c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zm12-3c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zM9 10l12-3" />
+                      <div className="absolute inset-0 bg-gradient-to-br from-[#0c0d10] to-[#040405] flex flex-col items-center justify-center p-6 border border-white/5 relative overflow-hidden">
+                        <div className="absolute inset-0 bg-gradient-to-r from-transparent via-[#E5D5C0]/[0.03] to-transparent -translate-x-full animate-shimmer" />
+                        <svg className="w-10 h-10 text-zinc-700 animate-spin" style={{ animationDuration: '6s' }} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.25}>
+                          <circle cx="12" cy="12" r="10" />
+                          <circle cx="12" cy="12" r="7.5" strokeDasharray="2 2" />
+                          <circle cx="12" cy="12" r="4" />
+                          <circle cx="12" cy="12" r="1.5" />
                         </svg>
+                        <span className="font-mono text-[8px] uppercase tracking-[0.25em] text-[#E5D5C0]/40 mt-3 leading-none select-none">1017 SIGNATURE DISK</span>
                       </div>
                     )}
-
-                    {/* Cinematic sweep light transition */}
-                    <div className="absolute inset-0 bg-gradient-to-tr from-transparent via-white/10 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-[1200ms] ease-out z-20 pointer-events-none" />
 
                     {/* Integrated Certification Badges inside Cover Frame */}
                     {activeBadges.length > 0 && (

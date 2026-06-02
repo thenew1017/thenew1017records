@@ -73,6 +73,9 @@ function getPremiumBadge(role?: string | null): string {
   return `✓ ${role}`;
 }
 
+
+
+
 export function CinematicArtistImage({ 
   src, 
   alt, 
@@ -97,15 +100,12 @@ export function CinematicArtistImage({
     const x = e.clientX - rect.left;
     const y = e.clientY - rect.top;
     
-    // Coordinates normalized from -0.5 to 0.5
     const normX = (x / rect.width) - 0.5;
     const normY = (y / rect.height) - 0.5;
     
-    // Realistic 3D Tilt bounds: max 9 degrees for luxurious micro-tilt
     setRotateX(-normY * 9);
     setRotateY(normX * 9);
     
-    // Live studio lighting reflection coordinates
     setLightX((x / rect.width) * 100);
     setLightY((y / rect.height) * 100);
   };
@@ -148,45 +148,59 @@ export function CinematicArtistImage({
           transition: isHovered ? "transform 0.08s ease-out, box-shadow 0.3s ease" : "transform 0.5s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.5s cubic-bezier(0.16, 1, 0.3, 1)",
         }}
       >
-        {/* Full-Color Premium Image - GPU Accelerated with Luxury Visuals */}
-        <PremiumImage
-          src={src}
-          alt={alt}
-          loading="lazy"
-          aspectRatioClass=""
-          className="transition-transform duration-[700ms] ease-out transform-gpu"
-          style={{
-            transform: isHovered ? "scale(1.03) translateZ(0)" : "scale(1) translateZ(0)",
-            filter: "contrast(1.03) saturate(1.06) brightness(0.96)",
-            transition: "transform 0.7s cubic-bezier(0.16, 1, 0.3, 1), filter 0.5s ease",
-          }}
-        />
-
-        {/* Dynamic Custom Logo Overlay */}
-        {logoSrc && (
-          <div className="absolute top-4 right-4 z-20 h-10 w-16 pointer-events-none select-none flex items-center justify-end">
-            <img 
-              src={logoSrc} 
-              alt="Artist Logo" 
-              className="max-h-full max-w-full object-contain filter invert opacity-80 group-hover:opacity-100 group-hover:scale-105 transition-all duration-500"
+        {src ? (
+          <>
+            {/* Full-Color Premium Image - GPU Accelerated with Luxury Visuals */}
+            <PremiumImage
+              src={src}
+              alt={alt}
+              loading="lazy"
+              aspectRatioClass=""
+              className="transition-transform duration-[700ms] ease-out transform-gpu"
+              style={{
+                transform: isHovered ? "scale(1.03) translateZ(0)" : "scale(1) translateZ(0)",
+                filter: "contrast(1.03) saturate(1.06) brightness(0.96)",
+                transition: "transform 0.7s cubic-bezier(0.16, 1, 0.3, 1), filter 0.5s ease",
+              }}
             />
+
+            {/* Dynamic Custom Logo Overlay */}
+            {logoSrc && (
+              <div className="absolute top-4 right-4 z-20 h-10 w-16 pointer-events-none select-none flex items-center justify-end">
+                <img 
+                  src={logoSrc} 
+                  alt="Artist Logo" 
+                  className="max-h-full max-w-full object-contain filter invert opacity-80 group-hover:opacity-100 group-hover:scale-105 transition-all duration-500"
+                />
+              </div>
+            )}
+
+            {/* Ambient Dark Cinematic Shading */}
+            <div 
+              className="absolute inset-0 bg-gradient-to-t from-black via-black/25 to-transparent pointer-events-none transition-opacity duration-500"
+              style={{ opacity: isHovered ? 0.75 : 0.85 }}
+            />
+
+            {/* Dynamic Studio Lighting Spotlight Reflection Layer */}
+            <div
+              className="absolute inset-0 pointer-events-none mix-blend-overlay opacity-0 transition-opacity duration-300 will-change-transform"
+              style={{
+                opacity: isHovered ? 0.6 : 0,
+                background: `radial-gradient(circle at ${lightX}% ${lightY}%, rgba(255, 255, 255, 0.45) 0%, transparent 60%)`,
+              }}
+            />
+          </>
+        ) : (
+          <div className="absolute inset-0 bg-gradient-to-br from-[#0c0d10] to-[#020203] flex flex-col items-center justify-center p-8 text-center relative overflow-hidden border border-white/5">
+            <div className="absolute inset-0 bg-gradient-to-r from-transparent via-[#E5D5C0]/[0.02] to-transparent -translate-x-full animate-shimmer pointer-events-none" />
+            <svg className="w-12 h-12 text-zinc-700 animate-pulse" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.25}>
+              <circle cx="12" cy="12" r="9" />
+              <path strokeLinecap="round" strokeLinejoin="round" d="M12 7a3 3 0 100 6 3 3 0 000-6z" />
+              <path strokeLinecap="round" strokeLinejoin="round" d="M4.5 18.75a9 9 0 0115 0" />
+            </svg>
+            <span className="font-mono text-[9px] uppercase tracking-[0.3em] text-[#E5D5C0]/50 mt-4 leading-none select-none">OFFICIAL DOSSIER PORTRAIT</span>
           </div>
         )}
-
-        {/* Ambient Dark Cinematic Shading */}
-        <div 
-          className="absolute inset-0 bg-gradient-to-t from-black via-black/25 to-transparent pointer-events-none transition-opacity duration-500"
-          style={{ opacity: isHovered ? 0.75 : 0.85 }}
-        />
-
-        {/* Dynamic Studio Lighting Spotlight Reflection Layer */}
-        <div
-          className="absolute inset-0 pointer-events-none mix-blend-overlay opacity-0 transition-opacity duration-300 will-change-transform"
-          style={{
-            opacity: isHovered ? 0.6 : 0,
-            background: `radial-gradient(circle at ${lightX}% ${lightY}%, rgba(255, 255, 255, 0.45) 0%, transparent 60%)`,
-          }}
-        />
 
         {/* High-End Glass Bevel highlight */}
         <div 

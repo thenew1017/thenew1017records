@@ -11,7 +11,7 @@ CREATE TABLE IF NOT EXISTS public.founder_spotlight (
   stat_2_value TEXT NOT NULL DEFAULT '5B+',
   stat_3_label TEXT NOT NULL DEFAULT 'Careers Run',
   stat_3_value TEXT NOT NULL DEFAULT 'PLATINUM',
-  founder_image_url TEXT DEFAULT '/src/assets/showcase.jpg',
+  founder_image_url TEXT DEFAULT 'https://vveslmalxlprmlfcdjae.supabase.co/storage/v1/object/public/media/founder/spotlight-1780301297380.jpg',
   founder_image_alt TEXT NOT NULL DEFAULT 'Gucci Mane Founder Showcase',
   is_visible BOOLEAN NOT NULL DEFAULT true,
   created_at TIMESTAMPTZ NOT NULL DEFAULT now(),
@@ -43,7 +43,7 @@ VALUES (
   '5B+',
   'Careers Run',
   'PLATINUM',
-  '/src/assets/showcase.jpg',
+  'https://vveslmalxlprmlfcdjae.supabase.co/storage/v1/object/public/media/founder/spotlight-1780301297380.jpg',
   'Gucci Mane Founder Showcase',
   true
 )

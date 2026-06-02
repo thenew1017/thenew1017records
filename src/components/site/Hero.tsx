@@ -6,7 +6,6 @@ import { getPublicSettings } from "@/lib/cms.functions";
 import { Link } from "@tanstack/react-router";
 import { TransitionLink } from "@/components/ui/PageTransition";
 import { preload } from "react-dom";
-import fallbackBanner from "@/assets/showcase.jpg";
 
 type HeroSettings = {
   eyebrow?: string;
@@ -38,7 +37,7 @@ export function Hero() {
     ...((data?.settings?.hero as HeroSettings | undefined) ?? {}),
   };
 
-  const displayBanner = hero.banner_url || fallbackBanner;
+  const displayBanner = hero.banner_url || "";
 
   return (
     <section
@@ -146,7 +145,9 @@ function LogoEmblem({ displayBanner, title }: { displayBanner: string; title: st
   const [logoLoaded, setLogoLoaded] = useState(false);
 
   // Preload centerpiece image natively using React 19 hook during render phase
-  preload(displayBanner, { as: "image" });
+  if (displayBanner) {
+    preload(displayBanner, { as: "image" });
+  }
 
   const handleMouseMove = (e: React.MouseEvent<HTMLDivElement>) => {
     if (!cardRef.current) return;
@@ -171,7 +172,7 @@ function LogoEmblem({ displayBanner, title }: { displayBanner: string; title: st
       onMouseMove={handleMouseMove}
       onMouseLeave={handleMouseLeave}
       style={{
-        transform: `perspective(1000px) rotateX(${rotateX}deg) rotateY(${rotateY}deg) scale3d(${logoLoaded ? 1.03 : 1}, ${logoLoaded ? 1.03 : 1}, 1.01)`,
+        transform: `perspective(1000px) rotateX(${rotateX}deg) rotateY(${rotateY}deg) scale3d(${displayBanner && logoLoaded ? 1.03 : 1}, ${displayBanner && logoLoaded ? 1.03 : 1}, 1.01)`,
         transition: "transform 0.15s ease-out",
         transformStyle: "preserve-3d",
       }}
@@ -190,27 +191,44 @@ function LogoEmblem({ displayBanner, title }: { displayBanner: string; title: st
         <div className="absolute top-[45%] right-[15%] w-1.5 h-1.5 rounded-full bg-[#E5D5C0]/45 animate-pulse duration-[3000ms]" style={{ animationDelay: '300ms' }} />
       </div>
 
-      {/* Shimmer skeleton for smooth loading transition */}
-      {!logoLoaded && (
-        <div className="absolute inset-0 m-auto w-48 h-48 bg-gradient-to-r from-white/[0.01] via-white/[0.05] to-white/[0.01] bg-[length:200%_100%] animate-shimmer pointer-events-none rounded-full" />
-      )}
+      {displayBanner ? (
+        <>
+          {/* Shimmer skeleton for smooth loading transition */}
+          {!logoLoaded && (
+            <div className="absolute inset-0 m-auto w-48 h-48 bg-gradient-to-r from-white/[0.01] via-white/[0.05] to-white/[0.01] bg-[length:200%_100%] animate-shimmer pointer-events-none rounded-full" />
+          )}
 
-      {/* Main Centerpiece Logo - Completely frameless, transparent background */}
-      <img
-        src={displayBanner}
-        alt={title}
-        onLoad={() => setLogoLoaded(true)}
-        loading="eager"
-        // @ts-ignore
-        fetchpriority="high"
-        className={`w-full max-w-[85%] h-auto object-contain transition-all duration-700 ease-out group-hover:scale-[1.04] drop-shadow-[0_4px_12px_rgba(0,0,0,0.85)] drop-shadow-[0_0_10px_rgba(229,213,192,0.08)] group-hover:drop-shadow-[0_8px_20px_rgba(0,0,0,0.9)] group-hover:drop-shadow-[0_0_15px_rgba(229,213,192,0.12)] ${
-          logoLoaded ? "opacity-100" : "opacity-0"
-        }`}
-        style={{
-          imageRendering: "auto",
-          transform: `translateZ(30px)`, // creates a premium 3D parallax pop-out effect
-        }}
-      />
+          {/* Main Centerpiece Logo - Completely frameless, transparent background */}
+          <img
+            src={displayBanner}
+            alt={title}
+            onLoad={() => setLogoLoaded(true)}
+            loading="eager"
+            // @ts-ignore
+            fetchpriority="high"
+            className={`w-full max-w-[85%] h-auto object-contain transition-all duration-700 ease-out group-hover:scale-[1.04] drop-shadow-[0_4px_12px_rgba(0,0,0,0.85)] drop-shadow-[0_0_10px_rgba(229,213,192,0.08)] group-hover:drop-shadow-[0_8px_20px_rgba(0,0,0,0.9)] group-hover:drop-shadow-[0_0_15px_rgba(229,213,192,0.12)] ${
+              logoLoaded ? "opacity-100" : "opacity-0"
+            }`}
+            style={{
+              imageRendering: "auto",
+              transform: `translateZ(30px)`, // creates a premium 3D parallax pop-out effect
+            }}
+          />
+        </>
+      ) : (
+        <div 
+          className="relative w-full max-w-[85%] aspect-square flex flex-col items-center justify-center border border-[#E5D5C0]/25 rounded-full bg-gradient-to-br from-black/60 to-white/[0.01] shadow-[0_20px_50px_rgba(0,0,0,0.9)] backdrop-blur-md transition-all duration-500 hover:border-[#E5D5C0]/40 group-hover:scale-[1.02]"
+          style={{ transform: `translateZ(30px)` }}
+        >
+          <div className="absolute inset-0 rounded-full bg-gradient-to-r from-transparent via-[#E5D5C0]/5 to-transparent -translate-x-full animate-shimmer pointer-events-none" />
+          <span className="font-display font-black text-5xl sm:text-6xl md:text-7xl tracking-[0.2em] text-gradient-gold select-none animate-pulse mr-[-0.2em]">
+            1017
+          </span>
+          <span className="font-mono text-[9px] uppercase tracking-[0.4em] text-[#E5D5C0]/60 mt-5">
+            Headquarters Portal
+          </span>
+        </div>
+      )}
     </motion.div>
   );
 }
