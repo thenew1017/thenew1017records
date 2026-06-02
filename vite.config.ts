@@ -1,9 +1,13 @@
 import { defineConfig } from "vite";
 import react from "@vitejs/plugin-react";
 import tailwindcss from "@tailwindcss/vite";
-import { cloudflare } from "@cloudflare/vite-plugin";
 import { tanstackStart } from "@tanstack/react-start/plugin/vite";
 import tsconfigPaths from "vite-tsconfig-paths";
+import { nitro } from "nitro/vite";
+
+// Deployment target: "vercel" | "cloudflare-workers" (default: vercel)
+// Set DEPLOY_TARGET=cloudflare-workers to build for Cloudflare Workers instead.
+const deployTarget = process.env.DEPLOY_TARGET ?? "vercel";
 
 export default defineConfig(({ command }) => ({
   plugins: [
@@ -17,9 +21,14 @@ export default defineConfig(({ command }) => ({
     // but still registered so /@react-refresh resolves for dev-client-entry.
     react(),
     tailwindcss(),
-    // Cloudflare Workers plugin only needed for production builds.
-    // In dev it triggers its own esbuild pass on the server bundle before
-    // TanStack Start's virtual modules are registered, causing resolution errors.
-    ...(command === "build" ? [cloudflare({ persistState: false })] : []),
+    // Nitro server adapter — only active during production builds.
+    // Uses Vercel preset by default; override with DEPLOY_TARGET env var.
+    ...(command === "build"
+      ? [
+          nitro({
+            preset: deployTarget === "cloudflare-workers" ? "cloudflare-workers" : "vercel",
+          }),
+        ]
+      : []),
   ],
 }));
