@@ -1,5 +1,5 @@
 import { motion, useScroll, useTransform } from "motion/react";
-import { useRef } from "react";
+import { useRef, useState, useEffect } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { getPublicSettings } from "@/lib/cms.functions";
 import { Link } from "@tanstack/react-router";
@@ -31,6 +31,17 @@ export function Showcase({ settings }: { settings?: Record<string, any> }) {
   const scale = useTransform(scrollYProgress, [0, 1], [1.15, 1]);
   const y = useTransform(scrollYProgress, [0, 1], ["-6%", "6%"]);
 
+  const [isMobile, setIsMobile] = useState(false);
+
+  useEffect(() => {
+    // Detect viewport width smaller than 1024px (mobile/tablet range)
+    const media = window.matchMedia("(max-width: 1023px)");
+    setIsMobile(media.matches);
+    const listener = (e: MediaQueryListEvent) => setIsMobile(e.matches);
+    media.addEventListener("change", listener);
+    return () => media.removeEventListener("change", listener);
+  }, []);
+
   const { data } = useQuery({
     queryKey: ["public-settings"],
     queryFn: () => getPublicSettings(),
@@ -58,10 +69,19 @@ export function Showcase({ settings }: { settings?: Record<string, any> }) {
           <motion.img
             src={displayImage}
             alt={showcaseSettings.title}
-            style={{ scale, y }}
+            style={isMobile ? {
+              position: "absolute",
+              inset: 0,
+              width: "100%",
+              height: "100%",
+              objectFit: "cover",
+              pointerEvents: "none",
+              willChange: "transform",
+              transform: "translate3d(0,0,0)",
+            } : { scale, y }}
             width={1920}
             height={1080}
-            className="absolute inset-0 h-full w-full object-cover object-[30%_center] md:object-center"
+            className="absolute inset-0 h-full w-full object-cover object-[30%_center] md:object-center pointer-events-none showcase-bg-image artist-photo-container"
             loading="lazy"
           />
         ) : (

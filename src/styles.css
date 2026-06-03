@@ -279,6 +279,20 @@
     backface-visibility: hidden;
     perspective: 1000px;
   }
+
+  /* Force static layout and hardware acceleration on mobile showcase background image */
+  @media (max-width: 1023px) {
+    .showcase-bg-image {
+      position: absolute !important;
+      inset: 0 !important;
+      width: 100% !important;
+      height: 100% !important;
+      object-fit: cover !important;
+      pointer-events: none !important;
+      will-change: transform !important;
+      transform: translate3d(0, 0, 0) !important;
+    }
+  }
 }
 
 @media (max-width: 768px) {
