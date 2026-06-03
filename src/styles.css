@@ -356,3 +356,20 @@
   }
 }
 
+/* Pre-allocate Paint GPU Layers via CSS to prevent layout paint drops */
+.artist-image-class, .artist-photo-image, .artist-photo-container img, img:not([alt*="Logo"]):not([alt*="LogoEmblem"]) {
+  content-visibility: auto;
+  contain-intrinsic-size: 100% 500px; /* Adjusted based on card aspect-ratio */
+  transform: translate3d(0, 0, 0);
+  backface-visibility: hidden;
+  perspective: 1000px;
+  will-change: transform, opacity;
+}
+
+/* Neutralize Image Container Background Stalling */
+.image-parent-container, .artist-photo-container, .artist-photo-outer {
+  background-color: #000000 !important;
+  isolation: isolate;
+}
+
+

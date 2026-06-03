@@ -7,6 +7,7 @@ interface PremiumImageProps extends React.ImgHTMLAttributes<HTMLImageElement> {
   className?: string;
   loading?: "lazy" | "eager";
   fetchPriority?: "high" | "low" | "auto";
+  decoding?: "async" | "sync" | "auto";
   fallbackSrc?: string;
 }
 
@@ -17,6 +18,7 @@ export function PremiumImage({
   className = "",
   loading = "lazy",
   fetchPriority = "auto",
+  decoding = "async",
   fallbackSrc,
   style,
   ...props
@@ -67,6 +69,9 @@ export function PremiumImage({
   return (
     <div 
       className={`relative overflow-hidden w-full h-full ${aspectRatioClass} bg-[#000000] rounded-[inherit] artist-photo-container`}
+      style={{
+        backgroundColor: "#000000",
+      }}
     >
       {/* Premium Dark Gradient Shimmer Skeleton */}
       {!loaded && !error && (
@@ -80,6 +85,7 @@ export function PremiumImage({
           src={finalSrc}
           alt={alt}
           loading={loading}
+          decoding={decoding}
           // @ts-ignore
           fetchpriority={fetchPriority}
           onLoad={handleLoad}

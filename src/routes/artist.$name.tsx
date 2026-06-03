@@ -405,6 +405,8 @@ function ArtistDetailPage() {
                       <img
                         src={img.image_url}
                         alt={img.caption || "Gallery photo"}
+                        decoding="async"
+                        loading="eager"
                         className="w-full h-full object-cover transition-transform duration-[700ms] ease-out group-hover:scale-[1.03]"
                       />
                     ) : (
