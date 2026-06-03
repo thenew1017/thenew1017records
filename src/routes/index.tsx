@@ -10,7 +10,7 @@ import { ArtistDiscovery } from "@/components/site/ArtistDiscovery";
 import { Manifesto } from "@/components/site/Manifesto";
 import { Showcase } from "@/components/site/Showcase";
 
-import { listPublicArtists } from "@/lib/cms.functions";
+import { listPublicArtists, getPublicSettings } from "@/lib/cms.functions";
 
 export const Route = createFileRoute("/")({
   component: Index,
@@ -18,17 +18,21 @@ export const Route = createFileRoute("/")({
   pendingComponent: HomepagePendingComponent,
   loader: async () => {
     try {
-      const res = await listPublicArtists();
+      const [artistsRes, settingsRes] = await Promise.all([
+        listPublicArtists(),
+        getPublicSettings()
+      ]);
       const resolvedUrl = process.env.SUPABASE_URL || "NOT_SET";
       const resolvedKey = process.env.SUPABASE_PUBLISHABLE_KEY || process.env.SUPABASE_ANON_KEY || "NOT_SET";
       return { 
-        artists: res?.artists || [], 
+        artists: artistsRes?.artists || [], 
+        settings: settingsRes?.settings || {},
         error: null,
         debugInfo: `URL: ${resolvedUrl}, Key: ${resolvedKey.substring(0, 12)}...`
       };
     } catch (err: any) {
       console.error("Homepage SSR loader error:", err);
-      return { artists: [], error: err?.message || String(err), debugInfo: "Error" };
+      return { artists: [], settings: {}, error: err?.message || String(err), debugInfo: "Error" };
     }
   },
   head: () => ({
@@ -83,13 +87,13 @@ function Index() {
   return (
     <main id="top" className="relative min-h-screen bg-background text-foreground grain-overlay">
       <Nav />
-      <Hero />
+      <Hero settings={loaderData?.settings} />
       <Marquee />
 
       <Artists initialArtists={loaderData?.artists} />
-      <Showcase />
+      <Showcase settings={loaderData?.settings} />
       <Manifesto />
-      <Releases />
+      <Releases settings={loaderData?.settings} />
       <ArtistDiscovery />
       <ArtistCTA />
       <Footer />

@@ -311,10 +311,11 @@ const METRIC_THEMES = {
   }
 };
 
-export function Releases() {
+export function Releases({ settings }: { settings?: Record<string, any> }) {
   const { data } = useQuery({
     queryKey: ["public-settings"],
     queryFn: () => getPublicSettings(),
+    initialData: settings ? { settings } : undefined,
     staleTime: 30_000,
   });
 

@@ -322,10 +322,18 @@ export const Route = createFileRoute("/release/$name")({
   pendingComponent: ReleasePendingComponent,
   loader: async ({ params }) => {
     try {
-      const { release } = await getPublicReleaseBySlug({ data: { name: params.name } });
-      return { release };
+      const [releaseRes, settingsRes] = await Promise.all([
+        getPublicReleaseBySlug({ data: { name: params.name } }),
+        getPublicSettings()
+      ]);
+      return { release: releaseRes.release, settings: settingsRes?.settings || {} };
     } catch {
-      return { release: null };
+      try {
+        const settingsRes = await getPublicSettings();
+        return { release: null, settings: settingsRes?.settings || {} };
+      } catch {
+        return { release: null, settings: {} };
+      }
     }
   },
   head: ({ loaderData }) => {
@@ -378,20 +386,22 @@ function ReleaseDetailPage() {
   const { name } = useParams({ from: "/release/$name" });
   const fetchRelease = useServerFn(getPublicReleaseBySlug);
   const fetchSettings = useServerFn(getPublicSettings);
+  const loaderData = Route.useLoaderData();
 
   const { data: releaseQuery } = useQuery({
     queryKey: ["public-release", name],
     queryFn: () => fetchRelease({ data: { name } }),
+    initialData: loaderData?.release ? { release: loaderData.release } : undefined,
     staleTime: 30_000,
   });
 
   const { data: settingsQuery } = useQuery({
     queryKey: ["public-settings"],
     queryFn: () => fetchSettings(),
+    initialData: loaderData?.settings ? { settings: loaderData.settings } : undefined,
     staleTime: 30_000,
   });
 
-  const loaderData = Route.useLoaderData();
   let release = releaseQuery?.release || loaderData?.release;
 
   // Fallback to FALLBACK_RELEASES if database doesn't have it (for perfect backwards compatibility / preview)

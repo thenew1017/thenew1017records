@@ -25,7 +25,7 @@ const SHOWCASE_DEFAULT: ShowcaseSetting = {
   button_url: "/about-1017"
 };
 
-export function Showcase() {
+export function Showcase({ settings }: { settings?: Record<string, any> }) {
   const ref = useRef<HTMLDivElement>(null);
   const { scrollYProgress } = useScroll({ target: ref, offset: ["start end", "end start"] });
   const scale = useTransform(scrollYProgress, [0, 1], [1.15, 1]);
@@ -34,6 +34,7 @@ export function Showcase() {
   const { data } = useQuery({
     queryKey: ["public-settings"],
     queryFn: () => getPublicSettings(),
+    initialData: settings ? { settings } : undefined,
     staleTime: 30_000,
   });
 

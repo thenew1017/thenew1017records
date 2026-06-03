@@ -23,12 +23,13 @@ const HERO_FALLBACK: HeroSettings = {
   banner_url: "",
 };
 
-export function Hero() {
+export function Hero({ settings }: { settings?: Record<string, any> }) {
   const fetchSettings = useServerFn(getPublicSettings);
   
   const { data } = useQuery({
     queryKey: ["public-settings"],
     queryFn: () => fetchSettings(),
+    initialData: settings ? { settings } : undefined,
     staleTime: 30_000,
   });
 
