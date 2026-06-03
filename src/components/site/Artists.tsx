@@ -299,52 +299,56 @@ export function Artists({ initialArtists }: { initialArtists?: any[] }) {
         {/* Roster Module Grid */}
         <div className="grid grid-cols-1 gap-8 sm:grid-cols-2 lg:grid-cols-4">
           {artists.map((a, i) => (
-            <MotionLink
+            <motion.div
               key={a.id ?? a.name}
-              to="/artist/$name"
-              params={{ name: slugify(a.name) }}
-              onMouseEnter={() => {
-                if (a.id) trackHover(a.id);
-              }}
               initial={{ opacity: 0, y: 50 }}
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true, amount: 0.1 }}
               transition={{ duration: 0.8, delay: i * 0.08, ease: [0.22, 1, 0.36, 1] }}
-              className="group relative flex flex-col text-left outline-none focus-visible:ring-2 focus-visible:ring-accent bg-transparent p-0 border-none transition-all duration-[250ms] ease-in-out cursor-pointer select-none transform-gpu"
+              className="group relative flex flex-col text-left bg-transparent p-0 border-none transition-all duration-[250ms] ease-in-out select-none transform-gpu"
             >
-              {/* Middle: Cinematic Standalone Artist Image */}
-              <CinematicArtistImage
-                src={a.image_url ?? ""}
-                alt={a.name}
-                logoSrc={a.logo_url}
-              />
+              <Link
+                to="/artist/$name"
+                params={{ name: slugify(a.name) }}
+                onMouseEnter={() => {
+                  if (a.id) trackHover(a.id);
+                }}
+                className="outline-none focus-visible:ring-2 focus-visible:ring-accent flex flex-col flex-grow text-left cursor-pointer"
+              >
+                {/* Middle: Cinematic Standalone Artist Image */}
+                <CinematicArtistImage
+                  src={a.image_url ?? ""}
+                  alt={a.name}
+                  logoSrc={a.logo_url}
+                />
 
-              {/* Bottom: Artist Name, Bio & Platform Icons */}
-              <div className="pt-5 relative w-full flex flex-col flex-grow">
-                {/* Flat Typographic Roster Badges */}
-                <div className="flex items-center justify-between gap-3 mb-2 font-mono text-[9px] uppercase tracking-[0.2em] text-zinc-500">
-                  <span>{getPremiumBadge(a.role)}</span>
-                  <span className="flex items-center gap-1">
-                    <span className="h-1.5 w-1.5 rounded-full bg-red-500" />
-                    LIVE
-                  </span>
-                </div>
+                {/* Bottom: Artist Name, Bio & Platform Icons */}
+                <div className="pt-5 relative w-full flex flex-col flex-grow">
+                  {/* Flat Typographic Roster Badges */}
+                  <div className="flex items-center justify-between gap-3 mb-2 font-mono text-[9px] uppercase tracking-[0.2em] text-zinc-500">
+                    <span>{getPremiumBadge(a.role)}</span>
+                    <span className="flex items-center gap-1">
+                      <span className="h-1.5 w-1.5 rounded-full bg-red-500" />
+                      LIVE
+                    </span>
+                  </div>
 
-                <h3 className="font-display text-2xl uppercase tracking-tight text-white group-hover:text-[#E5D5C0] transition-colors duration-[250ms] ease-in-out">
-                  {a.name}
-                </h3>
-                
-                {a.bio && (
-                  <p className="mt-2 text-xs leading-relaxed text-zinc-400 font-light font-sans line-clamp-2">
-                    {a.bio}
-                  </p>
-                )}
-                
-                <div className="mt-4 pt-4 border-t border-white/5 flex items-center justify-center w-full">
-                  <SocialRow a={a} />
+                  <h3 className="font-display text-2xl uppercase tracking-tight text-white group-hover:text-[#E5D5C0] transition-colors duration-[250ms] ease-in-out">
+                    {a.name}
+                  </h3>
+                  
+                  {a.bio && (
+                    <p className="mt-2 text-xs leading-relaxed text-zinc-400 font-light font-sans line-clamp-2">
+                      {a.bio}
+                    </p>
+                  )}
                 </div>
+              </Link>
+
+              <div className="mt-4 pt-4 border-t border-white/5 flex items-center justify-center w-full relative z-30">
+                <SocialRow a={a} />
               </div>
-            </MotionLink>
+            </motion.div>
           ))}
         </div>
       </div>
