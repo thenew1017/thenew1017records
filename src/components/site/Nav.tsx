@@ -68,18 +68,7 @@ export function Nav() {
 
   const handleContactClick = (e: React.MouseEvent) => {
     e.preventDefault();
-    const username = "1017___.records";
-    const isMobile = /Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
-    if (isMobile) {
-      // Attempt direct app deep link
-      window.location.href = `instagram://user?username=${username}`;
-      // Fallback web url opening
-      setTimeout(() => {
-        window.open(`https://instagram.com/${username}`, "_blank");
-      }, 800);
-    } else {
-      window.open(`https://instagram.com/${username}`, "_blank");
-    }
+    window.location.href = "mailto:1017recordsoffcial@gmail.com";
   };
 
   const [last, setLast] = useState(0);
@@ -191,10 +180,11 @@ export function Nav() {
               const isActive = activeSection ? l.hash === `#${activeSection}` : false;
               const isContact = l.label === "Contact";
               const linkContent = isContact ? (
-                <a
-                  key={l.href}
-                  onClick={handleContactClick}
-                  className="relative py-2 text-[11px] font-bold uppercase tracking-[0.25em] text-white/45 hover:text-white transition-colors duration-300 select-none cursor-pointer"
+                 <a
+                   key={l.href}
+                   href="mailto:1017recordsoffcial@gmail.com"
+                   onClick={handleContactClick}
+                   className="relative py-2 text-[11px] font-bold uppercase tracking-[0.25em] text-white/45 hover:text-white transition-colors duration-300 select-none cursor-pointer"
                 >
                   {l.label}
                   <span className="absolute bottom-0 left-1/2 h-[2px] -translate-x-1/2 bg-lux-gold transition-all duration-300 ease-out shadow-[0_0_8px_rgba(229,213,192,0.6)] w-0 opacity-0 group-hover:w-full group-hover:opacity-100" />
@@ -314,7 +304,7 @@ export function Nav() {
                      transition={{ delay: i * 0.04, duration: 0.6, ease: [0.16, 1, 0.3, 1] }}
                    >
                      <a
-                       href={isContact ? undefined : l.href}
+                       href={isContact ? "mailto:1017recordsoffcial@gmail.com" : l.href}
                        onClick={(e) => {
                          if (isContact) {
                            handleContactClick(e);
