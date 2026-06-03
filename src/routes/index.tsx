@@ -85,16 +85,7 @@ function Index() {
       <Nav />
       <Hero />
       <Marquee />
-      {loaderData?.error && (
-        <div id="ssr-error-log" className="bg-red-950/80 border border-red-500 text-red-200 p-4 font-mono text-xs mx-auto max-w-[1600px] mt-8">
-          [SSR Error Log]: {loaderData.error}
-        </div>
-      )}
-      {loaderData?.debugInfo && (
-        <div id="ssr-debug-log" className="bg-zinc-950/80 border border-zinc-500 text-zinc-200 p-4 font-mono text-xs mx-auto max-w-[1600px] mt-4">
-          [SSR Debug Log]: {loaderData.debugInfo}
-        </div>
-      )}
+
       <Artists initialArtists={loaderData?.artists} />
       <Showcase />
       <Manifesto />
