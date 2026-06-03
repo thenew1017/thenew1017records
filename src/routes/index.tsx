@@ -19,10 +19,16 @@ export const Route = createFileRoute("/")({
   loader: async () => {
     try {
       const res = await listPublicArtists();
-      return { artists: res?.artists || [], error: null };
+      const resolvedUrl = process.env.SUPABASE_URL || "NOT_SET";
+      const resolvedKey = process.env.SUPABASE_PUBLISHABLE_KEY || "NOT_SET";
+      return { 
+        artists: res?.artists || [], 
+        error: null,
+        debugInfo: `URL: ${resolvedUrl}, Key: ${resolvedKey.substring(0, 12)}...`
+      };
     } catch (err: any) {
       console.error("Homepage SSR loader error:", err);
-      return { artists: [], error: err?.message || String(err) };
+      return { artists: [], error: err?.message || String(err), debugInfo: "Error" };
     }
   },
   head: () => ({
@@ -82,6 +88,11 @@ function Index() {
       {loaderData?.error && (
         <div id="ssr-error-log" className="bg-red-950/80 border border-red-500 text-red-200 p-4 font-mono text-xs mx-auto max-w-[1600px] mt-8">
           [SSR Error Log]: {loaderData.error}
+        </div>
+      )}
+      {loaderData?.debugInfo && (
+        <div id="ssr-debug-log" className="bg-zinc-950/80 border border-zinc-500 text-zinc-200 p-4 font-mono text-xs mx-auto max-w-[1600px] mt-4">
+          [SSR Debug Log]: {loaderData.debugInfo}
         </div>
       )}
       <Artists initialArtists={loaderData?.artists} />
