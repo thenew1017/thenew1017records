@@ -257,6 +257,7 @@ function AboutPage() {
                       alt={spotlight.founder_image_alt || spotlight.founder_name}
                       aspectRatioClass="aspect-[3/4]"
                       loading="eager"
+                      decoding="async"
                       fetchPriority="high"
                       className="transition-transform duration-700 ease-out transform-gpu group-hover:scale-103"
                       style={{

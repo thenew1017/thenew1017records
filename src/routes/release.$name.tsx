@@ -615,6 +615,7 @@ function ReleaseDetailPage() {
                     alt={release.title}
                     aspectRatioClass="aspect-square"
                     loading="eager"
+                    decoding="async"
                     fetchPriority="high"
                     className="transition-transform duration-1000"
                   />

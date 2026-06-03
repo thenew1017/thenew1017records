@@ -175,6 +175,7 @@ export function CinematicArtistImage({
               src={src}
               alt={alt}
               loading="eager"
+              decoding="async"
               fetchPriority="high"
               aspectRatioClass=""
               className="transition-transform duration-[700ms] ease-out transform-gpu artist-photo-image"
