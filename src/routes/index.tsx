@@ -85,7 +85,7 @@ function HomepagePendingComponent() {
 function Index() {
   const loaderData = Route.useLoaderData();
   return (
-    <main id="top" className="relative min-h-screen bg-background text-foreground grain-overlay">
+    <main id="top" className="relative min-h-screen bg-background text-foreground grain-overlay overflow-x-hidden w-full max-w-full">
       <Nav />
       <Hero settings={loaderData?.settings} />
       <Marquee />

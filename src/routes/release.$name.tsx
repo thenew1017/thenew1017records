@@ -411,7 +411,7 @@ function ReleaseDetailPage() {
 
   if (!release) {
     return (
-      <main className="relative min-h-screen bg-background text-foreground grain-overlay flex flex-col justify-between">
+      <main className="relative min-h-screen bg-background text-foreground grain-overlay overflow-x-hidden w-full max-w-full flex flex-col justify-between">
         <Nav />
         <div className="mx-auto max-w-lg text-center px-6 py-40 space-y-6">
           <h1 className="font-display text-5xl uppercase text-gradient-gold">Dossier Locked</h1>
@@ -550,7 +550,7 @@ function ReleaseDetailPage() {
   };
 
   return (
-    <main className="relative min-h-screen bg-background text-foreground grain-overlay overflow-x-hidden">
+    <main className="relative min-h-screen bg-background text-foreground grain-overlay overflow-x-hidden w-full max-w-full">
       <Nav />
 
       {/* Cyber Ambient Lighting Grid */}

@@ -56,7 +56,7 @@ export const Route = createFileRoute("/about-1017")({
 function AboutErrorComponent({ error }: { error: any }) {
   console.error("Recruitment Page SSR/Render Error caught by boundary:", error);
   return (
-    <main className="relative min-h-screen bg-[#000000] text-foreground flex flex-col items-center justify-center p-6 text-center space-y-6">
+    <main className="relative min-h-screen bg-[#000000] text-foreground grain-overlay overflow-x-hidden w-full max-w-full flex flex-col items-center justify-center p-6 text-center space-y-6">
       <div className="absolute inset-0 -z-10 bg-[radial-gradient(ellipse_at_center,rgba(212,175,55,0.04),transparent_50%)]" />
       <span className="h-12 w-12 rounded-full bg-red-500/10 text-red-500 flex items-center justify-center text-lg border border-red-500/20 shadow-[0_0_15px_rgba(239,68,68,0.15)] font-bold">
         ⚠
@@ -74,7 +74,7 @@ function AboutErrorComponent({ error }: { error: any }) {
 
 function AboutPendingComponent() {
   return (
-    <main className="relative min-h-screen bg-[#000000] text-foreground flex flex-col items-center justify-center p-6 text-center">
+    <main className="relative min-h-screen bg-[#000000] text-foreground grain-overlay overflow-x-hidden w-full max-w-full flex flex-col items-center justify-center p-6 text-center">
       <div className="absolute inset-0 -z-10 bg-[radial-gradient(ellipse_at_center,rgba(212,175,55,0.02),transparent_50%)]" />
       <div className="space-y-4">
         <div className="h-6 w-6 border-2 border-[#E5D5C0] border-t-transparent rounded-full animate-spin mx-auto" />
@@ -216,7 +216,7 @@ function AboutPage() {
   }
 
   return (
-    <main className="relative min-h-screen bg-[#000000] text-foreground grain-overlay overflow-x-hidden">
+    <main className="relative min-h-screen bg-[#000000] text-foreground grain-overlay overflow-x-hidden w-full max-w-full">
       <Nav />
 
       {/* Cyber Ambient Lighting Grid - Matte Black Refinement */}
