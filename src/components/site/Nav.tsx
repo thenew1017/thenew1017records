@@ -285,10 +285,11 @@ export function Nav() {
           <button
             aria-label="Toggle menu"
             onClick={() => setOpen((v) => !v)}
-            className={`relative z-55 flex h-10 w-10 flex-col items-center justify-center gap-1.5 lg:hidden select-none cursor-pointer focus:outline-none transition-opacity duration-300 ${open ? "opacity-0 pointer-events-none" : "opacity-100"}`}
+            className={`relative z-55 flex h-10 w-10 flex-col items-center justify-center gap-1 lg:hidden select-none cursor-pointer focus:outline-none transition-opacity duration-300 ${open ? "opacity-0 pointer-events-none" : "opacity-100"}`}
           >
-            <span className="h-[2px] w-5 bg-white" />
-            <span className="h-[2px] w-5 bg-white" />
+            <span className="h-[1.5px] w-5 bg-white" />
+            <span className="h-[1.5px] w-5 bg-white" />
+            <span className="h-[1.5px] w-5 bg-white" />
           </button>
         </div>
       </motion.header>
