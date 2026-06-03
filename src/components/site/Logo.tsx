@@ -31,6 +31,18 @@ export function Logo({ className = "", scrolled = false }: { className?: string;
       
       {/* Clean Logo Digits */}
       <div className="relative flex items-center gap-3.5 md:gap-4">
+        {/* Balanced brand secondary description */}
+        <span 
+          className={`font-sans font-black uppercase tracking-[0.35em] text-white/45 group-hover:text-[#E5D5C0] transition-colors duration-500 leading-none ${
+            scrolled ? "text-[8px]" : "text-[9px]"
+          }`}
+        >
+          THE NEW RECORDS
+        </span>
+        
+        {/* Clean Luxury Divider */}
+        <span className="h-5 w-[1px] bg-white/10 group-hover:bg-[#E5D5C0]/30 transition-colors duration-500" />
+        
         {/* Big Editorial 1017 block */}
         <span 
           style={{ letterSpacing: "-0.04em" }}
@@ -39,18 +51,6 @@ export function Logo({ className = "", scrolled = false }: { className?: string;
           }`}
         >
           1017
-        </span>
-        
-        {/* Clean Luxury Divider */}
-        <span className="h-5 w-[1px] bg-white/10 group-hover:bg-[#E5D5C0]/30 transition-colors duration-500" />
-        
-        {/* Balanced brand secondary description */}
-        <span 
-          className={`font-sans font-black uppercase tracking-[0.35em] text-white/45 group-hover:text-[#E5D5C0] transition-colors duration-500 leading-none ${
-            scrolled ? "text-[8px]" : "text-[9px]"
-          }`}
-        >
-          THE NEW RECORDS
         </span>
       </div>
     </Link>
