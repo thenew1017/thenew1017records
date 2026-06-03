@@ -354,7 +354,7 @@ export function Nav() {
                 <span className="text-white/60">SYSTEM GATEWAY SECURED</span>
               </div>
               
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-2 gap-4 cta-buttons">
                 <a
                   href="#artist-cta"
                   onClick={() => setOpen(false)}
