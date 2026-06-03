@@ -354,6 +354,19 @@
     background: none !important;
     display: none !important;
   }
+
+  /* Disable hover scales and transitions on mobile viewports (< 1024px) for Releases and Roster */
+  .group:hover img, 
+  .group:hover .artist-photo-image, 
+  .group:hover .artist-photo-inner,
+  .group:hover .transition-transform,
+  .group:hover .transform-gpu,
+  .group:hover {
+    transform: none !important;
+    scale: 1 !important;
+    transition: none !important;
+    box-shadow: none !important;
+  }
 }
 
 /* Pre-allocate Paint GPU Layers via CSS to prevent layout paint drops */

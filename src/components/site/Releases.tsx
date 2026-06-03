@@ -1,3 +1,4 @@
+import { useState, useEffect } from "react";
 import { motion } from "motion/react";
 import { useQuery } from "@tanstack/react-query";
 import { Link } from "@tanstack/react-router";
@@ -319,6 +320,11 @@ export function Releases({ settings }: { settings?: Record<string, any> }) {
     staleTime: 30_000,
   });
 
+  const [isMobileDevice, setIsMobileDevice] = useState(false);
+  useEffect(() => {
+    setIsMobileDevice(window.innerWidth < 1024);
+  }, []);
+
   const parsedReleases = (data?.settings?.releases as ReleaseSetting[] | undefined) ?? [];
   const badgeTemplates = (data?.settings?.releases_badge_templates as BadgeTemplate[] | undefined) ?? DEFAULT_TEMPLATES;
   const publishedReleases = parsedReleases.filter((r) => r.published);
@@ -514,10 +520,10 @@ export function Releases({ settings }: { settings?: Record<string, any> }) {
               return (
                 <motion.div
                   key={r.id}
-                  initial={{ opacity: 0, y: 50 }}
-                  whileInView={{ opacity: 1, y: 0 }}
+                  initial={isMobileDevice ? false : { opacity: 0, y: 50 }}
+                  whileInView={isMobileDevice ? undefined : { opacity: 1, y: 0 }}
                   viewport={{ once: true, amount: 0.1 }}
-                  transition={{ duration: 1, ease: [0.22, 1, 0.36, 1] }}
+                  transition={isMobileDevice ? undefined : { duration: 1, ease: [0.22, 1, 0.36, 1] }}
                   className="col-span-1 sm:col-span-2 lg:col-span-4 group relative bg-transparent py-8 flex flex-col md:flex-row items-stretch gap-6 md:gap-10 border-b border-white/5 transition-all duration-700 overflow-hidden"
                 >
                   {/* Left Column: Cover Artwork (Primary Focus) */}
@@ -651,10 +657,10 @@ export function Releases({ settings }: { settings?: Record<string, any> }) {
                 className="block outline-none group"
               >
                 <motion.div
-                  initial={{ opacity: 0, y: 45 }}
-                  whileInView={{ opacity: 1, y: 0 }}
+                  initial={isMobileDevice ? false : { opacity: 0, y: 45 }}
+                  whileInView={isMobileDevice ? undefined : { opacity: 1, y: 0 }}
                   viewport={{ once: true, amount: 0.15 }}
-                  transition={{ duration: 0.8, delay: i * 0.08, ease: [0.22, 1, 0.36, 1] }}
+                  transition={isMobileDevice ? undefined : { duration: 0.8, delay: i * 0.08, ease: [0.22, 1, 0.36, 1] }}
                   className="flex flex-col text-left relative bg-transparent border-none p-0 transition-all duration-700 overflow-hidden"
                 >
                   {/* Artwork (Primary Focus - occupying 80% visual attention) */}

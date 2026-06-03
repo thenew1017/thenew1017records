@@ -236,6 +236,11 @@ export function Artists({ initialArtists }: { initialArtists?: any[] }) {
     initialData: initialArtists ? { artists: initialArtists } : undefined
   });
 
+  const [isMobileDevice, setIsMobileDevice] = useState(false);
+  useEffect(() => {
+    setIsMobileDevice(window.innerWidth < 1024);
+  }, []);
+
   useEffect(() => {
     void ensureSession();
     const channel = supabase
@@ -312,10 +317,10 @@ export function Artists({ initialArtists }: { initialArtists?: any[] }) {
           {artists.map((a, i) => (
             <motion.div
               key={a.id ?? a.name}
-              initial={{ opacity: 0, y: 50 }}
-              whileInView={{ opacity: 1, y: 0 }}
+              initial={isMobileDevice ? false : { opacity: 0, y: 50 }}
+              whileInView={isMobileDevice ? undefined : { opacity: 1, y: 0 }}
               viewport={{ once: true, amount: 0.1 }}
-              transition={{ duration: 0.8, delay: i * 0.08, ease: [0.22, 1, 0.36, 1] }}
+              transition={isMobileDevice ? undefined : { duration: 0.8, delay: i * 0.08, ease: [0.22, 1, 0.36, 1] }}
               style={{
                 willChange: "transform, opacity",
                 transform: "translateZ(0)",

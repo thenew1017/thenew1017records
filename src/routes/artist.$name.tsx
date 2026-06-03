@@ -1,5 +1,5 @@
 import { createFileRoute, Link, useParams } from "@tanstack/react-router";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
 import { getPublicArtistBySlug, listPublicArtists, slugify, getArtistMediaGallery } from "@/lib/cms.functions";
@@ -169,6 +169,11 @@ function ArtistDetailPage() {
   const fetchAll = useServerFn(listPublicArtists);
   const fetchGallery = useServerFn(getArtistMediaGallery);
 
+  const [isMobileDevice, setIsMobileDevice] = useState(false);
+  useEffect(() => {
+    setIsMobileDevice(window.innerWidth < 1024);
+  }, []);
+
   // Client-side hydration query (shares the SSR loaderData cache)
   const { data: artistQuery } = useQuery({
     queryKey: ["public-artist", name],
@@ -257,9 +262,9 @@ function ArtistDetailPage() {
           {/* LEFT: Premium Portrait Showcase */}
           <div className="lg:col-span-5 flex justify-center">
             <motion.div
-              initial={{ opacity: 0, y: 30 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
+              initial={isMobileDevice ? false : { opacity: 0, y: 30 }}
+              animate={isMobileDevice ? undefined : { opacity: 1, y: 0 }}
+              transition={isMobileDevice ? undefined : { duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
               className="w-full max-w-[420px] select-none artist-photo-container"
               style={{
                 willChange: "transform, opacity",
