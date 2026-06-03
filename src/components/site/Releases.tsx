@@ -527,7 +527,9 @@ export function Releases({ settings }: { settings?: Record<string, any> }) {
                         src={r.cover_url}
                         alt={r.title}
                         aspectRatioClass="aspect-square"
-                        loading="lazy"
+                        loading="eager"
+                        fetchPriority="high"
+                        decoding="async"
                         className="transition-transform duration-[1000ms] ease-out group-hover:scale-[1.04]"
                       />
                     ) : (

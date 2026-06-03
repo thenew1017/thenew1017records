@@ -23,7 +23,7 @@ export function PremiumImage({
   style,
   ...props
 }: PremiumImageProps) {
-  const [loaded, setLoaded] = useState(false);
+  const [loaded, setLoaded] = useState(loading === "eager");
   const [error, setError] = useState(false);
   const imgRef = useRef<HTMLImageElement>(null);
 
@@ -74,8 +74,12 @@ export function PremiumImage({
       }}
     >
       {/* Premium Dark Gradient Shimmer Skeleton */}
-      {!loaded && !error && (
-        <div className="absolute inset-0 bg-gradient-to-r from-[#0d0e12] via-[#1a1c24] to-[#0d0e12] bg-[length:200%_100%] animate-shimmer pointer-events-none rounded-[inherit]" />
+      {!error && (
+        <div 
+          className={`absolute inset-0 bg-gradient-to-r from-[#0d0e12] via-[#1a1c24] to-[#0d0e12] bg-[length:200%_100%] animate-shimmer pointer-events-none rounded-[inherit] transition-opacity duration-500 ${
+            loaded ? "opacity-0" : "opacity-100"
+          }`} 
+        />
       )}
 
       {/* Actual Image */}
