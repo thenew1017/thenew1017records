@@ -354,7 +354,17 @@ export const checkIsAdmin = createServerFn({ method: "GET" })
           process.env.SUPABASE_ANON_KEY || 
           process.env.VITE_SUPABASE_PUBLISHABLE_KEY || 
           process.env.VITE_SUPABASE_ANON_KEY;
-        client = createClient(url!, key!);
+        client = createClient(url!, key!, {
+          global: {
+            headers: {
+              Authorization: `Bearer ${data.token}`,
+            },
+          },
+          auth: {
+            persistSession: false,
+            autoRefreshToken: false,
+          },
+        });
         const { data: userData, error: userError } = await client.auth.getUser(data.token);
         if (!userError && userData?.user) {
           userId = userData.user.id;
