@@ -366,18 +366,6 @@ export function Nav() {
           </motion.div>
         )}
       </AnimatePresence>
-
-      <ScrollProgress />
     </>
-  );
-}
-
-function ScrollProgress() {
-  const { scrollYProgress } = useScroll();
-  return (
-    <motion.div
-      style={{ scaleX: scrollYProgress }}
-      className="fixed inset-x-0 top-0 z-[60] h-[3px] origin-left bg-lux-gold shadow-[0_0_10px_rgba(229,213,192,0.6)]"
-    />
   );
 }
