@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 
 interface PremiumImageProps extends React.ImgHTMLAttributes<HTMLImageElement> {
   src: string;
@@ -23,7 +23,7 @@ export function PremiumImage({
 }: PremiumImageProps) {
   const [loaded, setLoaded] = useState(false);
   const [error, setError] = useState(false);
-  const imgRef = React.useRef<HTMLImageElement>(null);
+  const imgRef = useRef<HTMLImageElement>(null);
 
   // Preload critical images above the fold
   useEffect(() => {
@@ -35,10 +35,23 @@ export function PremiumImage({
 
   // Sync complete state if image is already cached/loaded before hydration
   useEffect(() => {
-    if (imgRef.current && imgRef.current.complete) {
-      setLoaded(true);
+    if (imgRef.current) {
+      if (imgRef.current.complete) {
+        setLoaded(true);
+      } else {
+        setLoaded(false);
+      }
     }
   }, [src]);
+
+  // Callback ref is executed as soon as the element is mounted/rendered to the DOM
+  const refCallback = (node: HTMLImageElement | null) => {
+    // @ts-ignore
+    imgRef.current = node;
+    if (node && node.complete) {
+      setLoaded(true);
+    }
+  };
 
   const handleLoad = () => {
     setLoaded(true);
@@ -63,7 +76,7 @@ export function PremiumImage({
       {/* Actual Image */}
       {finalSrc && (
         <img
-          ref={imgRef}
+          ref={refCallback}
           src={finalSrc}
           alt={alt}
           loading={loading}
@@ -92,3 +105,4 @@ export function PremiumImage({
     </div>
   );
 }
+

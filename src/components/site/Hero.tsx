@@ -143,11 +143,32 @@ function LogoEmblem({ displayBanner, title }: { displayBanner: string; title: st
   const [rotateX, setRotateX] = useState(0);
   const [rotateY, setRotateY] = useState(0);
   const [logoLoaded, setLogoLoaded] = useState(false);
+  const imgRef = useRef<HTMLImageElement>(null);
 
   // Preload centerpiece image natively using React 19 hook during render phase
   if (displayBanner) {
     preload(displayBanner, { as: "image" });
   }
+
+  // Sync complete state when banner changes
+  useEffect(() => {
+    if (imgRef.current) {
+      if (imgRef.current.complete) {
+        setLogoLoaded(true);
+      } else {
+        setLogoLoaded(false);
+      }
+    }
+  }, [displayBanner]);
+
+  // Callback ref is executed as soon as the img element is mounted
+  const refCallback = (node: HTMLImageElement | null) => {
+    // @ts-ignore
+    imgRef.current = node;
+    if (node && node.complete) {
+      setLogoLoaded(true);
+    }
+  };
 
   const handleMouseMove = (e: React.MouseEvent<HTMLDivElement>) => {
     if (!cardRef.current) return;
@@ -184,10 +205,10 @@ function LogoEmblem({ displayBanner, title }: { displayBanner: string; title: st
       {/* Layered luxury ambient particles - highly subtle for clean premium feel */}
       <div className="absolute inset-0 overflow-hidden pointer-events-none opacity-20">
         <div className="absolute top-[15%] left-[20%] w-1.5 h-1.5 rounded-full bg-[#E5D5C0]/85 animate-pulse duration-[3000ms]" style={{ animationDelay: '0ms' }} />
-        <div className="absolute top-[80%] left-[15%] w-1 h-1 rounded-full bg-[#E5D5C0]/65 animate-pulse duration-[4000ms]" style={{ animationDelay: '1200ms' }} />
+        <div className="absolute top-[80%] left-[15%] w-1.5 h-1.5 rounded-full bg-[#E5D5C0]/65 animate-pulse duration-[4000ms]" style={{ animationDelay: '1200ms' }} />
         <div className="absolute top-[25%] right-[25%] w-1.5 h-1.5 rounded-full bg-[#E5D5C0]/90 animate-pulse duration-[3500ms]" style={{ animationDelay: '600ms' }} />
         <div className="absolute top-[70%] right-[20%] w-2 h-2 rounded-full bg-[#E5D5C0]/55 animate-pulse duration-[4500ms]" style={{ animationDelay: '1800ms' }} />
-        <div className="absolute bottom-[35%] left-[40%] w-1 h-1 rounded-full bg-[#E5D5C0]/75 animate-pulse duration-[2800ms]" style={{ animationDelay: '900ms' }} />
+        <div className="absolute bottom-[35%] left-[40%] w-1.5 h-1.5 rounded-full bg-[#E5D5C0]/75 animate-pulse duration-[2800ms]" style={{ animationDelay: '900ms' }} />
         <div className="absolute top-[45%] right-[15%] w-1.5 h-1.5 rounded-full bg-[#E5D5C0]/45 animate-pulse duration-[3000ms]" style={{ animationDelay: '300ms' }} />
       </div>
 
@@ -200,6 +221,7 @@ function LogoEmblem({ displayBanner, title }: { displayBanner: string; title: st
 
           {/* Main Centerpiece Logo - Completely frameless, transparent background */}
           <img
+            ref={refCallback}
             src={displayBanner}
             alt={title}
             onLoad={() => setLogoLoaded(true)}
