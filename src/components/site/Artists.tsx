@@ -130,6 +130,8 @@ export function CinematicArtistImage({
       style={{
         perspective: "1000px",
         transformStyle: "preserve-3d",
+        willChange: "transform",
+        transform: "translateZ(0)"
       }}
     >
       {/* 3D Motion Container */}
@@ -137,13 +139,14 @@ export function CinematicArtistImage({
         className="relative w-full h-full rounded-sm transition-all duration-300 ease-out will-change-transform transform-gpu"
         style={{
           transform: isHovered 
-            ? `rotateX(${rotateX}deg) rotateY(${rotateY}deg) scale3d(1.06, 1.06, 1.06)` 
-            : "rotateX(0deg) rotateY(0deg) scale3d(1, 1, 1)",
+            ? `rotateX(${rotateX}deg) rotateY(${rotateY}deg) scale3d(1.06, 1.06, 1.06) translateZ(0)` 
+            : "rotateX(0deg) rotateY(0deg) scale3d(1, 1, 1) translateZ(0)",
           boxShadow: isHovered
             ? "0 25px 50px -12px rgba(0, 0, 0, 0.75), 0 0 35px rgba(255, 255, 255, 0.04)"
             : "0 10px 20px -10px rgba(0, 0, 0, 0.5)",
           transformStyle: "preserve-3d",
           transition: isHovered ? "transform 0.08s ease-out, box-shadow 0.3s ease" : "transform 0.5s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.5s cubic-bezier(0.16, 1, 0.3, 1)",
+          willChange: "transform"
         }}
       >
         {src ? (
