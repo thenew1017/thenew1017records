@@ -28,6 +28,7 @@ function Magnetic({ children }: { children: React.ReactElement }) {
   }, []);
 
   const handleMouseMove = (e: React.MouseEvent) => {
+    if (typeof window !== "undefined" && window.innerWidth < 1024) return;
     if (isMobile) return;
     if (!ref.current) return;
     const { clientX, clientY } = e;
@@ -139,6 +140,7 @@ export function Nav() {
 
   // Track cursor position inside the header to drive proximity gold aura reflections
   const handleHeaderMouseMove = (e: React.MouseEvent) => {
+    if (typeof window !== "undefined" && window.innerWidth < 1024) return;
     if (isMobile) return;
     if (!headerRef.current) return;
     const rect = headerRef.current.getBoundingClientRect();

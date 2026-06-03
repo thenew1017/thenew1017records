@@ -497,6 +497,7 @@ function ReleaseDetailPage() {
   }, []);
 
   const handleMouseMove = (e: React.MouseEvent<HTMLDivElement>) => {
+    if (typeof window !== "undefined" && window.innerWidth < 1024) return;
     if (isMobile) return;
     if (!cardRef.current) return;
     const rect = cardRef.current.getBoundingClientRect();

@@ -104,6 +104,7 @@ export function CinematicArtistImage({
   }, []);
 
   const handleMouseMove = (e: React.MouseEvent<HTMLDivElement>) => {
+    if (typeof window !== "undefined" && window.innerWidth < 1024) return;
     if (isMobile) return;
     if (!cardRef.current) return;
     const rect = cardRef.current.getBoundingClientRect();
@@ -121,11 +122,13 @@ export function CinematicArtistImage({
   };
 
   const handleMouseEnter = () => {
+    if (typeof window !== "undefined" && window.innerWidth < 1024) return;
     if (isMobile) return;
     setIsHovered(true);
   };
 
   const handleMouseLeave = () => {
+    if (typeof window !== "undefined" && window.innerWidth < 1024) return;
     if (isMobile) return;
     setIsHovered(false);
     setRotateX(0);
