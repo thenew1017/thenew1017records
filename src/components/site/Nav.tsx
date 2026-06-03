@@ -12,6 +12,7 @@ const links = [
   { label: "Contact", href: "/#contact", hash: "#contact" }
 ];
 
+
 // Magnetic Mouse Effect Wrapper Component
 function Magnetic({ children }: { children: React.ReactElement }) {
   const ref = useRef<HTMLDivElement>(null);
@@ -303,25 +304,25 @@ export function Nav() {
                      exit={{ opacity: 0, scale: 0.95, y: 20 }}
                      transition={{ delay: i * 0.04, duration: 0.6, ease: [0.16, 1, 0.3, 1] }}
                    >
-                     <a
-                       href={isContact ? "mailto:1017recordsoffcial@gmail.com" : l.href}
-                       onClick={(e) => {
-                         if (isContact) {
-                           handleContactClick(e);
-                         }
-                         setOpen(false);
-                       }}
-                       className={`group flex items-baseline justify-between border-b border-white/5 pb-4 font-display text-4xl sm:text-6xl uppercase tracking-tighter transition-all duration-500 cursor-pointer select-none mobile-nav-link ${
-                         isActive ? "text-[#D4AF37]" : "text-white/45 hover:text-white"
-                       }`}
-                     >
-                       <span>{l.label}</span>
-                       <span className={`font-mono text-xs sm:text-sm tracking-widest transition-opacity duration-300 ${
-                         isActive ? "text-[#D4AF37] opacity-100" : "text-lux-gold opacity-0 group-hover:opacity-100"
-                       }`}>
-                         // 0{i + 1}
-                       </span>
-                     </a>
+                      <a
+                        href={isContact ? "mailto:1017recordsoffcial@gmail.com" : l.href}
+                        onClick={(e) => {
+                          if (isContact) {
+                            handleContactClick(e);
+                          }
+                          setOpen(false);
+                        }}
+                        className={`group flex items-baseline justify-between border-b border-white/5 pb-4 font-display text-4xl sm:text-6xl uppercase tracking-tighter transition-all duration-500 cursor-pointer select-none mobile-nav-link ${
+                          isActive ? "text-[#D4AF37]" : "text-white/45 hover:text-white"
+                        }`}
+                      >
+                        <span>{l.label}</span>
+                        <span className={`font-mono text-xs sm:text-sm tracking-widest transition-opacity duration-300 ${
+                          isActive ? "text-[#D4AF37] opacity-100" : "text-lux-gold opacity-0 group-hover:opacity-100"
+                        }`}>
+                          // 0{i + 1}
+                        </span>
+                      </a>
                    </motion.div>
                 );
               })}
@@ -341,7 +342,7 @@ export function Nav() {
                   <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-[#E5D5C0] opacity-75"></span>
                   <span className="relative inline-flex rounded-full h-2 w-2 bg-[#E5D5C0] shadow-[0_0_8px_rgba(229,213,192,0.85)]"></span>
                 </span>
-                <span className="text-white/60">SYSTEM GATEWAY SECURED</span>
+                <span className="text-white/60">OFFICIAL TALENT GATEWAY</span>
               </div>
               
               <div className="grid grid-cols-2 gap-4 cta-buttons">
