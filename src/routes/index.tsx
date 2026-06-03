@@ -18,11 +18,11 @@ export const Route = createFileRoute("/")({
   pendingComponent: HomepagePendingComponent,
   loader: async () => {
     try {
-      const { artists } = await listPublicArtists();
-      return { artists };
-    } catch (err) {
+      const res = await listPublicArtists();
+      return { artists: res?.artists || [], error: null };
+    } catch (err: any) {
       console.error("Homepage SSR loader error:", err);
-      return { artists: [] };
+      return { artists: [], error: err?.message || String(err) };
     }
   },
   head: () => ({
@@ -79,6 +79,11 @@ function Index() {
       <Nav />
       <Hero />
       <Marquee />
+      {loaderData?.error && (
+        <div id="ssr-error-log" className="bg-red-950/80 border border-red-500 text-red-200 p-4 font-mono text-xs mx-auto max-w-[1600px] mt-8">
+          [SSR Error Log]: {loaderData.error}
+        </div>
+      )}
       <Artists initialArtists={loaderData?.artists} />
       <Showcase />
       <Manifesto />
