@@ -323,6 +323,11 @@ export function Releases({ settings }: { settings?: Record<string, any> }) {
   const [isMobileDevice, setIsMobileDevice] = useState(false);
   useEffect(() => {
     setIsMobileDevice(window.innerWidth < 1024);
+    const handleResize = () => {
+      setIsMobileDevice(window.innerWidth < 1024);
+    };
+    window.addEventListener("resize", handleResize);
+    return () => window.removeEventListener("resize", handleResize);
   }, []);
 
   const parsedReleases = (data?.settings?.releases as ReleaseSetting[] | undefined) ?? [];
@@ -517,13 +522,125 @@ export function Releases({ settings }: { settings?: Record<string, any> }) {
 
             // SPECIAL RENDER CASE: FEATURED RELEASE (Double-width split-panel)
             if (r.featured) {
+              if (isMobileDevice) {
+                return (
+                  <div
+                    key={r.id}
+                    className="col-span-1 sm:col-span-2 lg:col-span-4 group relative bg-transparent py-8 flex flex-col md:flex-row items-stretch gap-6 md:gap-10 border-b border-white/5 overflow-hidden"
+                  >
+                    {/* Left Column: Cover Artwork (Primary Focus) */}
+                    <div className="w-full md:w-[38%] aspect-square shrink-0 rounded-none overflow-hidden border border-white/5 relative">
+                      {r.cover_url ? (
+                        <PremiumImage
+                          src={r.cover_url}
+                          alt={r.title}
+                          aspectRatioClass="aspect-square"
+                          loading="eager"
+                          fetchPriority="high"
+                          decoding="async"
+                          className="artist-photo-image"
+                        />
+                      ) : (
+                        <div className="absolute inset-0 bg-gradient-to-br from-[#0c0d10] to-[#040405] flex flex-col items-center justify-center p-6 border border-white/5 relative overflow-hidden">
+                          <div className="absolute inset-0 bg-gradient-to-r from-transparent via-[#E5D5C0]/[0.03] to-transparent -translate-x-full animate-shimmer" />
+                          <svg className="w-12 h-12 text-zinc-700" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.25}>
+                            <circle cx="12" cy="12" r="10" />
+                            <circle cx="12" cy="12" r="7.5" strokeDasharray="2 2" />
+                            <circle cx="12" cy="12" r="4" />
+                            <circle cx="12" cy="12" r="1.5" />
+                          </svg>
+                          <span className="font-mono text-[9px] uppercase tracking-[0.3em] text-[#E5D5C0]/50 mt-4 leading-none select-none">1017 SIGNATURE DISK</span>
+                        </div>
+                      )}
+                      <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/20 to-transparent opacity-85 z-20" />
+
+                      {/* Integrated Certification Badges inside Cover Frame */}
+                      {activeBadges.length > 0 && (
+                        <div className="absolute bottom-4 left-4 z-30 flex flex-wrap gap-2 pointer-events-auto">
+                          {activeBadges.map((badge) => (
+                            <div
+                              key={badge.id}
+                              className={`inline-flex items-center gap-2 px-3.5 py-2.5 rounded-none text-xs md:text-[13px] tracking-[0.06em] border border-zinc-800/80 border-l-[3.5px] ${
+                                badge.theme === "red" 
+                                  ? "bg-[#090a0c]/95 border-l-red-500 text-white" 
+                                  : badge.theme === "gold" 
+                                  ? "bg-[#0f1013]/95 border-l-[#d4af37] text-[#d4af37]" 
+                                  : "bg-[#14161a]/95 border-l-slate-400 text-slate-200"
+                              }`}
+                              style={{
+                                boxShadow: "0 8px 16px rgba(0,0,0,0.6), inset 0 1px 0px rgba(255,255,255,0.04)"
+                              }}
+                            >
+                              <span className="shrink-0">{getBadgeIcon(badge.theme, "h-4.5 w-4.5")}</span>
+                              <span className="leading-none">{badge.title}</span>
+                            </div>
+                          ))}
+                        </div>
+                      )}
+                    </div>
+
+                    {/* Right Column: Info & Stats */}
+                    <div className="flex-1 flex flex-col justify-between py-2 relative z-10 text-left">
+                      <div className="mt-4 md:mt-0 space-y-4">
+                        <div className="flex items-center gap-3 font-mono text-[9px] text-muted-foreground uppercase tracking-[0.25em]">
+                          <span className="border border-white/10 px-2 py-0.5 bg-white/5 rounded-md font-bold text-accent">FEATURED</span>
+                          <span>FORMAT: {r.format}</span>
+                          <span>•</span>
+                          <span>YEAR: {yearStr}</span>
+                          {r.genre && (
+                            <>
+                              <span>•</span>
+                              <span className="text-accent">{r.genre}</span>
+                            </>
+                          )}
+                        </div>
+
+                        <h3 className="font-display text-4xl md:text-5xl lg:text-6xl uppercase tracking-tight text-white leading-[0.95]">
+                          {r.title}
+                        </h3>
+
+                        <p className="text-[12px] font-mono uppercase tracking-[0.3em] text-red-500 font-extrabold flex items-center gap-2">
+                          <svg className="h-4.5 w-4.5 text-red-500 fill-current shrink-0" viewBox="0 0 24 24">
+                            <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z" />
+                          </svg>
+                          {r.artist}
+                          <span className="text-white/20 font-black tracking-widest text-[9px] ml-auto font-mono">1017 SIGNATURE DISK</span>
+                        </p>
+
+                        {renderFeaturedStats(r, hasStats)}
+
+                        {r.description && (
+                          <p className="text-xs font-mono text-muted-foreground/80 leading-relaxed max-w-2xl border-l-2 border-red-500/20 pl-4 py-0.5 uppercase tracking-[0.08em]">
+                            {r.description}
+                          </p>
+                        )}
+                      </div>
+
+                      <div className="flex flex-wrap items-center gap-5 border-t border-white/5 pt-6 mt-6">
+                        <Link
+                          to="/release/$name"
+                          params={{ name: slugify(r.title) }}
+                          className="bg-white text-black hover:bg-white/90 px-8 py-4 text-[11px] font-black uppercase tracking-[0.25em] shadow-xl hover:shadow-[0_15px_30px_rgba(255,255,255,0.1)] transition-all duration-300 rounded-lg inline-flex items-center gap-2.5"
+                        >
+                          ▶ Listen Now
+                        </Link>
+
+                        <SocialLinksRow
+                          urls={[r.spotify_url, r.apple_url, r.youtube_url, r.soundcloud_url]}
+                        />
+                      </div>
+                    </div>
+                  </div>
+                );
+              }
+
               return (
                 <motion.div
                   key={r.id}
-                  initial={isMobileDevice ? false : { opacity: 0, y: 50 }}
-                  whileInView={isMobileDevice ? undefined : { opacity: 1, y: 0 }}
+                  initial={{ opacity: 0, y: 50 }}
+                  whileInView={{ opacity: 1, y: 0 }}
                   viewport={{ once: true, amount: 0.1 }}
-                  transition={isMobileDevice ? undefined : { duration: 1, ease: [0.22, 1, 0.36, 1] }}
+                  transition={{ duration: 1, ease: [0.22, 1, 0.36, 1] }}
                   className="col-span-1 sm:col-span-2 lg:col-span-4 group relative bg-transparent py-8 flex flex-col md:flex-row items-stretch gap-6 md:gap-10 border-b border-white/5 transition-all duration-700 overflow-hidden"
                 >
                   {/* Left Column: Cover Artwork (Primary Focus) */}
@@ -649,6 +766,88 @@ export function Releases({ settings }: { settings?: Record<string, any> }) {
             }
 
             // STANDARD RENDER CASE: Luxury Collector's Cover Card
+            if (isMobileDevice) {
+              return (
+                <Link
+                  key={r.id}
+                  to="/release/$name"
+                  params={{ name: slugify(r.title) }}
+                  className="block outline-none group"
+                >
+                  <div className="flex flex-col text-left relative bg-transparent border-none p-0 overflow-hidden">
+                    {/* Artwork (Primary Focus) */}
+                    <div className="relative aspect-square w-full overflow-hidden rounded-none bg-black/50 z-10 flex items-center justify-center border border-white/5">
+                      <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/20 to-transparent opacity-85 z-20" />
+                      {r.cover_url ? (
+                        <PremiumImage
+                          src={r.cover_url}
+                          alt={r.title}
+                          aspectRatioClass="aspect-square"
+                          loading="lazy"
+                          className="artist-photo-image"
+                        />
+                      ) : (
+                        <div className="absolute inset-0 bg-gradient-to-br from-[#0c0d10] to-[#040405] flex flex-col items-center justify-center p-6 border border-white/5 relative overflow-hidden">
+                          <div className="absolute inset-0 bg-gradient-to-r from-transparent via-[#E5D5C0]/[0.03] to-transparent -translate-x-full animate-shimmer" />
+                          <svg className="w-10 h-10 text-zinc-700" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.25}>
+                            <circle cx="12" cy="12" r="10" />
+                            <circle cx="12" cy="12" r="7.5" strokeDasharray="2 2" />
+                            <circle cx="12" cy="12" r="4" />
+                            <circle cx="12" cy="12" r="1.5" />
+                          </svg>
+                          <span className="font-mono text-[8px] uppercase tracking-[0.25em] text-[#E5D5C0]/40 mt-3 leading-none select-none">1017 SIGNATURE DISK</span>
+                        </div>
+                      )}
+                      
+                      {activeBadges.length > 0 && (
+                        <div className="absolute bottom-3 left-3 z-30 flex flex-wrap gap-1.5 pointer-events-auto">
+                          {activeBadges.map((badge) => (
+                            <div
+                              key={badge.id}
+                              className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-none text-[9px] font-sans font-bold uppercase tracking-[0.08em] shadow-lg border border-zinc-800/80 border-l-[3.5px] ${
+                                badge.theme === "red" 
+                                  ? "bg-[#090a0c]/95 border-l-red-500 text-white" 
+                                  : badge.theme === "gold" 
+                                  ? "bg-[#0f1013]/95 border-l-[#d4af37] text-[#d4af37]" 
+                                  : "bg-[#14161a]/95 border-l-slate-400 text-slate-200"
+                              }`}
+                              style={{
+                                boxShadow: "0 6px 12px rgba(0,0,0,0.5), inset 0 1px 0px rgba(255,255,255,0.04)"
+                              }}
+                            >
+                              <span className="shrink-0">{getBadgeIcon(badge.theme, "h-3.5 w-3.5")}</span>
+                              <span className="leading-none">{badge.title}</span>
+                            </div>
+                          ))}
+                        </div>
+                      )}
+                    </div>
+                    {/* Info & Data specifications */}
+                    <div className="mt-4 flex flex-col gap-2.5 relative z-10">
+                      <div className="space-y-1">
+                        <div className="flex items-center justify-between gap-2.5">
+                          <h3 className="font-display text-2xl uppercase tracking-tight text-white group-hover:text-[#d4af37] transition-colors duration-500 truncate" title={r.title}>
+                            {r.title}
+                          </h3>
+                          <span className="font-mono text-[9px] tracking-widest text-muted-foreground bg-white/5 border border-white/10 px-2 py-0.5 rounded-md shrink-0 font-bold uppercase">
+                            {yearStr}
+                          </span>
+                        </div>
+                        <p className="text-[10px] font-mono uppercase tracking-[0.25em] text-red-500 flex items-center gap-1.5 font-extrabold">
+                          <svg className="h-3.5 w-3.5 text-red-500 fill-current shrink-0" viewBox="0 0 24 24">
+                            <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z" />
+                          </svg>
+                          <span className="truncate" title={r.artist}>{r.artist}</span>
+                          <span className="text-white/20 font-black tracking-widest text-[8px] ml-auto font-mono">1017 ARTIST</span>
+                        </p>
+                      </div>
+                      {renderStandardStats(r, hasStats)}
+                    </div>
+                  </div>
+                </Link>
+              );
+            }
+
             return (
               <Link
                 key={r.id}
@@ -657,10 +856,10 @@ export function Releases({ settings }: { settings?: Record<string, any> }) {
                 className="block outline-none group"
               >
                 <motion.div
-                  initial={isMobileDevice ? false : { opacity: 0, y: 45 }}
-                  whileInView={isMobileDevice ? undefined : { opacity: 1, y: 0 }}
+                  initial={{ opacity: 0, y: 45 }}
+                  whileInView={{ opacity: 1, y: 0 }}
                   viewport={{ once: true, amount: 0.15 }}
-                  transition={isMobileDevice ? undefined : { duration: 0.8, delay: i * 0.08, ease: [0.22, 1, 0.36, 1] }}
+                  transition={{ duration: 0.8, delay: i * 0.08, ease: [0.22, 1, 0.36, 1] }}
                   className="flex flex-col text-left relative bg-transparent border-none p-0 transition-all duration-700 overflow-hidden"
                 >
                   {/* Artwork (Primary Focus - occupying 80% visual attention) */}

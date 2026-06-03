@@ -133,6 +133,16 @@ function AboutPage() {
   const [highlightPortal, setHighlightPortal] = useState(false);
   const [triggerFocus, setTriggerFocus] = useState(0);
   const [showSticky, setShowSticky] = useState(false);
+  const [isMobileDevice, setIsMobileDevice] = useState(false);
+
+  useEffect(() => {
+    setIsMobileDevice(window.innerWidth < 1024);
+    const handleResize = () => {
+      setIsMobileDevice(window.innerWidth < 1024);
+    };
+    window.addEventListener("resize", handleResize);
+    return () => window.removeEventListener("resize", handleResize);
+  }, []);
 
   useEffect(() => {
     // 1. Intersection Observer for progress funnel
@@ -249,7 +259,7 @@ function AboutPage() {
             <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 lg:gap-16 items-center bg-transparent relative overflow-hidden text-left py-12 border-t border-white/5 content-visibility-auto">
               
               {/* Premium Portrait Frame */}
-              <div className="lg:col-span-5 w-full max-w-[420px] aspect-[3/4] overflow-hidden rounded-none border border-[#E5D5C0]/20 mx-auto lg:mx-0 group flex items-center justify-center relative bg-[#000000] artist-photo-container">
+              <div className={isMobileDevice ? "lg:col-span-5 w-full max-w-[420px] aspect-[3/4] overflow-hidden rounded-none border border-[#E5D5C0]/20 mx-auto lg:mx-0 group flex items-center justify-center relative bg-[#000000]" : "lg:col-span-5 w-full max-w-[420px] aspect-[3/4] overflow-hidden rounded-none border border-[#E5D5C0]/20 mx-auto lg:mx-0 group flex items-center justify-center relative bg-[#000000] artist-photo-container"}>
                 {spotlight.founder_image_url ? (
                   <div className="relative w-full h-full overflow-hidden border border-white/5">
                     <PremiumImage
@@ -259,7 +269,7 @@ function AboutPage() {
                       loading="eager"
                       decoding="async"
                       fetchPriority="high"
-                      className="transition-transform duration-700 ease-out transform-gpu group-hover:scale-103"
+                      className={isMobileDevice ? "artist-photo-image" : "transition-transform duration-700 ease-out transform-gpu group-hover:scale-103"}
                       style={{
                         filter: "contrast(1.05) saturate(1.04) brightness(0.98)",
                       }}

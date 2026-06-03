@@ -137,6 +137,47 @@ export function CinematicArtistImage({
     setLightY(50);
   };
 
+  if (isMobile) {
+    return (
+      <div
+        className={`relative ${aspect} w-full rounded-sm overflow-hidden bg-[#000000] shadow-lg select-none`}
+      >
+        {src ? (
+          <>
+            <PremiumImage
+              src={src}
+              alt={alt}
+              loading="eager"
+              decoding="async"
+              fetchPriority="high"
+              aspectRatioClass=""
+              className="artist-photo-image"
+              style={{
+                filter: "contrast(1.03) saturate(1.06) brightness(0.96)",
+              }}
+            />
+            <div 
+              className="absolute inset-0 bg-gradient-to-t from-black via-black/25 to-transparent pointer-events-none opacity-85"
+            />
+          </>
+        ) : (
+          <div className="absolute inset-0 bg-gradient-to-br from-[#0c0d10] to-[#020203] flex flex-col items-center justify-center p-8 text-center relative overflow-hidden border border-white/5">
+            <div className="absolute inset-0 bg-gradient-to-r from-transparent via-[#E5D5C0]/[0.02] to-transparent -translate-x-full animate-shimmer pointer-events-none" />
+            <svg className="w-12 h-12 text-zinc-700 animate-pulse" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.25}>
+              <circle cx="12" cy="12" r="9" />
+              <path strokeLinecap="round" strokeLinejoin="round" d="M12 7a3 3 0 100 6 3 3 0 000-6z" />
+              <path strokeLinecap="round" strokeLinejoin="round" d="M4.5 18.75a9 9 0 0115 0" />
+            </svg>
+            <span className="font-mono text-[9px] uppercase tracking-[0.3em] text-[#E5D5C0]/50 mt-4 leading-none select-none">OFFICIAL DOSSIER PORTRAIT</span>
+          </div>
+        )}
+        <div 
+          className="absolute inset-0 border border-white/5 rounded-sm pointer-events-none"
+        />
+      </div>
+    );
+  }
+
   return (
     <div
       ref={cardRef}
@@ -314,62 +355,96 @@ export function Artists({ initialArtists }: { initialArtists?: any[] }) {
  
         {/* Roster Module Grid */}
         <div className="grid grid-cols-1 gap-8 sm:grid-cols-2 lg:grid-cols-4">
-          {artists.map((a, i) => (
-            <motion.div
-              key={a.id ?? a.name}
-              initial={isMobileDevice ? false : { opacity: 0, y: 50 }}
-              whileInView={isMobileDevice ? undefined : { opacity: 1, y: 0 }}
-              viewport={{ once: true, amount: 0.1 }}
-              transition={isMobileDevice ? undefined : { duration: 0.8, delay: i * 0.08, ease: [0.22, 1, 0.36, 1] }}
-              style={{
-                willChange: "transform, opacity",
-                transform: "translateZ(0)",
-                backfaceVisibility: "hidden"
-              }}
-              className="group relative flex flex-col text-left bg-transparent p-0 border-none transition-all duration-[250ms] ease-in-out select-none transform-gpu"
-            >
-              <Link
-                to="/artist/$name"
-                params={{ name: slugify(a.name) }}
-                onMouseEnter={() => {
-                  if (a.id) trackHover(a.id);
-                }}
-                className="outline-none focus-visible:ring-2 focus-visible:ring-accent flex flex-col flex-grow text-left cursor-pointer"
-              >
-                {/* Middle: Cinematic Standalone Artist Image */}
-                <CinematicArtistImage
-                  src={a.image_url ?? ""}
-                  alt={a.name}
-                />
-
-                {/* Bottom: Artist Name, Bio & Platform Icons */}
-                <div className="pt-5 relative w-full flex flex-col flex-grow">
-                  {/* Flat Typographic Roster Badges */}
-                  <div className="flex items-center justify-between gap-3 mb-2 font-mono text-[9px] uppercase tracking-[0.2em] text-zinc-500">
-                    <span>{getPremiumBadge(a.role)}</span>
-                    <span className="flex items-center gap-1">
-                      <span className="h-1.5 w-1.5 rounded-full bg-red-500" />
-                      LIVE
-                    </span>
+          {artists.map((a, i) => {
+            if (isMobileDevice) {
+              return (
+                <div
+                  key={a.id ?? a.name}
+                  className="group relative flex flex-col text-left bg-transparent p-0 border-none select-none"
+                >
+                  <Link
+                    to="/artist/$name"
+                    params={{ name: slugify(a.name) }}
+                    className="outline-none flex flex-col flex-grow text-left cursor-pointer"
+                  >
+                    <CinematicArtistImage
+                      src={a.image_url ?? ""}
+                      alt={a.name}
+                    />
+                    <div className="pt-5 relative w-full flex flex-col flex-grow">
+                      <div className="flex items-center justify-between gap-3 mb-2 font-mono text-[9px] uppercase tracking-[0.2em] text-zinc-500">
+                        <span>{getPremiumBadge(a.role)}</span>
+                        <span className="flex items-center gap-1">
+                          <span className="h-1.5 w-1.5 rounded-full bg-red-500" />
+                          LIVE
+                        </span>
+                      </div>
+                      <h3 className="font-display text-2xl uppercase tracking-tight text-white group-hover:text-[#E5D5C0] transition-colors duration-[250ms] ease-in-out">
+                        {a.name}
+                      </h3>
+                      {a.bio && (
+                        <p className="mt-2 text-xs leading-relaxed text-zinc-400 font-light font-sans line-clamp-2">
+                          {a.bio}
+                        </p>
+                      )}
+                    </div>
+                  </Link>
+                  <div className="mt-4 pt-4 border-t border-white/5 flex items-center justify-center w-full relative z-30">
+                    <SocialRow a={a} />
                   </div>
-
-                  <h3 className="font-display text-2xl uppercase tracking-tight text-white group-hover:text-[#E5D5C0] transition-colors duration-[250ms] ease-in-out">
-                    {a.name}
-                  </h3>
-                  
-                  {a.bio && (
-                    <p className="mt-2 text-xs leading-relaxed text-zinc-400 font-light font-sans line-clamp-2">
-                      {a.bio}
-                    </p>
-                  )}
                 </div>
-              </Link>
-
-              <div className="mt-4 pt-4 border-t border-white/5 flex items-center justify-center w-full relative z-30">
-                <SocialRow a={a} />
-              </div>
-            </motion.div>
-          ))}
+              );
+            }
+            return (
+              <motion.div
+                key={a.id ?? a.name}
+                initial={{ opacity: 0, y: 50 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true, amount: 0.1 }}
+                transition={{ duration: 0.8, delay: i * 0.08, ease: [0.22, 1, 0.36, 1] }}
+                style={{
+                  willChange: "transform, opacity",
+                  transform: "translateZ(0)",
+                  backfaceVisibility: "hidden"
+                }}
+                className="group relative flex flex-col text-left bg-transparent p-0 border-none transition-all duration-[250ms] ease-in-out select-none transform-gpu"
+              >
+                <Link
+                  to="/artist/$name"
+                  params={{ name: slugify(a.name) }}
+                  onMouseEnter={() => {
+                    if (a.id) trackHover(a.id);
+                  }}
+                  className="outline-none focus-visible:ring-2 focus-visible:ring-accent flex flex-col flex-grow text-left cursor-pointer"
+                >
+                  <CinematicArtistImage
+                    src={a.image_url ?? ""}
+                    alt={a.name}
+                  />
+                  <div className="pt-5 relative w-full flex flex-col flex-grow">
+                    <div className="flex items-center justify-between gap-3 mb-2 font-mono text-[9px] uppercase tracking-[0.2em] text-zinc-500">
+                      <span>{getPremiumBadge(a.role)}</span>
+                      <span className="flex items-center gap-1">
+                        <span className="h-1.5 w-1.5 rounded-full bg-red-500" />
+                        LIVE
+                      </span>
+                    </div>
+                    <h3 className="font-display text-2xl uppercase tracking-tight text-white group-hover:text-[#E5D5C0] transition-colors duration-[250ms] ease-in-out">
+                      {a.name}
+                    </h3>
+                    {a.bio && (
+                      <p className="mt-2 text-xs leading-relaxed text-zinc-400 font-light font-sans line-clamp-2">
+                        {a.bio}
+                      </p>
+                    )}
+                  </div>
+                </Link>
+                <div className="mt-4 pt-4 border-t border-white/5 flex items-center justify-center w-full relative z-30">
+                  <SocialRow a={a} />
+                </div>
+              </motion.div>
+            );
+          })}
         </div>
       </div>
     </section>

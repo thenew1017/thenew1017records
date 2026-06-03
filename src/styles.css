@@ -334,13 +334,15 @@
 /* Disable hover, tilt, and spot reflections on mobile viewports (< 1024px) for CinematicArtistImage */
 @media (max-width: 1023px) {
   .artist-photo-inner {
-    transform: rotateX(0deg) rotateY(0deg) scale3d(1, 1, 1) translateZ(0) !important;
+    transform: none !important;
+    scale: 1 !important;
     box-shadow: 0 10px 20px -10px rgba(0, 0, 0, 0.5) !important;
     transition: none !important;
   }
   
   .artist-photo-image {
-    transform: scale(1) translateZ(0) !important;
+    transform: none !important;
+    scale: 1 !important;
     transition: none !important;
   }
   
@@ -361,7 +363,9 @@
   .group:hover .artist-photo-inner,
   .group:hover .transition-transform,
   .group:hover .transform-gpu,
-  .group:hover {
+  .group:hover,
+  .artist-photo-container:hover,
+  .artist-photo-container:hover * {
     transform: none !important;
     scale: 1 !important;
     transition: none !important;

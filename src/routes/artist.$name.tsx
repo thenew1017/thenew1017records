@@ -172,6 +172,11 @@ function ArtistDetailPage() {
   const [isMobileDevice, setIsMobileDevice] = useState(false);
   useEffect(() => {
     setIsMobileDevice(window.innerWidth < 1024);
+    const handleResize = () => {
+      setIsMobileDevice(window.innerWidth < 1024);
+    };
+    window.addEventListener("resize", handleResize);
+    return () => window.removeEventListener("resize", handleResize);
   }, []);
 
   // Client-side hydration query (shares the SSR loaderData cache)
@@ -261,23 +266,32 @@ function ArtistDetailPage() {
           
           {/* LEFT: Premium Portrait Showcase */}
           <div className="lg:col-span-5 flex justify-center">
-            <motion.div
-              initial={isMobileDevice ? false : { opacity: 0, y: 30 }}
-              animate={isMobileDevice ? undefined : { opacity: 1, y: 0 }}
-              transition={isMobileDevice ? undefined : { duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
-              className="w-full max-w-[420px] select-none artist-photo-container"
-              style={{
-                willChange: "transform, opacity",
-                transform: "translateZ(0)",
-                backfaceVisibility: "hidden",
-                perspective: 1000,
-              }}
-            >
-              <CinematicArtistImage
-                src={artistImage}
-                alt={artist.name}
-              />
-            </motion.div>
+            {isMobileDevice ? (
+              <div className="w-full max-w-[420px] select-none">
+                <CinematicArtistImage
+                  src={artistImage}
+                  alt={artist.name}
+                />
+              </div>
+            ) : (
+              <motion.div
+                initial={{ opacity: 0, y: 30 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
+                className="w-full max-w-[420px] select-none artist-photo-container"
+                style={{
+                  willChange: "transform, opacity",
+                  transform: "translateZ(0)",
+                  backfaceVisibility: "hidden",
+                  perspective: 1000,
+                }}
+              >
+                <CinematicArtistImage
+                  src={artistImage}
+                  alt={artist.name}
+                />
+              </motion.div>
+            )}
           </div>
 
           {/* RIGHT: High-contrast typography & listeners counter */}
