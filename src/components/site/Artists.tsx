@@ -79,12 +79,10 @@ function getPremiumBadge(role?: string | null): string {
 export function CinematicArtistImage({ 
   src, 
   alt, 
-  logoSrc,
   aspect = "aspect-[3/4]" 
 }: { 
   src: string; 
   alt: string; 
-  logoSrc?: string | null;
   aspect?: string; 
 }) {
   const cardRef = useRef<HTMLDivElement>(null);
@@ -164,16 +162,7 @@ export function CinematicArtistImage({
               }}
             />
 
-            {/* Dynamic Custom Logo Overlay */}
-            {logoSrc && (
-              <div className="absolute top-4 right-4 z-20 h-10 w-16 pointer-events-none select-none flex items-center justify-end">
-                <img 
-                  src={logoSrc} 
-                  alt="Artist Logo" 
-                  className="max-h-full max-w-full object-contain filter invert opacity-80 group-hover:opacity-100 group-hover:scale-105 transition-all duration-500"
-                />
-              </div>
-            )}
+
 
             {/* Ambient Dark Cinematic Shading */}
             <div 
@@ -236,13 +225,12 @@ export function Artists({ initialArtists }: { initialArtists?: any[] }) {
     };
   }, [qc]);
 
-  const artists: (Artist & { rating?: number; logo_url?: string | null })[] = (data?.artists.length ?? 0) > 0
+  const artists: (Artist & { rating?: number })[] = (data?.artists.length ?? 0) > 0
     ? (data!.artists as Artist[]).map((a, i) => {
         const [tagVal, ratingVal] = (a.tag || "").split("|");
         return {
           ...a,
           image_url: a.image_url || null,
-          logo_url: a.logo_url || null,
           tag: tagVal || String(i + 1).padStart(2, "0"),
           rating: ratingVal ? parseInt(ratingVal) : 5,
         };
@@ -253,7 +241,7 @@ export function Artists({ initialArtists }: { initialArtists?: any[] }) {
   if (typeof window !== "undefined") {
     console.log("=== 1017 PUBLIC ROSTER HYDRATION AUDIT ===");
     console.log("⚡ [Supabase Client Query] Fetching public roster via listPublicArtists server function.");
-    console.log("⚡ [Supabase Client Query Definition] SELECT id, name, role, tag, bio, image_url, logo_url, spotify_url, apple_url, youtube_url, instagram_url, twitter_url, website_url, sort_order FROM artists WHERE published = true ORDER BY sort_order ASC, created_at ASC");
+    console.log("⚡ [Supabase Client Query Definition] SELECT id, name, role, tag, bio, image_url, spotify_url, apple_url, youtube_url, instagram_url, twitter_url, website_url, sort_order FROM artists WHERE published = true ORDER BY sort_order ASC, created_at ASC");
     if (data?.artists) {
       console.log("✅ [Supabase Client Response] Full database payload received:", data.artists);
     } else {
@@ -264,7 +252,6 @@ export function Artists({ initialArtists }: { initialArtists?: any[] }) {
       artists.forEach((app) => {
         console.log(`Artist Card: ${app.name}`);
         console.log(` - image_url: ${app.image_url || "NONE"}`);
-        console.log(` - logo_url: ${app.logo_url || "NONE"}`);
       });
     } else {
       console.log("ℹ️ [Supabase Client Response] Roster is empty.");
@@ -319,7 +306,6 @@ export function Artists({ initialArtists }: { initialArtists?: any[] }) {
                 <CinematicArtistImage
                   src={a.image_url ?? ""}
                   alt={a.name}
-                  logoSrc={a.logo_url}
                 />
 
                 {/* Bottom: Artist Name, Bio & Platform Icons */}

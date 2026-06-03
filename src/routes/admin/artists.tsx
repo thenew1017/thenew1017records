@@ -37,7 +37,7 @@ type Artist = {
 };
 
 const EMPTY: Artist = {
-  name: "", role: "", tag: "", bio: "", image_url: "", logo_url: "",
+  name: "", role: "", tag: "", bio: "", image_url: "",
   spotify_url: "", apple_url: "", youtube_url: "",
   instagram_url: "", twitter_url: "", website_url: "",
   sort_order: 0, published: true,
@@ -138,14 +138,12 @@ function ArtistForm({ initial, onClose, onSave }: { initial: Artist; onClose: ()
   });
   const [busy, setBusy] = useState(false);
   const [uploading, setUploading] = useState(false);
-  const [uploadingLogo, setUploadingLogo] = useState(false);
   const [err, setErr] = useState<string | null>(null);
 
   const set = <K extends keyof Artist>(k: K, v: Artist[K]) => setA((s) => ({ ...s, [k]: v }));
 
-  const upload = async (file: File, field: "image_url" | "logo_url") => {
-    if (field === "image_url") setUploading(true);
-    else setUploadingLogo(true);
+  const upload = async (file: File) => {
+    setUploading(true);
     setErr(null);
     try {
       const ext = file.name.split(".").pop() ?? "jpg";
@@ -153,12 +151,11 @@ function ArtistForm({ initial, onClose, onSave }: { initial: Artist; onClose: ()
       const { error } = await supabase.storage.from("media").upload(path, file, { upsert: false, cacheControl: "31536000" });
       if (error) throw error;
       const { data: { publicUrl } } = supabase.storage.from("media").getPublicUrl(path);
-      set(field, publicUrl);
+      set("image_url", publicUrl);
     } catch (e) {
       setErr(e instanceof Error ? e.message : "Upload failed");
     } finally {
       setUploading(false);
-      setUploadingLogo(false);
     }
   };
 
@@ -171,7 +168,7 @@ function ArtistForm({ initial, onClose, onSave }: { initial: Artist; onClose: ()
       const clean: Artist = { ...a };
       // Serialise rating inside tag field
       clean.tag = `${a.tag || ""}|${rating}`;
-      const urlKeys: (keyof Artist)[] = ["image_url","logo_url","spotify_url","apple_url","youtube_url","instagram_url","twitter_url","website_url","role","tag","bio"];
+      const urlKeys: (keyof Artist)[] = ["image_url","spotify_url","apple_url","youtube_url","instagram_url","twitter_url","website_url","role","tag","bio"];
       for (const k of urlKeys) if (clean[k] === "") (clean as Record<string, unknown>)[k] = null;
       await onSave(clean);
     } catch (e) {
@@ -208,29 +205,17 @@ function ArtistForm({ initial, onClose, onSave }: { initial: Artist; onClose: ()
 
           <Field label="Bio"><textarea rows={3} value={a.bio ?? ""} onChange={(e) => set("bio", e.target.value)} className={inputCls} /></Field>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <div className="grid grid-cols-1 gap-6">
             <Field label="Image">
               <div className="flex items-center gap-4">
                 {a.image_url && <img src={a.image_url} alt="" className="h-20 w-20 object-cover rounded-md border border-border" />}
                 <label className="inline-flex items-center gap-2 cursor-pointer bg-secondary hover:bg-accent hover:text-accent-foreground px-4 py-2 rounded-md text-xs uppercase tracking-[0.2em]">
                   <Upload className="h-4 w-4" /> {uploading ? "Uploading…" : "Upload image"}
-                  <input type="file" accept="image/*" className="hidden" onChange={(e) => e.target.files?.[0] && upload(e.target.files[0], "image_url")} />
+                  <input type="file" accept="image/*" className="hidden" onChange={(e) => e.target.files?.[0] && upload(e.target.files[0])} />
                 </label>
                 {a.image_url && <button type="button" onClick={() => set("image_url", "")} className="text-xs text-destructive underline">remove</button>}
               </div>
               <input value={a.image_url ?? ""} onChange={(e) => set("image_url", e.target.value)} className={`${inputCls} mt-2`} placeholder="or paste image URL" />
-            </Field>
-
-            <Field label="Logo">
-              <div className="flex items-center gap-4">
-                {a.logo_url && <img src={a.logo_url} alt="" className="h-20 w-20 object-contain bg-secondary/30 rounded-md border border-border p-1" />}
-                <label className="inline-flex items-center gap-2 cursor-pointer bg-secondary hover:bg-accent hover:text-accent-foreground px-4 py-2 rounded-md text-xs uppercase tracking-[0.2em]">
-                  <Upload className="h-4 w-4" /> {uploadingLogo ? "Uploading…" : "Upload logo"}
-                  <input type="file" accept="image/*" className="hidden" onChange={(e) => e.target.files?.[0] && upload(e.target.files[0], "logo_url")} />
-                </label>
-                {a.logo_url && <button type="button" onClick={() => set("logo_url", "")} className="text-xs text-destructive underline">remove</button>}
-              </div>
-              <input value={a.logo_url ?? ""} onChange={(e) => set("logo_url", e.target.value)} className={`${inputCls} mt-2`} placeholder="or paste logo URL" />
             </Field>
           </div>
 

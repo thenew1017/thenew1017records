@@ -253,7 +253,6 @@ function ArtistDetailPage() {
   if (typeof window !== "undefined" && artist) {
     console.log(`=== 1017 ARTIST DETAILS HYDRATION AUDIT (${artist.name}) ===`);
     console.log(` - image_url: ${artist.image_url || "NONE"}`);
-    console.log(` - logo_url: ${artist.logo_url || "NONE"}`);
     console.log("=============================================================");
   }
 
@@ -295,7 +294,6 @@ function ArtistDetailPage() {
               <CinematicArtistImage
                 src={artistImage}
                 alt={artist.name}
-                logoSrc={artist.logo_url}
               />
             </motion.div>
           </div>
@@ -325,15 +323,7 @@ function ArtistDetailPage() {
               <h1 className="font-display text-5xl uppercase leading-[0.85] text-foreground sm:text-6xl md:text-7xl lg:text-8xl xl:text-[96px] tracking-tighter">
                 {artist.name}
               </h1>
-              {artist.logo_url && (
-                <div className="h-16 w-28 flex items-center justify-start pointer-events-none mt-2">
-                  <img 
-                    src={artist.logo_url} 
-                    alt={`${artist.name} Logo`} 
-                    className="max-h-full max-w-full object-contain filter invert opacity-90 group-hover:opacity-100 transition-opacity duration-300" 
-                  />
-                </div>
-              )}
+
             </div>
 
             {/* Short Bio Block */}

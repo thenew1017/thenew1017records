@@ -14,7 +14,6 @@ const ArtistSchema = z.object({
   tag: z.string().max(20).nullable().optional(),
   bio: z.string().max(2000).nullable().optional(),
   image_url: z.string().url().nullable().optional(),
-  logo_url: z.string().url().nullable().optional(),
   spotify_url: z.string().url().nullable().optional(),
   apple_url: z.string().url().nullable().optional(),
   youtube_url: z.string().url().nullable().optional(),
@@ -54,38 +53,19 @@ export const listPublicArtists = createServerFn({ method: "GET" }).handler(async
   console.log(` - Resolved Key (anon): ${resolvedKey ? resolvedKey.substring(0, 20) + "..." : "MISSING"}`);
   console.log("==========================================");
   
-  const queryColumns = "id,name,role,tag,bio,image_url,logo_url,spotify_url,apple_url,youtube_url,instagram_url,twitter_url,website_url,sort_order";
+  const queryColumns = "id,name,role,tag,bio,image_url,spotify_url,apple_url,youtube_url,instagram_url,twitter_url,website_url,sort_order";
   console.log("⚡ [Supabase Server Roster Query] Executing:", `supabase.from("artists").select("${queryColumns}")`);
   console.log("⚡ [SQL Equivalent]:", `SELECT ${queryColumns} FROM public.artists WHERE published = true ORDER BY sort_order ASC, created_at ASC;`);
   
   const { supabase } = await import("@/integrations/supabase/client");
-  let { data, error } = await supabase
+  const { data, error } = await supabase
     .from("artists")
     .select(queryColumns)
     .eq("published", true)
     .order("sort_order", { ascending: true })
     .order("created_at", { ascending: true });
     
-  if (error && error.message.includes("logo_url")) {
-    console.warn("⚠️ [Supabase Roster Query Fallback] 'logo_url' column does not exist in public.artists yet. Retrying query without logo_url.");
-    const queryColumnsFallback = "id,name,role,tag,bio,image_url,spotify_url,apple_url,youtube_url,instagram_url,twitter_url,website_url,sort_order";
-    console.log("⚡ [Supabase Server Roster Query Fallback] Executing:", `supabase.from("artists").select("${queryColumnsFallback}")`);
-    
-    const fallbackRes = await supabase
-      .from("artists")
-      .select(queryColumnsFallback)
-      .eq("published", true)
-      .order("sort_order", { ascending: true })
-      .order("created_at", { ascending: true });
-      
-    if (fallbackRes.error) {
-      console.error("❌ [Supabase Roster Query Fallback Failure] Error:", fallbackRes.error.message);
-      throw new Error(fallbackRes.error.message);
-    }
-    
-    // Polyfill logo_url as null
-    data = (fallbackRes.data ?? []).map(row => ({ ...row, logo_url: null }));
-  } else if (error) {
+  if (error) {
     console.error("❌ [Supabase Server Roster Query Failure] Error:", error.message);
     throw new Error(error.message);
   }
