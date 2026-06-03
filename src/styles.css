@@ -271,6 +271,14 @@
       background-position: 200% 0;
     }
   }
+
+  /* Force GPU & Scroll Fixes for Artist Photo Container */
+  .artist-photo-container {
+    will-change: transform;
+    transform: translateZ(0);
+    backface-visibility: hidden;
+    perspective: 1000px;
+  }
 }
 
 @media (max-width: 768px) {

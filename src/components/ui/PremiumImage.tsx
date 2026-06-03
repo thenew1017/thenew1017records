@@ -66,7 +66,7 @@ export function PremiumImage({
 
   return (
     <div 
-      className={`relative overflow-hidden w-full h-full ${aspectRatioClass} bg-[#0b0c10] rounded-[inherit]`}
+      className={`relative overflow-hidden w-full h-full ${aspectRatioClass} bg-[#0b0c10] rounded-[inherit] artist-photo-container`}
     >
       {/* Premium Dark Gradient Shimmer Skeleton */}
       {!loaded && !error && (

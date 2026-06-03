@@ -126,17 +126,18 @@ export function CinematicArtistImage({
       onMouseMove={handleMouseMove}
       onMouseEnter={handleMouseEnter}
       onMouseLeave={handleMouseLeave}
-      className={`relative ${aspect} w-full rounded-sm overflow-hidden bg-black/40 shadow-lg select-none cursor-pointer transform-gpu`}
+      className={`relative ${aspect} w-full rounded-sm overflow-hidden bg-black/40 shadow-lg select-none cursor-pointer transform-gpu artist-photo-container`}
       style={{
         perspective: "1000px",
         transformStyle: "preserve-3d",
         willChange: "transform",
-        transform: "translateZ(0)"
+        transform: "translateZ(0)",
+        backfaceVisibility: "hidden"
       }}
     >
       {/* 3D Motion Container */}
       <div
-        className="relative w-full h-full rounded-sm transition-all duration-300 ease-out will-change-transform transform-gpu"
+        className="relative w-full h-full rounded-sm transition-all duration-300 ease-out will-change-transform transform-gpu artist-photo-container"
         style={{
           transform: isHovered 
             ? `rotateX(${rotateX}deg) rotateY(${rotateY}deg) scale3d(1.06, 1.06, 1.06) translateZ(0)` 
@@ -146,7 +147,8 @@ export function CinematicArtistImage({
             : "0 10px 20px -10px rgba(0, 0, 0, 0.5)",
           transformStyle: "preserve-3d",
           transition: isHovered ? "transform 0.08s ease-out, box-shadow 0.3s ease" : "transform 0.5s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.5s cubic-bezier(0.16, 1, 0.3, 1)",
-          willChange: "transform"
+          willChange: "transform",
+          backfaceVisibility: "hidden"
         }}
       >
         {src ? (
