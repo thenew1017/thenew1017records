@@ -1,6 +1,7 @@
 import React, { createContext, useContext, useState, useEffect } from "react";
 import { useNavigate, useRouter } from "@tanstack/react-router";
 import { motion, AnimatePresence } from "motion/react";
+import { useIsMobile } from "@/hooks/useIsMobile";
 
 interface TransitionContextType {
   isTransitioning: boolean;
@@ -22,8 +23,13 @@ export function PageTransitionProvider({ children }: { children: React.ReactNode
   const [transitionTo, setTransitionTo] = useState<string | null>(null);
   const navigate = useNavigate();
   const router = useRouter();
+  const isMobile = useIsMobile();
 
   const startTransition = async (to: string) => {
+    if (isMobile) {
+      await navigate({ to: to as any });
+      return;
+    }
     if (isTransitioning) return;
     setIsTransitioning(true);
     setTransitionTo(to);
@@ -68,10 +74,11 @@ export function PageTransitionProvider({ children }: { children: React.ReactNode
 
 export function PageTransitionOverlay() {
   const { isTransitioning } = usePageTransition();
+  const isMobile = useIsMobile();
 
   return (
     <AnimatePresence>
-      {isTransitioning && (
+      {!isMobile && isTransitioning && (
         <motion.div
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
