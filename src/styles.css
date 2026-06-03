@@ -259,10 +259,15 @@
 }
 
 @media (max-width: 768px) {
+  .mobile-nav-link {
+    font-size: 28px !important; /* ~22% reduction from 36px to optimize hierarchy */
+    line-height: 1.25 !important;
+  }
+
   .cta-buttons {
     display: flex !important;
     flex-wrap: wrap !important;
-    gap: 12px !important;
+    gap: 16px !important; /* Slightly more breathing room between buttons */
     justify-content: center !important;
     align-items: center !important;
     width: 100% !important;
@@ -270,12 +275,12 @@
 
   .cta-buttons button,
   .cta-buttons a {
-    flex: 1 1 190px !important;
-    min-width: 190px !important;
-    max-width: 280px !important;
-    height: 52px !important; /* Height: 52px */
+    flex: 1 1 200px !important; /* Equal width and dynamic scaling */
+    min-width: 200px !important;
+    max-width: 280px !important; /* Maximum width: 280px */
+    height: 54px !important; /* Height: 54px */
     font-size: 14px !important; /* Font size: 14px */
-    border-radius: 9999px !important; /* Border radius: 9999px */
+    border-radius: 9999px !important; /* Maintain pill shape */
     display: inline-flex !important;
     justify-content: center !important;
     align-items: center !important;

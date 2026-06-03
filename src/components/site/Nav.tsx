@@ -321,7 +321,7 @@ export function Nav() {
                          }
                          setOpen(false);
                        }}
-                       className={`group flex items-baseline justify-between border-b border-white/5 pb-4 font-display text-4xl sm:text-6xl uppercase tracking-tighter transition-all duration-500 cursor-pointer select-none ${
+                       className={`group flex items-baseline justify-between border-b border-white/5 pb-4 font-display text-4xl sm:text-6xl uppercase tracking-tighter transition-all duration-500 cursor-pointer select-none mobile-nav-link ${
                          isActive ? "text-[#D4AF37]" : "text-white/45 hover:text-white"
                        }`}
                      >
