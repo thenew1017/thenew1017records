@@ -9,6 +9,7 @@ import { CinematicArtistImage } from "@/components/site/Artists";
 import { motion } from "motion/react";
 import { ArrowLeft, Music2, Apple, Youtube, Instagram, Twitter, Globe, ArrowRight, Camera } from "lucide-react";
 import { SocialLinksRow } from "@/components/ui/SocialLinks";
+import { useIsMobile } from "@/hooks/useIsMobile";
 
 const fallbacks: string[] = [];
 
@@ -169,15 +170,7 @@ function ArtistDetailPage() {
   const fetchAll = useServerFn(listPublicArtists);
   const fetchGallery = useServerFn(getArtistMediaGallery);
 
-  const [isMobileDevice, setIsMobileDevice] = useState(false);
-  useEffect(() => {
-    setIsMobileDevice(window.innerWidth < 1024);
-    const handleResize = () => {
-      setIsMobileDevice(window.innerWidth < 1024);
-    };
-    window.addEventListener("resize", handleResize);
-    return () => window.removeEventListener("resize", handleResize);
-  }, []);
+  const isMobileDevice = useIsMobile();
 
   // Client-side hydration query (shares the SSR loaderData cache)
   const { data: artistQuery } = useQuery({
@@ -418,7 +411,9 @@ function ArtistDetailPage() {
                 return (
                   <div
                     key={img.id || idx}
-                    className="group relative w-full aspect-square rounded-none overflow-hidden bg-black/40 border border-white/5 hover:border-white/15 transition-all duration-500 transform-gpu"
+                    className={isMobileDevice 
+                      ? "relative w-full aspect-square rounded-none overflow-hidden bg-black/40 border border-white/5 select-none" 
+                      : "group relative w-full aspect-square rounded-none overflow-hidden bg-black/40 border border-white/5 hover:border-white/15 transition-all duration-500 transform-gpu"}
                   >
                     {img.image_url ? (
                       <img
@@ -426,7 +421,10 @@ function ArtistDetailPage() {
                         alt={img.caption || "Gallery photo"}
                         decoding="async"
                         loading="eager"
-                        className="w-full h-full object-cover transition-transform duration-[700ms] ease-out group-hover:scale-[1.03]"
+                        className={isMobileDevice
+                          ? "w-full h-full object-cover"
+                          : "w-full h-full object-cover transition-transform duration-[700ms] ease-out group-hover:scale-[1.03]"}
+                        style={isMobileDevice ? { pointerEvents: "none" } : undefined}
                       />
                     ) : (
                       <div className="absolute inset-0 bg-gradient-to-br from-[#0c0d10] to-[#020203] flex flex-col items-center justify-center p-4 relative overflow-hidden">
@@ -481,7 +479,9 @@ function ArtistDetailPage() {
                     key={a.id || a.name}
                     to="/artist/$name"
                     params={{ name: slugify(a.name) }}
-                    className="group relative flex flex-col text-left outline-none bg-transparent p-0 border-none transition-all duration-[250ms] ease-in-out cursor-pointer select-none transform-gpu"
+                    className={isMobileDevice 
+                      ? "relative flex flex-col text-left outline-none bg-transparent p-0 border-none select-none cursor-pointer"
+                      : "group relative flex flex-col text-left outline-none bg-transparent p-0 border-none transition-all duration-[250ms] ease-in-out cursor-pointer select-none transform-gpu"}
                   >
                     {/* Middle: Cinematic Image */}
                     <CinematicArtistImage

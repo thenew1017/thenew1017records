@@ -9,6 +9,7 @@ import { useQuery } from "@tanstack/react-query";
 import { submitArtistApplication, getPublicFounderSpotlight } from "@/lib/cms.functions";
 import { PremiumImage } from "@/components/ui/PremiumImage";
 import { supabase } from "@/integrations/supabase/client";
+import { useIsMobile } from "@/hooks/useIsMobile";
 
 export const Route = createFileRoute("/about-1017")({
   component: AboutPage,
@@ -133,16 +134,7 @@ function AboutPage() {
   const [highlightPortal, setHighlightPortal] = useState(false);
   const [triggerFocus, setTriggerFocus] = useState(0);
   const [showSticky, setShowSticky] = useState(false);
-  const [isMobileDevice, setIsMobileDevice] = useState(false);
-
-  useEffect(() => {
-    setIsMobileDevice(window.innerWidth < 1024);
-    const handleResize = () => {
-      setIsMobileDevice(window.innerWidth < 1024);
-    };
-    window.addEventListener("resize", handleResize);
-    return () => window.removeEventListener("resize", handleResize);
-  }, []);
+  const isMobileDevice = useIsMobile();
 
   useEffect(() => {
     // 1. Intersection Observer for progress funnel

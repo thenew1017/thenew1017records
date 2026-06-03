@@ -6,6 +6,7 @@ import { getPublicSettings, slugify } from "@/lib/cms.functions";
 import { ExternalLink } from "lucide-react";
 import { PremiumImage } from "@/components/ui/PremiumImage";
 import { SocialLinksRow } from "@/components/ui/SocialLinks";
+import { useIsMobile } from "@/hooks/useIsMobile";
 
 type BadgeTemplate = {
   id: "verified_hit" | "gold_record" | "platinum_record";
@@ -320,15 +321,7 @@ export function Releases({ settings }: { settings?: Record<string, any> }) {
     staleTime: 30_000,
   });
 
-  const [isMobileDevice, setIsMobileDevice] = useState(false);
-  useEffect(() => {
-    setIsMobileDevice(window.innerWidth < 1024);
-    const handleResize = () => {
-      setIsMobileDevice(window.innerWidth < 1024);
-    };
-    window.addEventListener("resize", handleResize);
-    return () => window.removeEventListener("resize", handleResize);
-  }, []);
+  const isMobileDevice = useIsMobile();
 
   const parsedReleases = (data?.settings?.releases as ReleaseSetting[] | undefined) ?? [];
   const badgeTemplates = (data?.settings?.releases_badge_templates as BadgeTemplate[] | undefined) ?? DEFAULT_TEMPLATES;

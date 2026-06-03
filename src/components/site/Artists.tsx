@@ -9,6 +9,7 @@ import { Instagram, Twitter, Youtube, Music2, Apple, Globe } from "lucide-react"
 import { trackClick, trackHover, ensureSession } from "@/lib/analytics";
 import { PremiumImage } from "@/components/ui/PremiumImage";
 import { SocialLinkButton } from "@/components/ui/SocialLinks";
+import { useIsMobile } from "@/hooks/useIsMobile";
 
 
 type Artist = {
@@ -92,19 +93,9 @@ export function CinematicArtistImage({
   const [lightY, setLightY] = useState(50);
   const [isHovered, setIsHovered] = useState(false);
 
-  const [isMobile, setIsMobile] = useState(false);
-
-  useEffect(() => {
-    // Disable hover/tilt animations on screens smaller than 1024px (mobile/tablet)
-    const media = window.matchMedia("(max-width: 1023px)");
-    setIsMobile(media.matches);
-    const listener = (e: MediaQueryListEvent) => setIsMobile(e.matches);
-    media.addEventListener("change", listener);
-    return () => media.removeEventListener("change", listener);
-  }, []);
+  const isMobile = useIsMobile();
 
   const handleMouseMove = (e: React.MouseEvent<HTMLDivElement>) => {
-    if (typeof window !== "undefined" && window.innerWidth < 1024) return;
     if (isMobile) return;
     if (!cardRef.current) return;
     const rect = cardRef.current.getBoundingClientRect();
@@ -122,13 +113,11 @@ export function CinematicArtistImage({
   };
 
   const handleMouseEnter = () => {
-    if (typeof window !== "undefined" && window.innerWidth < 1024) return;
     if (isMobile) return;
     setIsHovered(true);
   };
 
   const handleMouseLeave = () => {
-    if (typeof window !== "undefined" && window.innerWidth < 1024) return;
     if (isMobile) return;
     setIsHovered(false);
     setRotateX(0);
@@ -154,6 +143,7 @@ export function CinematicArtistImage({
               className="artist-photo-image"
               style={{
                 filter: "contrast(1.03) saturate(1.06) brightness(0.96)",
+                pointerEvents: "none",
               }}
             />
             <div 
@@ -277,10 +267,7 @@ export function Artists({ initialArtists }: { initialArtists?: any[] }) {
     initialData: initialArtists ? { artists: initialArtists } : undefined
   });
 
-  const [isMobileDevice, setIsMobileDevice] = useState(false);
-  useEffect(() => {
-    setIsMobileDevice(window.innerWidth < 1024);
-  }, []);
+  const isMobileDevice = useIsMobile();
 
   useEffect(() => {
     void ensureSession();

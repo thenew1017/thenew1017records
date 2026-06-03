@@ -389,4 +389,38 @@
   isolation: isolate;
 }
 
+/* Nuclear option for mobile: kill ALL transforms and transitions on touch devices */
+@media (max-width: 1023px) {
+  /* Artist cards & track covers */
+  .artist-card,
+  .artist-photo-container,
+  .artist-photo-inner,
+  .artist-photo-outer,
+  .track-cover,
+  [data-tilt],
+  [data-framer-motion] {
+    transform: none !important;
+    transition: none !important;
+    will-change: auto !important;
+    animation: none !important;
+  }
+}
+
+/* Also add this globally — prevents iOS from treating scroll as hover */
+@media (hover: none) and (pointer: coarse) {
+  * {
+    -webkit-tap-highlight-color: transparent;
+  }
+  
+  /* Disable any :hover pseudo-class effects on touch devices */
+  .artist-card:hover,
+  .artist-photo-container:hover,
+  .artist-photo-inner:hover,
+  .artist-photo-outer:hover,
+  .track-cover:hover {
+    transform: none !important;
+    filter: none !important;
+  }
+}
+
 
