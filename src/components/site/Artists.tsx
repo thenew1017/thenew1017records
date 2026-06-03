@@ -126,7 +126,7 @@ export function CinematicArtistImage({
       onMouseMove={handleMouseMove}
       onMouseEnter={handleMouseEnter}
       onMouseLeave={handleMouseLeave}
-      className={`relative ${aspect} w-full rounded-sm overflow-hidden bg-black/40 shadow-lg select-none cursor-pointer transform-gpu artist-photo-container`}
+      className={`relative ${aspect} w-full rounded-sm overflow-hidden bg-[#000000] shadow-lg select-none cursor-pointer transform-gpu artist-photo-container`}
       style={{
         perspective: "1000px",
         transformStyle: "preserve-3d",
@@ -157,7 +157,8 @@ export function CinematicArtistImage({
             <PremiumImage
               src={src}
               alt={alt}
-              loading="lazy"
+              loading="eager"
+              fetchPriority="high"
               aspectRatioClass=""
               className="transition-transform duration-[700ms] ease-out transform-gpu"
               style={{
@@ -265,7 +266,7 @@ export function Artists({ initialArtists }: { initialArtists?: any[] }) {
   }
 
   return (
-    <section id="artists" className="relative px-6 py-32 md:px-10 border-t border-white/5">
+    <section id="artists" className="relative px-6 py-32 md:px-10 border-t border-white/5 content-visibility-auto">
       {/* Background glow flares for division */}
       <div className="pointer-events-none absolute inset-x-0 top-0 -z-10 h-px bg-gradient-to-r from-transparent via-white/5 to-transparent" />
       <div className="pointer-events-none absolute -right-32 top-1/2 h-[70vmin] w-[70vmin] glow-gold opacity-[0.02] -translate-y-1/2" />
@@ -287,7 +288,7 @@ export function Artists({ initialArtists }: { initialArtists?: any[] }) {
             A roster forged in late nights and louder mornings. Discover the specialized sound vectors defining the next global audio wave.
           </p>
         </div>
-
+ 
         {/* Roster Module Grid */}
         <div className="grid grid-cols-1 gap-8 sm:grid-cols-2 lg:grid-cols-4">
           {artists.map((a, i) => (
@@ -297,6 +298,11 @@ export function Artists({ initialArtists }: { initialArtists?: any[] }) {
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true, amount: 0.1 }}
               transition={{ duration: 0.8, delay: i * 0.08, ease: [0.22, 1, 0.36, 1] }}
+              style={{
+                willChange: "transform, opacity",
+                transform: "translateZ(0)",
+                backfaceVisibility: "hidden"
+              }}
               className="group relative flex flex-col text-left bg-transparent p-0 border-none transition-all duration-[250ms] ease-in-out select-none transform-gpu"
             >
               <Link

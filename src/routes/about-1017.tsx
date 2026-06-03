@@ -246,10 +246,10 @@ function AboutPage() {
             </div>
             
             {/* Luxury Editorial Showcase Box */}
-            <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 lg:gap-16 items-center bg-transparent relative overflow-hidden text-left py-12 border-t border-white/5">
+            <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 lg:gap-16 items-center bg-transparent relative overflow-hidden text-left py-12 border-t border-white/5 content-visibility-auto">
               
               {/* Premium Portrait Frame */}
-              <div className="lg:col-span-5 w-full max-w-[420px] aspect-[3/4] overflow-hidden rounded-none border border-[#E5D5C0]/20 mx-auto lg:mx-0 group flex items-center justify-center relative bg-gradient-to-br from-[#0a0a0d] to-[#020203]">
+              <div className="lg:col-span-5 w-full max-w-[420px] aspect-[3/4] overflow-hidden rounded-none border border-[#E5D5C0]/20 mx-auto lg:mx-0 group flex items-center justify-center relative bg-[#000000] artist-photo-container">
                 {spotlight.founder_image_url ? (
                   <div className="relative w-full h-full overflow-hidden border border-white/5">
                     <PremiumImage

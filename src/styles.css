@@ -274,10 +274,14 @@
 
   /* Force GPU & Scroll Fixes for Artist Photo Container */
   .artist-photo-container {
-    will-change: transform;
+    will-change: transform, opacity;
     transform: translateZ(0);
     backface-visibility: hidden;
     perspective: 1000px;
+  }
+
+  .content-visibility-auto {
+    content-visibility: auto;
   }
 
   /* Force static layout and hardware acceleration on mobile showcase background image */

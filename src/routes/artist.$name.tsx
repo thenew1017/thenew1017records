@@ -252,7 +252,7 @@ function ArtistDetailPage() {
         </Link>
 
         {/* SECTION 1 — HERO AREA */}
-        <div className="grid grid-cols-1 gap-12 lg:grid-cols-12 lg:gap-16 items-center">
+        <div className="grid grid-cols-1 gap-12 lg:grid-cols-12 lg:gap-16 items-center content-visibility-auto">
           
           {/* LEFT: Premium Portrait Showcase */}
           <div className="lg:col-span-5 flex justify-center">
@@ -262,7 +262,7 @@ function ArtistDetailPage() {
               transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
               className="w-full max-w-[420px] select-none artist-photo-container"
               style={{
-                willChange: "transform",
+                willChange: "transform, opacity",
                 transform: "translateZ(0)",
                 backfaceVisibility: "hidden",
                 perspective: 1000,
@@ -322,7 +322,7 @@ function ArtistDetailPage() {
 
 
         {/* SECTION 3 — CAREER HIGHLIGHTS */}
-        <div className="pt-24 mt-24 border-t border-white/5">
+        <div className="pt-24 mt-24 border-t border-white/5 content-visibility-auto">
           <div className="mb-12">
             <h2 className="font-display text-3xl uppercase tracking-tight text-white/90 md:text-4xl lg:text-5xl">
               Career <span className="text-stroke font-black">Highlights</span>
@@ -357,7 +357,7 @@ function ArtistDetailPage() {
         </div>
 
         {/* SECTION 4 — ARTIST STORY */}
-        <div className="pt-24 mt-24 border-t border-white/5 max-w-4xl mx-auto text-left space-y-8">
+        <div className="pt-24 mt-24 border-t border-white/5 max-w-4xl mx-auto text-left space-y-8 content-visibility-auto">
           <div className="text-center">
             <h2 className="font-display text-3xl uppercase tracking-tight text-white/90 md:text-4xl lg:text-5xl">
               The <span className="text-stroke font-black">Story</span>
@@ -383,7 +383,7 @@ function ArtistDetailPage() {
 
         {/* SECTION 5 — MEDIA GALLERY */}
         {galleryQuery?.gallery && galleryQuery.gallery.length > 0 && (
-          <div className="pt-24 mt-24 border-t border-white/5">
+          <div className="pt-24 mt-24 border-t border-white/5 content-visibility-auto">
             <div className="mb-12">
               <h2 className="font-display text-3xl uppercase tracking-tight text-white/90 md:text-4xl lg:text-5xl">
                 Media <span className="text-stroke font-black">Gallery</span>
@@ -441,7 +441,7 @@ function ArtistDetailPage() {
 
         {/* SECTION 6 — RELATED 1017 ARTISTS */}
         {related.length > 0 && (
-          <div className="pt-24 mt-24 border-t border-white/5">
+          <div className="pt-24 mt-24 border-t border-white/5 content-visibility-auto">
             <div className="mb-12">
               <h2 className="font-display text-3xl uppercase tracking-tight text-white/90 md:text-4xl lg:text-5xl">
                 Related <span className="text-stroke font-black">Roster</span>
