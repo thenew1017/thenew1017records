@@ -92,7 +92,19 @@ export function CinematicArtistImage({
   const [lightY, setLightY] = useState(50);
   const [isHovered, setIsHovered] = useState(false);
 
+  const [isMobile, setIsMobile] = useState(false);
+
+  useEffect(() => {
+    // Disable hover/tilt animations on screens smaller than 1024px (mobile/tablet)
+    const media = window.matchMedia("(max-width: 1023px)");
+    setIsMobile(media.matches);
+    const listener = (e: MediaQueryListEvent) => setIsMobile(e.matches);
+    media.addEventListener("change", listener);
+    return () => media.removeEventListener("change", listener);
+  }, []);
+
   const handleMouseMove = (e: React.MouseEvent<HTMLDivElement>) => {
+    if (isMobile) return;
     if (!cardRef.current) return;
     const rect = cardRef.current.getBoundingClientRect();
     const x = e.clientX - rect.left;
@@ -109,10 +121,12 @@ export function CinematicArtistImage({
   };
 
   const handleMouseEnter = () => {
+    if (isMobile) return;
     setIsHovered(true);
   };
 
   const handleMouseLeave = () => {
+    if (isMobile) return;
     setIsHovered(false);
     setRotateX(0);
     setRotateY(0);
@@ -126,27 +140,27 @@ export function CinematicArtistImage({
       onMouseMove={handleMouseMove}
       onMouseEnter={handleMouseEnter}
       onMouseLeave={handleMouseLeave}
-      className={`relative ${aspect} w-full rounded-sm overflow-hidden bg-[#000000] shadow-lg select-none cursor-pointer transform-gpu artist-photo-container`}
+      className={`relative ${aspect} w-full rounded-sm overflow-hidden bg-[#000000] shadow-lg select-none cursor-pointer transform-gpu artist-photo-container artist-photo-outer`}
       style={{
         perspective: "1000px",
         transformStyle: "preserve-3d",
-        willChange: "transform",
+        willChange: "transform, opacity",
         transform: "translateZ(0)",
         backfaceVisibility: "hidden"
       }}
     >
       {/* 3D Motion Container */}
       <div
-        className="relative w-full h-full rounded-sm transition-all duration-300 ease-out will-change-transform transform-gpu artist-photo-container"
+        className="relative w-full h-full rounded-sm transition-all duration-300 ease-out will-change-transform transform-gpu artist-photo-container artist-photo-inner"
         style={{
-          transform: isHovered 
+          transform: (isHovered && !isMobile) 
             ? `rotateX(${rotateX}deg) rotateY(${rotateY}deg) scale3d(1.06, 1.06, 1.06) translateZ(0)` 
             : "rotateX(0deg) rotateY(0deg) scale3d(1, 1, 1) translateZ(0)",
-          boxShadow: isHovered
+          boxShadow: (isHovered && !isMobile)
             ? "0 25px 50px -12px rgba(0, 0, 0, 0.75), 0 0 35px rgba(255, 255, 255, 0.04)"
             : "0 10px 20px -10px rgba(0, 0, 0, 0.5)",
           transformStyle: "preserve-3d",
-          transition: isHovered ? "transform 0.08s ease-out, box-shadow 0.3s ease" : "transform 0.5s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.5s cubic-bezier(0.16, 1, 0.3, 1)",
+          transition: (isHovered && !isMobile) ? "transform 0.08s ease-out, box-shadow 0.3s ease" : "transform 0.5s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.5s cubic-bezier(0.16, 1, 0.3, 1)",
           willChange: "transform",
           backfaceVisibility: "hidden"
         }}
@@ -160,9 +174,9 @@ export function CinematicArtistImage({
               loading="eager"
               fetchPriority="high"
               aspectRatioClass=""
-              className="transition-transform duration-[700ms] ease-out transform-gpu"
+              className="transition-transform duration-[700ms] ease-out transform-gpu artist-photo-image"
               style={{
-                transform: isHovered ? "scale(1.03) translateZ(0)" : "scale(1) translateZ(0)",
+                transform: (isHovered && !isMobile) ? "scale(1.03) translateZ(0)" : "scale(1) translateZ(0)",
                 filter: "contrast(1.03) saturate(1.06) brightness(0.96)",
                 transition: "transform 0.7s cubic-bezier(0.16, 1, 0.3, 1), filter 0.5s ease",
               }}
@@ -172,15 +186,15 @@ export function CinematicArtistImage({
 
             {/* Ambient Dark Cinematic Shading */}
             <div 
-              className="absolute inset-0 bg-gradient-to-t from-black via-black/25 to-transparent pointer-events-none transition-opacity duration-500"
-              style={{ opacity: isHovered ? 0.75 : 0.85 }}
+              className="absolute inset-0 bg-gradient-to-t from-black via-black/25 to-transparent pointer-events-none transition-opacity duration-500 artist-photo-shading"
+              style={{ opacity: (isHovered && !isMobile) ? 0.75 : 0.85 }}
             />
 
             {/* Dynamic Studio Lighting Spotlight Reflection Layer */}
             <div
-              className="absolute inset-0 pointer-events-none mix-blend-overlay opacity-0 transition-opacity duration-300 will-change-transform"
+              className="absolute inset-0 pointer-events-none mix-blend-overlay opacity-0 transition-opacity duration-300 will-change-transform artist-photo-spotlight"
               style={{
-                opacity: isHovered ? 0.6 : 0,
+                opacity: (isHovered && !isMobile) ? 0.6 : 0,
                 background: `radial-gradient(circle at ${lightX}% ${lightY}%, rgba(255, 255, 255, 0.45) 0%, transparent 60%)`,
               }}
             />
@@ -201,7 +215,7 @@ export function CinematicArtistImage({
         <div 
           className="absolute inset-0 border border-white/5 rounded-sm pointer-events-none transition-colors duration-300"
           style={{
-            borderColor: isHovered ? "rgba(255, 255, 255, 0.15)" : "rgba(255, 255, 255, 0.05)",
+            borderColor: (isHovered && !isMobile) ? "rgba(255, 255, 255, 0.15)" : "rgba(255, 255, 255, 0.05)",
           }}
         />
       </div>

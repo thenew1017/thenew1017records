@@ -145,6 +145,15 @@ function LogoEmblem({ displayBanner, title }: { displayBanner: string; title: st
   const [rotateY, setRotateY] = useState(0);
   const [logoLoaded, setLogoLoaded] = useState(false);
   const imgRef = useRef<HTMLImageElement>(null);
+  const [isMobile, setIsMobile] = useState(false);
+
+  useEffect(() => {
+    const media = window.matchMedia("(max-width: 1023px)");
+    setIsMobile(media.matches);
+    const listener = (e: MediaQueryListEvent) => setIsMobile(e.matches);
+    media.addEventListener("change", listener);
+    return () => media.removeEventListener("change", listener);
+  }, []);
 
   // Preload centerpiece image natively using React 19 hook during render phase
   if (displayBanner) {
@@ -172,6 +181,7 @@ function LogoEmblem({ displayBanner, title }: { displayBanner: string; title: st
   };
 
   const handleMouseMove = (e: React.MouseEvent<HTMLDivElement>) => {
+    if (isMobile) return;
     if (!cardRef.current) return;
     const rect = cardRef.current.getBoundingClientRect();
     const x = e.clientX - rect.left - rect.width / 2;
@@ -194,8 +204,10 @@ function LogoEmblem({ displayBanner, title }: { displayBanner: string; title: st
       onMouseMove={handleMouseMove}
       onMouseLeave={handleMouseLeave}
       style={{
-        transform: `perspective(1000px) rotateX(${rotateX}deg) rotateY(${rotateY}deg) scale3d(${displayBanner && logoLoaded ? 1.03 : 1}, ${displayBanner && logoLoaded ? 1.03 : 1}, 1.01)`,
-        transition: "transform 0.15s ease-out",
+        transform: (displayBanner && logoLoaded && !isMobile)
+          ? `perspective(1000px) rotateX(${rotateX}deg) rotateY(${rotateY}deg) scale3d(1.03, 1.03, 1.01)`
+          : "perspective(1000px) rotateX(0deg) rotateY(0deg) scale3d(1, 1, 1)",
+        transition: (displayBanner && logoLoaded && !isMobile) ? "transform 0.15s ease-out" : "transform 0.5s ease",
         transformStyle: "preserve-3d",
       }}
       className="relative w-full max-w-[380px] lg:max-w-[440px] flex items-center justify-center select-none cursor-pointer group"

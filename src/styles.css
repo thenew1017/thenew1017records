@@ -330,3 +330,29 @@
     box-sizing: border-box !important;
   }
 }
+
+/* Disable hover, tilt, and spot reflections on mobile viewports (< 1024px) for CinematicArtistImage */
+@media (max-width: 1023px) {
+  .artist-photo-inner {
+    transform: rotateX(0deg) rotateY(0deg) scale3d(1, 1, 1) translateZ(0) !important;
+    box-shadow: 0 10px 20px -10px rgba(0, 0, 0, 0.5) !important;
+    transition: none !important;
+  }
+  
+  .artist-photo-image {
+    transform: scale(1) translateZ(0) !important;
+    transition: none !important;
+  }
+  
+  .artist-photo-shading {
+    opacity: 0.85 !important;
+    transition: none !important;
+  }
+  
+  .artist-photo-spotlight {
+    opacity: 0 !important;
+    background: none !important;
+    display: none !important;
+  }
+}
+

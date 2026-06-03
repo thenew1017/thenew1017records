@@ -17,8 +17,18 @@ const links = [
 function Magnetic({ children }: { children: React.ReactElement }) {
   const ref = useRef<HTMLDivElement>(null);
   const [position, setPosition] = useState({ x: 0, y: 0 });
+  const [isMobile, setIsMobile] = useState(false);
+
+  useEffect(() => {
+    const media = window.matchMedia("(max-width: 1023px)");
+    setIsMobile(media.matches);
+    const listener = (e: MediaQueryListEvent) => setIsMobile(e.matches);
+    media.addEventListener("change", listener);
+    return () => media.removeEventListener("change", listener);
+  }, []);
 
   const handleMouseMove = (e: React.MouseEvent) => {
+    if (isMobile) return;
     if (!ref.current) return;
     const { clientX, clientY } = e;
     const { left, top, width, height } = ref.current.getBoundingClientRect();
@@ -76,6 +86,15 @@ export function Nav() {
   const [activeSection, setActiveSection] = useState("");
   const [mousePos, setMousePos] = useState({ x: 0, y: 0 });
   const headerRef = useRef<HTMLDivElement>(null);
+  const [isMobile, setIsMobile] = useState(false);
+
+  useEffect(() => {
+    const media = window.matchMedia("(max-width: 1023px)");
+    setIsMobile(media.matches);
+    const listener = (e: MediaQueryListEvent) => setIsMobile(e.matches);
+    media.addEventListener("change", listener);
+    return () => media.removeEventListener("change", listener);
+  }, []);
 
   // Scroll logic for premium Apple-like header transformation
   useMotionValueEvent(scrollY, "change", (y) => {
@@ -120,6 +139,7 @@ export function Nav() {
 
   // Track cursor position inside the header to drive proximity gold aura reflections
   const handleHeaderMouseMove = (e: React.MouseEvent) => {
+    if (isMobile) return;
     if (!headerRef.current) return;
     const rect = headerRef.current.getBoundingClientRect();
     const x = e.clientX - rect.left;
@@ -151,7 +171,9 @@ export function Nav() {
           <div
             className="absolute inset-0 -z-10 opacity-0 group-hover:opacity-100 transition-opacity duration-700 pointer-events-none rounded-full"
             style={{
-              background: `radial-gradient(350px circle at ${mousePos.x}px ${mousePos.y}px, rgba(229, 213, 192, 0.06), transparent 80%)`
+              background: !isMobile 
+                ? `radial-gradient(350px circle at ${mousePos.x}px ${mousePos.y}px, rgba(229, 213, 192, 0.06), transparent 80%)`
+                : "none"
             }}
           />
 
