@@ -41,8 +41,14 @@ export const listPublicArtists = createServerFn({ method: "GET" }).handler(async
     return publicArtistsCache;
   }
   
-  const resolvedUrl = process.env.SUPABASE_URL || import.meta.env.VITE_SUPABASE_URL;
-  const resolvedKey = process.env.SUPABASE_PUBLISHABLE_KEY || import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY || import.meta.env.VITE_SUPABASE_ANON_KEY;
+  const resolvedUrl = process.env.SUPABASE_URL || process.env.VITE_SUPABASE_URL || import.meta.env.VITE_SUPABASE_URL;
+  const resolvedKey = 
+    process.env.SUPABASE_PUBLISHABLE_KEY || 
+    process.env.SUPABASE_ANON_KEY || 
+    process.env.VITE_SUPABASE_PUBLISHABLE_KEY || 
+    process.env.VITE_SUPABASE_ANON_KEY || 
+    import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY || 
+    import.meta.env.VITE_SUPABASE_ANON_KEY;
   console.log("=== SUPABASE SERVER CONFIGURATION AUDIT ===");
   console.log(` - Resolved URL: ${resolvedUrl}`);
   console.log(` - Resolved Key (anon): ${resolvedKey ? resolvedKey.substring(0, 20) + "..." : "MISSING"}`);
@@ -340,8 +346,14 @@ export const checkIsAdmin = createServerFn({ method: "GET" })
 
       if (data?.token) {
         const { createClient } = await import("@supabase/supabase-js");
-        const url = import.meta.env.VITE_SUPABASE_URL || process.env.SUPABASE_URL;
-        const key = import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY || import.meta.env.VITE_SUPABASE_ANON_KEY || process.env.SUPABASE_PUBLISHABLE_KEY;
+        const url = import.meta.env.VITE_SUPABASE_URL || process.env.SUPABASE_URL || process.env.VITE_SUPABASE_URL;
+        const key = 
+          import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY || 
+          import.meta.env.VITE_SUPABASE_ANON_KEY || 
+          process.env.SUPABASE_PUBLISHABLE_KEY || 
+          process.env.SUPABASE_ANON_KEY || 
+          process.env.VITE_SUPABASE_PUBLISHABLE_KEY || 
+          process.env.VITE_SUPABASE_ANON_KEY;
         client = createClient(url!, key!);
         const { data: userData, error: userError } = await client.auth.getUser(data.token);
         if (!userError && userData?.user) {

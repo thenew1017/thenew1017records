@@ -42,7 +42,8 @@ loadEnv();
 export function getAdminClient() {
   const url = 
     process.env.SUPABASE_URL || 
-    import.meta.env.VITE_SUPABASE_URL;
+    import.meta.env.VITE_SUPABASE_URL ||
+    process.env.VITE_SUPABASE_URL;
     
   // Strictly process.env is checked for the service role key. 
   // We NEVER look up a VITE_ prefixed variable for the secret to prevent bundler leakage to the client-side.
@@ -54,8 +55,11 @@ export function getAdminClient() {
     console.warn("⚠️ [Supabase Server Client] SUPABASE_SERVICE_ROLE_KEY is missing! Falling back to publishable key for public reads.");
     key = 
       process.env.SUPABASE_PUBLISHABLE_KEY || 
+      process.env.SUPABASE_ANON_KEY || 
       import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY ||
-      import.meta.env.VITE_SUPABASE_ANON_KEY;
+      import.meta.env.VITE_SUPABASE_ANON_KEY ||
+      process.env.VITE_SUPABASE_PUBLISHABLE_KEY ||
+      process.env.VITE_SUPABASE_ANON_KEY;
   }
     
   if (!url || !key) {

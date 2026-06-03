@@ -20,7 +20,7 @@ export const Route = createFileRoute("/")({
     try {
       const res = await listPublicArtists();
       const resolvedUrl = process.env.SUPABASE_URL || "NOT_SET";
-      const resolvedKey = process.env.SUPABASE_PUBLISHABLE_KEY || "NOT_SET";
+      const resolvedKey = process.env.SUPABASE_PUBLISHABLE_KEY || process.env.SUPABASE_ANON_KEY || "NOT_SET";
       return { 
         artists: res?.artists || [], 
         error: null,
