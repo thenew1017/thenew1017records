@@ -181,16 +181,16 @@ function ApplicationsAdmin() {
   const getStatusColor = (status: string) => {
     switch (status) {
       case "Approved":
-        return "text-green-400 bg-green-500/10 border-green-500/20";
+        return "text-green-400 bg-green-500/10 border-green-500/30 shadow-[0_0_10px_rgba(34,197,94,0.2)]";
       case "Rejected":
-        return "text-red-400 bg-red-500/10 border-red-500/20";
+        return "text-red-400 bg-red-500/10 border-red-500/30 shadow-[0_0_10px_rgba(239,68,68,0.2)]";
       case "Reviewed":
       case "Reviewing":
-        return "text-blue-400 bg-blue-500/10 border-blue-500/20";
+        return "text-blue-400 bg-blue-500/10 border-blue-500/30 shadow-[0_0_10px_rgba(59,130,246,0.2)]";
       case "Archived":
-        return "text-zinc-400 bg-zinc-500/10 border-zinc-500/20";
+        return "text-zinc-400 bg-zinc-500/10 border-zinc-500/30 shadow-[0_0_10px_rgba(161,161,170,0.1)]";
       default:
-        return "text-amber-400 bg-amber-500/10 border-amber-500/20";
+        return "text-[#FFD700] bg-[#FFD700]/10 border-[#FFD700]/30 shadow-[0_0_10px_rgba(255,215,0,0.2)]";
     }
   };
 
@@ -210,7 +210,7 @@ function ApplicationsAdmin() {
               value={search}
               onChange={(e) => setSearch(e.target.value)}
               placeholder="Search by name, email, artist..."
-              className="w-full bg-black/60 border border-white/10 rounded-md pl-9 pr-4 py-2 text-xs focus:outline-none focus:border-[#FFD700] text-white font-mono"
+              className="w-full bg-white/[0.03] border border-white/10 rounded-lg pl-10 pr-4 py-2.5 text-xs focus:outline-none focus:border-[#FFD700] focus:ring-1 focus:ring-[#FFD700]/50 text-white font-mono transition-all duration-300 placeholder:text-white/20 shadow-inner"
             />
           </div>
 
@@ -222,7 +222,7 @@ function ApplicationsAdmin() {
             <select
               value={statusFilter}
               onChange={(e) => setStatusFilter(e.target.value)}
-              className="w-full bg-black/60 border border-white/10 rounded-md pl-9 pr-8 py-2 text-xs focus:outline-none focus:border-[#FFD700] text-white font-mono appearance-none cursor-pointer"
+              className="w-full bg-white/[0.03] border border-white/10 rounded-lg pl-10 pr-8 py-2.5 text-xs focus:outline-none focus:border-[#FFD700] focus:ring-1 focus:ring-[#FFD700]/50 text-white font-mono appearance-none cursor-pointer transition-all duration-300 shadow-inner"
             >
               {viewTab === "active" ? (
                 <>
@@ -245,7 +245,7 @@ function ApplicationsAdmin() {
           </span>
           <button
             onClick={() => refetch()}
-            className="p-2 border border-white/10 hover:border-accent hover:text-accent rounded-md transition-colors bg-black/40 text-muted-foreground cursor-pointer"
+            className="p-2.5 border border-white/10 hover:border-[#FFD700] hover:text-[#FFD700] rounded-lg transition-all duration-300 bg-white/[0.02] hover:bg-[#FFD700]/5 hover:shadow-[0_0_15px_rgba(255,215,0,0.15)] text-muted-foreground cursor-pointer"
             title="Refresh Data"
           >
             <RefreshCw className="h-4 w-4" />
@@ -254,23 +254,23 @@ function ApplicationsAdmin() {
       </div>
 
       {/* Luxury A&R Sub-Navigation Tabs */}
-      <div className="flex border-b border-white/5 mb-8 font-mono text-xs relative z-10">
+      <div className="flex border-b border-white/10 mb-8 font-mono text-[10px] relative z-10">
         <button
           onClick={() => { setViewTab("active"); setStatusFilter("All"); }}
-          className={`px-6 py-3 border-b-2 transition-all cursor-pointer uppercase tracking-widest ${
+          className={`px-8 py-3.5 border-b-2 transition-all duration-300 cursor-pointer uppercase tracking-widest ${
             viewTab === "active"
-              ? "border-[#FFD700] text-white font-semibold"
-              : "border-transparent text-muted-foreground hover:text-white"
+              ? "border-[#FFD700] text-[#FFD700] font-bold shadow-[0_4px_15px_-3px_rgba(255,215,0,0.25)] bg-gradient-to-t from-[#FFD700]/10 to-transparent"
+              : "border-transparent text-muted-foreground hover:text-white hover:bg-white/[0.02]"
           }`}
         >
           Active Queue ({countActive})
         </button>
         <button
           onClick={() => { setViewTab("archived"); setStatusFilter("Archived"); }}
-          className={`px-6 py-3 border-b-2 transition-all cursor-pointer uppercase tracking-widest ${
+          className={`px-8 py-3.5 border-b-2 transition-all duration-300 cursor-pointer uppercase tracking-widest ${
             viewTab === "archived"
-              ? "border-[#FFD700] text-white font-semibold"
-              : "border-transparent text-muted-foreground hover:text-white"
+              ? "border-[#FFD700] text-[#FFD700] font-bold shadow-[0_4px_15px_-3px_rgba(255,215,0,0.25)] bg-gradient-to-t from-[#FFD700]/10 to-transparent"
+              : "border-transparent text-muted-foreground hover:text-white hover:bg-white/[0.02]"
           }`}
         >
           Archived Dossiers ({countArchived})
@@ -281,36 +281,37 @@ function ApplicationsAdmin() {
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start relative z-10">
         
         {/* Left Column: Applications Table */}
-        <div className={`glass rounded-xl overflow-hidden shadow-2xl border border-white/5 ${selectedApp ? "lg:col-span-8" : "lg:col-span-12"}`}>
+        <div className={`bg-white/[0.01] rounded-2xl overflow-hidden shadow-2xl border border-white/10 backdrop-blur-xl ${selectedApp ? "lg:col-span-8" : "lg:col-span-12"}`}>
           {isLoading ? (
-            <div className="p-12 text-center text-muted-foreground font-mono text-xs uppercase tracking-[0.2em]">
+            <div className="p-16 text-center text-muted-foreground font-mono text-[10px] uppercase tracking-[0.3em]">
+              <div className="w-6 h-6 border-2 border-[#FFD700]/20 border-t-[#FFD700] rounded-full animate-spin mx-auto mb-4" />
               Fetching applications dossier...
             </div>
           ) : (
             <div className="overflow-x-auto">
               <table className="w-full text-xs text-left">
-                <thead className="bg-secondary/40 text-[9px] uppercase tracking-[0.3em] text-muted-foreground border-b border-border">
+                <thead className="bg-white/[0.03] text-[9px] uppercase tracking-[0.3em] font-mono font-semibold text-white/50 border-b border-white/10">
                   <tr>
-                    <th className="px-5 py-4">Submission Date</th>
-                    <th className="px-5 py-4">Artist Name</th>
-                    <th className="px-5 py-4">Applicant</th>
-                    <th className="px-5 py-4">Status</th>
-                    <th className="px-5 py-4 text-right">Actions</th>
+                    <th className="px-6 py-5">Submission Date</th>
+                    <th className="px-6 py-5">Artist Name</th>
+                    <th className="px-6 py-5">Applicant</th>
+                    <th className="px-6 py-5">Status</th>
+                    <th className="px-6 py-5 text-right">Actions</th>
                   </tr>
                 </thead>
-                <tbody className="divide-y divide-border font-light">
+                <tbody className="divide-y divide-white/5 font-light">
                   {filtered.map((app) => (
                     <tr
                       key={app.id}
-                      className={`hover:bg-white/[0.02] transition-colors ${
-                        selectedApp?.id === app.id ? "bg-white/[0.03] border-l-2 border-accent" : ""
+                      className={`hover:bg-white/[0.04] transition-all duration-200 group ${
+                        selectedApp?.id === app.id ? "bg-white/[0.06] border-l-2 border-[#FFD700]" : "border-l-2 border-transparent"
                       }`}
                     >
-                      <td className="px-5 py-4 text-muted-foreground font-mono">
-                        {new Date(app.submitted_at).toLocaleDateString()} {new Date(app.submitted_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                      <td className="px-6 py-5 text-muted-foreground font-mono text-[10px] uppercase tracking-wider">
+                        {new Date(app.submitted_at).toLocaleDateString()} <span className="opacity-50 ml-1">{new Date(app.submitted_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</span>
                       </td>
-                      <td className="px-5 py-4">
-                        <div className="flex items-center gap-3">
+                      <td className="px-6 py-5">
+                        <div className="flex items-center gap-4">
                           {app.artist_photo_url ? (
                             <div className="h-10 w-10 rounded-md overflow-hidden border border-white/10 shrink-0 bg-zinc-900 shadow-md">
                               <img src={app.artist_photo_url} alt={app.artist_name} className="h-full w-full object-cover" />
@@ -335,19 +336,19 @@ function ApplicationsAdmin() {
                           </div>
                         </div>
                       </td>
-                      <td className="px-5 py-4">
-                        <div className="font-semibold text-white">{app.full_name}</div>
-                        <div className="text-muted-foreground text-[10px] font-mono mt-0.5">{app.email}</div>
+                      <td className="px-6 py-5">
+                        <div className="font-semibold text-white tracking-wide">{app.full_name}</div>
+                        <div className="text-muted-foreground text-[10px] font-mono mt-1">{app.email}</div>
                       </td>
-                      <td className="px-5 py-4">
-                        <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-[9px] font-bold border ${getStatusColor(app.status)}`}>
+                      <td className="px-6 py-5">
+                        <span className={`inline-flex items-center px-2.5 py-1 rounded-md text-[9px] font-bold border uppercase tracking-widest ${getStatusColor(app.status)}`}>
                           {app.status}
                         </span>
                       </td>
-                      <td className="px-5 py-4 text-right space-x-2">
+                      <td className="px-6 py-5 text-right space-x-2">
                         <button
                           onClick={() => setSelectedApp(app)}
-                          className="text-white hover:text-accent hover:bg-white/5 p-2 rounded transition-colors cursor-pointer"
+                          className="text-white/70 hover:text-white hover:bg-white/10 p-2 rounded-md transition-all duration-200 cursor-pointer"
                           title="View Details"
                         >
                           <Eye className="h-4 w-4" />
@@ -396,7 +397,7 @@ function ApplicationsAdmin() {
 
         {/* Right Column: Detailed Application Panel */}
         {selectedApp && (
-          <div className="lg:col-span-4 border border-[#FFD700]/15 bg-white/[0.01] p-6 rounded-xl space-y-6 relative overflow-hidden shadow-2xl backdrop-blur-md">
+          <div className="lg:col-span-4 border border-white/10 bg-white/[0.02] p-8 rounded-2xl space-y-7 relative overflow-hidden shadow-2xl backdrop-blur-xl">
             
             {/* Tech Corner Brackets */}
             <div className="absolute top-3 left-3 w-3 h-3 border-t border-l border-[#FFD700]/30" />
@@ -438,9 +439,9 @@ function ApplicationsAdmin() {
             )}
 
             {/* Title / Identity */}
-            <div className="space-y-1">
-              <span className="text-[9px] font-mono uppercase tracking-[0.3em] text-[#FFD700]">STAGE IDENTITY</span>
-              <h3 className="font-display text-2xl uppercase text-white">{selectedApp.artist_name}</h3>
+            <div className="space-y-1.5">
+              <span className="text-[10px] font-mono uppercase tracking-[0.3em] text-[#FFD700]">STAGE IDENTITY</span>
+              <h3 className="font-display text-3xl uppercase text-white font-black tracking-tight">{selectedApp.artist_name}</h3>
             </div>
 
             {/* Technical Specifications */}
@@ -490,9 +491,9 @@ function ApplicationsAdmin() {
             </div>
 
             {/* Campaign Directives (Bio/Message) */}
-            <div className="space-y-2">
-              <h4 className="font-display text-sm uppercase text-lux-white">Campaign Details</h4>
-              <p className="text-xs text-muted-foreground leading-relaxed font-light bg-black/40 border border-white/5 p-4 rounded-md h-36 overflow-y-auto whitespace-pre-wrap select-text scrollbar-none font-sans">
+            <div className="space-y-3">
+              <h4 className="font-display text-sm uppercase text-lux-white tracking-wide">Campaign Details</h4>
+              <p className="text-xs text-white/70 leading-loose font-light bg-black/60 border border-white/5 p-5 rounded-lg h-40 overflow-y-auto whitespace-pre-wrap select-text scrollbar-none font-sans shadow-inner">
                 {selectedApp.campaign_details || "No campaign directives entered."}
               </p>
             </div>
@@ -502,16 +503,16 @@ function ApplicationsAdmin() {
               <div className="space-y-3 pt-4 border-t border-white/5">
                 <h4 className="font-mono text-[9px] uppercase tracking-widest text-white/30">ADMINISTRATION STATUS ACTION</h4>
                 
-                <div className="grid grid-cols-2 gap-2 font-mono text-[9px]">
+                <div className="grid grid-cols-2 gap-3 font-mono text-[9px]">
                   {["Pending", "Reviewed", "Approved", "Rejected"].map((st) => (
                     <button
                       key={st}
                       disabled={updatingId !== null}
                       onClick={() => handleStatusChange(selectedApp.id, st as any)}
-                      className={`px-3 py-2 border rounded-md uppercase tracking-wider text-center cursor-pointer transition-all ${
+                      className={`px-3 py-2.5 border rounded-lg uppercase tracking-wider text-center cursor-pointer transition-all duration-300 ${
                         selectedApp.status === st
-                          ? "bg-[#FFD700] text-black border-[#FFD700] font-semibold"
-                          : "bg-black/40 border-white/10 text-muted-foreground hover:border-white/20 hover:text-white"
+                          ? "bg-[#FFD700] text-black border-[#FFD700] font-bold shadow-[0_0_15px_rgba(255,215,0,0.3)]"
+                          : "bg-black/40 border-white/10 text-muted-foreground hover:border-white/20 hover:text-white hover:bg-white/[0.05]"
                       }`}
                     >
                       {updatingId === selectedApp.id && selectedApp.status === st ? "Saving..." : (st === "Reviewed" ? "Reviewing" : st)}
