@@ -31,9 +31,16 @@ export function Manifesto() {
         style={{ opacity }}
         className="mx-auto max-w-[1400px] relative z-10"
       >
-        <div className="mb-8 inline-flex items-center gap-2 border border-white/5 bg-white/5 px-3 py-1 rounded-full text-[9px] font-mono uppercase tracking-[0.35em] text-accent">
-          <span className="h-1.5 w-1.5 rounded-full bg-accent animate-pulse shadow-[0_0_8px_var(--color-accent)]" />
-          CORE OBJECTIVE // MANIFESTO
+        <div className="relative mb-8 inline-flex items-center gap-2.5 overflow-hidden rounded-full border border-[#D4AF37]/25 bg-gradient-to-b from-black/80 to-[#111111]/90 px-4 py-1.5 md:px-5 md:py-2 backdrop-blur-md shadow-[0_0_30px_rgba(212,175,55,0.15),inset_0_1px_1px_rgba(212,175,55,0.2)]">
+          {/* Gold sweep effect every 10 seconds */}
+          <div aria-hidden className="pointer-events-none absolute inset-0 z-0">
+             <div className="absolute top-0 -left-[200%] h-full w-[200%] animate-[gold-sweep-loop_10s_infinite_linear] bg-gradient-to-r from-transparent via-[#F4D06F]/15 to-transparent skew-x-[-25deg]" />
+          </div>
+
+          <span className="relative z-10 h-1.5 w-1.5 shrink-0 rounded-full bg-[#D4AF37] animate-pulse shadow-[0_0_10px_#F4D06F,0_0_2px_#D4AF37]" />
+          <span className="relative z-10 pt-[2px] text-[10px] md:text-xs font-mono uppercase tracking-[0.25em] md:tracking-[0.28em] font-medium text-[#C9A227] leading-none drop-shadow-[0_2px_4px_rgba(0,0,0,0.8)]">
+            CORE OBJECTIVE // MANIFESTO
+          </span>
         </div>
         
         <p className="font-display text-4xl uppercase leading-[1.0] text-foreground sm:text-5xl md:text-6xl lg:text-7xl xl:text-8xl tracking-tight text-balance">
