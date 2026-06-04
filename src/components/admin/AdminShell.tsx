@@ -8,7 +8,7 @@ import { Menu, X, LogOut, Users, Image as ImageIcon, Home, Mail, LayoutDashboard
 
 const NAV = [
   { to: "/admin/dashboard", label: "Dashboard", icon: LayoutDashboard, exact: true },
-  { to: "/admin/analytics", label: "Analytics", icon: BarChart3 },
+  { to: "/admin/analytics", label: "Visitor Analytics", icon: BarChart3 },
   { to: "/admin/artists", label: "Artists", icon: Users },
   { to: "/admin/homepage", label: "Homepage", icon: Home },
   { to: "/admin/releases", label: "Releases", icon: Music },

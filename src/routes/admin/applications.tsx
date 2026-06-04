@@ -2,7 +2,8 @@ import { createFileRoute } from "@tanstack/react-router";
 import { AdminShell } from "@/components/admin/AdminShell";
 import { useServerFn } from "@tanstack/react-start";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
-import { useState } from "react";
+import { useState, useEffect, useRef } from "react";
+import { toast } from "sonner";
 import {
   adminListApplications,
   adminUpdateApplicationStatus,
@@ -34,10 +35,32 @@ function ApplicationsAdmin() {
   const deleteFn = useServerFn(adminDeleteApplication);
   const qc = useQueryClient();
 
-  const { data, isLoading, refetch } = useQuery({
+  const { data, isLoading, isFetching, refetch } = useQuery({
     queryKey: ["adm-applications"],
     queryFn: () => listFn(),
+    refetchInterval: 30000,
   });
+
+  const prevCountRef = useRef<number | null>(null);
+
+  useEffect(() => {
+    if (data?.applications) {
+      const currentCount = data.applications.length;
+      if (prevCountRef.current !== null && currentCount > prevCountRef.current) {
+        const diff = currentCount - prevCountRef.current;
+        toast.success(`${diff} New Application${diff > 1 ? 's' : ''} Received`, {
+          description: "The dossier queue has been automatically synced.",
+          style: {
+            background: 'rgba(0,0,0,0.85)',
+            border: '1px solid rgba(255, 215, 0, 0.3)',
+            color: 'white',
+            backdropFilter: 'blur(10px)',
+          }
+        });
+      }
+      prevCountRef.current = currentCount;
+    }
+  }, [data?.applications]);
 
   const [search, setSearch] = useState("");
   const [statusFilter, setStatusFilter] = useState<string>("All");
@@ -198,10 +221,10 @@ function ApplicationsAdmin() {
     <AdminShell title="Artist Applications">
       
       {/* Search and Filters Header */}
-      <div className="flex flex-col md:flex-row gap-4 justify-between items-start md:items-center mb-6">
+      <div className="flex flex-col md:flex-row gap-4 justify-between items-start md:items-center mb-6 w-full">
         <div className="flex flex-col sm:flex-row gap-3 w-full md:w-auto">
           {/* Search Input */}
-          <div className="relative flex-1 sm:w-80">
+          <div className="relative w-full sm:w-80">
             <span className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-muted-foreground">
               <Search className="h-4 w-4" />
             </span>
@@ -215,7 +238,7 @@ function ApplicationsAdmin() {
           </div>
 
           {/* Status Filter */}
-          <div className="relative sm:w-56">
+          <div className="relative w-full sm:w-56">
             <span className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-muted-foreground">
               <Filter className="h-4 w-4" />
             </span>
@@ -239,22 +262,31 @@ function ApplicationsAdmin() {
           </div>
         </div>
 
-        <div className="flex items-center gap-3">
+        <div className="flex items-center gap-3 w-full md:w-auto justify-between md:justify-end">
           <span className="text-xs font-mono text-muted-foreground">
             {filtered.length} of {viewTab === "active" ? countActive : countArchived} filtered
           </span>
           <button
             onClick={() => refetch()}
-            className="p-2.5 border border-white/10 hover:border-[#FFD700] hover:text-[#FFD700] rounded-lg transition-all duration-300 bg-white/[0.02] hover:bg-[#FFD700]/5 hover:shadow-[0_0_15px_rgba(255,215,0,0.15)] text-muted-foreground cursor-pointer"
-            title="Refresh Data"
+            disabled={isFetching}
+            className={`group relative flex items-center gap-2 px-5 py-2.5 border rounded-lg transition-all duration-300 cursor-pointer overflow-hidden ${
+              isFetching 
+                ? "border-[#FFD700]/50 bg-[#FFD700]/10 text-[#FFD700] shadow-[0_0_20px_rgba(255,215,0,0.2)] scale-95"
+                : "border-white/10 hover:border-[#FFD700]/80 bg-white/[0.02] hover:bg-[#FFD700]/10 hover:shadow-[0_0_25px_rgba(255,215,0,0.25)] hover:scale-[1.02] text-muted-foreground hover:text-[#FFD700]"
+            }`}
+            title="Refresh Dossiers"
           >
-            <RefreshCw className="h-4 w-4" />
+            <RefreshCw className={`h-4 w-4 transition-transform duration-700 ${isFetching ? "animate-spin text-[#FFD700]" : "group-hover:rotate-180"}`} />
+            <span className="font-mono text-[10px] uppercase tracking-widest font-bold">
+              {isFetching ? "Syncing..." : "Sync"}
+            </span>
+            <div className="absolute inset-0 bg-gradient-to-r from-transparent via-[#FFD700]/10 to-transparent translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-1000 ease-in-out" />
           </button>
         </div>
       </div>
 
       {/* Luxury A&R Sub-Navigation Tabs */}
-      <div className="flex border-b border-white/10 mb-8 font-mono text-[10px] relative z-10">
+      <div className="flex border-b border-white/10 mb-6 md:mb-8 font-mono text-[10px] relative z-10 w-full overflow-x-auto whitespace-nowrap scrollbar-none">
         <button
           onClick={() => { setViewTab("active"); setStatusFilter("All"); }}
           className={`px-8 py-3.5 border-b-2 transition-all duration-300 cursor-pointer uppercase tracking-widest ${
@@ -288,109 +320,204 @@ function ApplicationsAdmin() {
               Fetching applications dossier...
             </div>
           ) : (
-            <div className="overflow-x-auto">
-              <table className="w-full text-xs text-left">
-                <thead className="bg-white/[0.03] text-[9px] uppercase tracking-[0.3em] font-mono font-semibold text-white/50 border-b border-white/10">
-                  <tr>
-                    <th className="px-6 py-5">Submission Date</th>
-                    <th className="px-6 py-5">Artist Name</th>
-                    <th className="px-6 py-5">Applicant</th>
-                    <th className="px-6 py-5">Status</th>
-                    <th className="px-6 py-5 text-right">Actions</th>
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-white/5 font-light">
-                  {filtered.map((app) => (
-                    <tr
-                      key={app.id}
-                      className={`hover:bg-white/[0.04] transition-all duration-200 group ${
-                        selectedApp?.id === app.id ? "bg-white/[0.06] border-l-2 border-[#FFD700]" : "border-l-2 border-transparent"
-                      }`}
-                    >
-                      <td className="px-6 py-5 text-muted-foreground font-mono text-[10px] uppercase tracking-wider">
-                        {new Date(app.submitted_at).toLocaleDateString()} <span className="opacity-50 ml-1">{new Date(app.submitted_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</span>
-                      </td>
-                      <td className="px-6 py-5">
-                        <div className="flex items-center gap-4">
-                          {app.artist_photo_url ? (
-                            <div className="h-10 w-10 rounded-md overflow-hidden border border-white/10 shrink-0 bg-zinc-900 shadow-md">
-                              <img src={app.artist_photo_url} alt={app.artist_name} className="h-full w-full object-cover" />
-                            </div>
-                          ) : (
-                            <div className="h-10 w-10 rounded-md border border-white/5 bg-zinc-950/50 flex items-center justify-center shrink-0 font-mono text-[9px] text-zinc-600">
-                              NO IMG
-                            </div>
-                          )}
-                          <div>
-                            <span className="font-display font-medium text-lux-white text-sm uppercase block leading-tight">{app.artist_name}</span>
-                            {app.spotify_link && (
-                              <a
-                                href={app.spotify_link}
-                                target="_blank"
-                                rel="noreferrer"
-                                className="inline-flex items-center gap-0.5 text-accent hover:underline text-[9px] font-mono block mt-0.5"
-                              >
-                                Spotify Link <ArrowUpRight className="h-2.5 w-2.5" />
-                              </a>
-                            )}
-                          </div>
-                        </div>
-                      </td>
-                      <td className="px-6 py-5">
-                        <div className="font-semibold text-white tracking-wide">{app.full_name}</div>
-                        <div className="text-muted-foreground text-[10px] font-mono mt-1">{app.email}</div>
-                      </td>
-                      <td className="px-6 py-5">
-                        <span className={`inline-flex items-center px-2.5 py-1 rounded-md text-[9px] font-bold border uppercase tracking-widest ${getStatusColor(app.status)}`}>
-                          {app.status}
-                        </span>
-                      </td>
-                      <td className="px-6 py-5 text-right space-x-2">
-                        <button
-                          onClick={() => setSelectedApp(app)}
-                          className="text-white/70 hover:text-white hover:bg-white/10 p-2 rounded-md transition-all duration-200 cursor-pointer"
-                          title="View Details"
-                        >
-                          <Eye className="h-4 w-4" />
-                        </button>
-                        {viewTab === "active" ? (
-                          <button
-                            onClick={() => handleArchive(app.id)}
-                            className="text-[#FFD700]/70 hover:text-[#FFD700] hover:bg-white/5 p-2 rounded transition-colors cursor-pointer"
-                            title="Archive Submission"
-                          >
-                            <Archive className="h-4 w-4" />
-                          </button>
-                        ) : (
-                          <>
-                            <button
-                              onClick={() => handleRestore(app.id)}
-                              className="text-green-400/70 hover:text-green-400 hover:bg-white/5 p-2 rounded transition-colors cursor-pointer"
-                              title="Restore Submission"
-                            >
-                              <RotateCcw className="h-4 w-4" />
-                            </button>
-                            <button
-                              onClick={() => handleRemove(app.id)}
-                              className="text-red-500/70 hover:text-red-500 hover:bg-white/5 p-2 rounded transition-colors cursor-pointer"
-                              title="Permanently Delete"
-                            >
-                              <Trash2 className="h-4 w-4" />
-                            </button>
-                          </>
-                        )}
-                      </td>
-                    </tr>
-                  ))}
-                  {filtered.length === 0 && (
+            <div className="w-full">
+              {/* Desktop Table View */}
+              <div className="hidden md:block overflow-x-auto">
+                <table className="w-full text-xs text-left">
+                  <thead className="bg-white/[0.03] text-[9px] uppercase tracking-[0.3em] font-mono font-semibold text-white/50 border-b border-white/10">
                     <tr>
-                      <td colSpan={5} className="px-5 py-12 text-center text-muted-foreground font-mono">
-                        No applications matched filters.
-                      </td>
+                      <th className="px-6 py-5">Submission Date</th>
+                      <th className="px-6 py-5">Artist Name</th>
+                      <th className="px-6 py-5">Applicant</th>
+                      <th className="px-6 py-5">Status</th>
+                      <th className="px-6 py-5 text-right">Actions</th>
                     </tr>
-                  )}
-                </tbody>
-              </table>
+                  </thead>
+                  <tbody className="divide-y divide-white/5 font-light">
+                    {filtered.map((app) => (
+                      <tr
+                        key={app.id}
+                        className={`hover:bg-white/[0.04] transition-all duration-200 group ${
+                          selectedApp?.id === app.id ? "bg-white/[0.06] border-l-2 border-[#FFD700]" : "border-l-2 border-transparent"
+                        }`}
+                      >
+                        <td className="px-6 py-5 text-muted-foreground font-mono text-[10px] uppercase tracking-wider">
+                          {new Date(app.submitted_at).toLocaleDateString()} <span className="opacity-50 ml-1">{new Date(app.submitted_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</span>
+                        </td>
+                        <td className="px-6 py-5">
+                          <div className="flex items-center gap-4">
+                            {app.artist_photo_url ? (
+                              <div className="h-10 w-10 rounded-md overflow-hidden border border-white/10 shrink-0 bg-zinc-900 shadow-md">
+                                <img src={app.artist_photo_url} alt={app.artist_name} className="h-full w-full object-cover" />
+                              </div>
+                            ) : (
+                              <div className="h-10 w-10 rounded-md border border-white/5 bg-zinc-950/50 flex items-center justify-center shrink-0 font-mono text-[9px] text-zinc-600">
+                                NO IMG
+                              </div>
+                            )}
+                            <div>
+                              <span className="font-display font-medium text-lux-white text-sm uppercase block leading-tight">{app.artist_name}</span>
+                              {app.spotify_link && (
+                                <a
+                                  href={app.spotify_link}
+                                  target="_blank"
+                                  rel="noreferrer"
+                                  className="inline-flex items-center gap-0.5 text-accent hover:underline text-[9px] font-mono block mt-0.5"
+                                >
+                                  Spotify Link <ArrowUpRight className="h-2.5 w-2.5" />
+                                </a>
+                              )}
+                            </div>
+                          </div>
+                        </td>
+                        <td className="px-6 py-5">
+                          <div className="font-semibold text-white tracking-wide">{app.full_name}</div>
+                          <div className="text-muted-foreground text-[10px] font-mono mt-1">{app.email}</div>
+                        </td>
+                        <td className="px-6 py-5">
+                          <span className={`inline-flex items-center px-2.5 py-1 rounded-md text-[9px] font-bold border uppercase tracking-widest ${getStatusColor(app.status)}`}>
+                            {app.status}
+                          </span>
+                        </td>
+                        <td className="px-6 py-5 text-right space-x-2">
+                          <button
+                            onClick={() => setSelectedApp(app)}
+                            className="text-white/70 hover:text-white hover:bg-white/10 p-2 rounded-md transition-all duration-200 cursor-pointer"
+                            title="View Details"
+                          >
+                            <Eye className="h-4 w-4" />
+                          </button>
+                          {viewTab === "active" ? (
+                            <button
+                              onClick={() => handleArchive(app.id)}
+                              className="text-[#FFD700]/70 hover:text-[#FFD700] hover:bg-white/5 p-2 rounded transition-colors cursor-pointer"
+                              title="Archive Submission"
+                            >
+                              <Archive className="h-4 w-4" />
+                            </button>
+                          ) : (
+                            <>
+                              <button
+                                onClick={() => handleRestore(app.id)}
+                                className="text-green-400/70 hover:text-green-400 hover:bg-white/5 p-2 rounded transition-colors cursor-pointer"
+                                title="Restore Submission"
+                              >
+                                <RotateCcw className="h-4 w-4" />
+                              </button>
+                              <button
+                                onClick={() => handleRemove(app.id)}
+                                className="text-red-500/70 hover:text-red-500 hover:bg-white/5 p-2 rounded transition-colors cursor-pointer"
+                                title="Permanently Delete"
+                              >
+                                <Trash2 className="h-4 w-4" />
+                              </button>
+                            </>
+                          )}
+                        </td>
+                      </tr>
+                    ))}
+                    {filtered.length === 0 && (
+                      <tr>
+                        <td colSpan={5} className="px-5 py-12 text-center text-muted-foreground font-mono">
+                          No applications matched filters.
+                        </td>
+                      </tr>
+                    )}
+                  </tbody>
+                </table>
+              </div>
+
+              {/* Mobile Cards View */}
+              <div className="md:hidden flex flex-col divide-y divide-white/5">
+                {filtered.map((app) => (
+                  <div 
+                    key={app.id} 
+                    className={`p-5 flex flex-col gap-5 transition-all duration-200 ${
+                      selectedApp?.id === app.id ? "bg-white/[0.06] border-l-2 border-[#FFD700]" : "border-l-2 border-transparent hover:bg-white/[0.02]"
+                    }`}
+                  >
+                    <div className="flex justify-between items-center">
+                      <span className="text-muted-foreground font-mono text-[10px] uppercase tracking-wider">
+                        {new Date(app.submitted_at).toLocaleDateString()}
+                      </span>
+                      <span className={`inline-flex items-center px-2.5 py-1 rounded-md text-[9px] font-bold border uppercase tracking-widest ${getStatusColor(app.status)}`}>
+                        {app.status}
+                      </span>
+                    </div>
+
+                    <div className="flex items-center gap-4">
+                      {app.artist_photo_url ? (
+                        <div className="h-14 w-14 rounded-md overflow-hidden border border-white/10 shrink-0 bg-zinc-900 shadow-md">
+                          <img src={app.artist_photo_url} alt={app.artist_name} className="h-full w-full object-cover" />
+                        </div>
+                      ) : (
+                        <div className="h-14 w-14 rounded-md border border-white/5 bg-zinc-950/50 flex items-center justify-center shrink-0 font-mono text-[9px] text-zinc-600">
+                          NO IMG
+                        </div>
+                      )}
+                      <div className="flex-1 min-w-0">
+                        <span className="font-display font-medium text-lux-white text-base uppercase block leading-tight truncate">{app.artist_name}</span>
+                        {app.spotify_link && (
+                          <a
+                            href={app.spotify_link}
+                            target="_blank"
+                            rel="noreferrer"
+                            className="inline-flex items-center gap-0.5 text-accent hover:underline text-[9px] font-mono mt-1"
+                          >
+                            Spotify Link <ArrowUpRight className="h-2.5 w-2.5" />
+                          </a>
+                        )}
+                      </div>
+                    </div>
+
+                    <div className="bg-white/[0.02] rounded-lg p-3.5 border border-white/5">
+                      <div className="font-semibold text-white tracking-wide text-xs truncate">{app.full_name}</div>
+                      <div className="text-muted-foreground text-[10px] font-mono mt-1 truncate">{app.email}</div>
+                    </div>
+
+                    <div className="flex items-center justify-end gap-3 pt-2 border-t border-white/5">
+                      <button
+                        onClick={() => setSelectedApp(app)}
+                        className="text-white hover:text-white bg-white/5 hover:bg-white/10 p-3 rounded-lg transition-all duration-200 cursor-pointer flex-1 flex justify-center items-center"
+                        title="View Details"
+                      >
+                        <Eye className="h-4 w-4" />
+                      </button>
+                      {viewTab === "active" ? (
+                        <button
+                          onClick={() => handleArchive(app.id)}
+                          className="text-[#FFD700] bg-[#FFD700]/5 hover:bg-[#FFD700]/10 p-3 rounded-lg transition-colors cursor-pointer flex-1 flex justify-center items-center"
+                          title="Archive Submission"
+                        >
+                          <Archive className="h-4 w-4" />
+                        </button>
+                      ) : (
+                        <>
+                          <button
+                            onClick={() => handleRestore(app.id)}
+                            className="text-green-400 bg-green-500/5 hover:bg-green-500/10 p-3 rounded-lg transition-colors cursor-pointer flex-1 flex justify-center items-center"
+                            title="Restore Submission"
+                          >
+                            <RotateCcw className="h-4 w-4" />
+                          </button>
+                          <button
+                            onClick={() => handleRemove(app.id)}
+                            className="text-red-500 bg-red-500/5 hover:bg-red-500/10 p-3 rounded-lg transition-colors cursor-pointer flex-1 flex justify-center items-center"
+                            title="Permanently Delete"
+                          >
+                            <Trash2 className="h-4 w-4" />
+                          </button>
+                        </>
+                      )}
+                    </div>
+                  </div>
+                ))}
+                {filtered.length === 0 && (
+                  <div className="p-8 text-center text-muted-foreground font-mono text-xs">
+                    No applications matched filters.
+                  </div>
+                )}
+              </div>
             </div>
           )}
         </div>

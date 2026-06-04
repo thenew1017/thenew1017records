@@ -796,6 +796,166 @@ export const adminGetFounderSpotlight = createServerFn({ method: "GET" })
     return { data };
   });
 
+export const adminRegenerateAdminTokens = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .handler(async ({ context }) => {
+    const admin = await assertAdmin(context.userId, context.supabase);
+    await logActivity(context.userId, "admin_security_token_refresh", {});
+    return { ok: true };
+  });
+
+export const adminGetVisitorAnalytics = createServerFn({ method: "GET" })
+  .middleware([requireSupabaseAuth])
+  .handler(async ({ context }) => {
+    const admin = await assertAdmin(context.userId, context.supabase);
+    
+    const now = Date.now();
+    // Fetch last 30 days of data
+    const since30 = new Date(now - 30 * 24 * 60 * 60 * 1000).toISOString();
+    const since1 = new Date(now - 24 * 60 * 60 * 1000).toISOString();
+    const activeThreshold = new Date(now - 5 * 60 * 1000).toISOString();
+
+    const { data: sessions, error: sErr } = await admin
+      .from("artist_sessions")
+      .select("*")
+      .gte("last_seen", since30);
+
+    const { data: artistsData, error: aErr } = await admin
+      .from("artists")
+      .select("id,name");
+
+    const { data: views, error: vErr } = await admin
+      .from("artist_views")
+      .select("artist_id,created_at,source")
+      .gte("created_at", since30);
+
+    if (sErr || aErr || vErr) {
+      throw new Error("Failed to fetch analytics data");
+    }
+
+    // Process overview
+    const totalVisitors = sessions?.length || 0;
+    const activeVisitors = sessions?.filter(s => s.last_seen >= activeThreshold).length || 0;
+    const newVisitorsToday = sessions?.filter(s => s.first_seen >= since1).length || 0;
+    const returningVisitors = sessions?.filter(s => {
+      const first = new Date(s.first_seen).getTime();
+      const last = new Date(s.last_seen).getTime();
+      return (last - first) > 24 * 60 * 60 * 1000;
+    }).length || 0;
+
+    const totalVisits = sessions?.reduce((acc, s) => acc + (s.view_count || 1), 0) || 0;
+
+    let avgSessionDuration = 0;
+    let durationCount = 0;
+    sessions?.forEach(s => {
+      const first = new Date(s.first_seen).getTime();
+      const last = new Date(s.last_seen).getTime();
+      if (last > first) {
+        avgSessionDuration += (last - first);
+        durationCount++;
+      }
+    });
+    if (durationCount > 0) {
+      avgSessionDuration = avgSessionDuration / durationCount; // in MS
+    }
+
+    // Process Geography & Devices from user_agent
+    const geoMap = new Map<string, number>();
+    let mobile = 0, desktop = 0, tablet = 0;
+
+    sessions?.forEach(s => {
+      const ua = s.user_agent || "";
+      if (ua.match(/Mobile|Android|iP(hone|od)|IEMobile|BlackBerry|Kindle|Silk-Accelerated|(hpw|web)OS|Opera M(obi|ini)/)) {
+        if (ua.match(/tablet|ipad|playbook|silk/i)) tablet++;
+        else mobile++;
+      } else {
+        desktop++;
+      }
+
+      const geoMatch = ua.match(/\[GEO:(.*?)\]/);
+      if (geoMatch && geoMatch[1]) {
+        const loc = geoMatch[1].trim();
+        geoMap.set(loc, (geoMap.get(loc) || 0) + 1);
+      } else {
+        geoMap.set("Unknown", (geoMap.get("Unknown") || 0) + 1);
+      }
+    });
+
+    const geography = Array.from(geoMap.entries())
+      .map(([location, count]) => ({ location, count }))
+      .sort((a, b) => b.count - a.count)
+      .slice(0, 10);
+
+    // Process Top Pages (Artists & Generic Pages)
+    const artistNameMap = new Map<string, string>();
+    artistsData?.forEach(a => artistNameMap.set(a.id, a.name));
+
+    const pageViewCount = new Map<string, number>();
+    views?.forEach(v => {
+      if (v.source?.startsWith("page:")) {
+        const path = v.source.replace("page:", "");
+        pageViewCount.set(path, (pageViewCount.get(path) || 0) + 1);
+      } else {
+        const name = artistNameMap.get(v.artist_id) || "Unknown Artist";
+        pageViewCount.set(name, (pageViewCount.get(name) || 0) + 1);
+      }
+    });
+
+    const topPages = Array.from(pageViewCount.entries())
+      .map(([name, count]) => ({ name, count }))
+      .sort((a, b) => b.count - a.count)
+      .slice(0, 10);
+
+    // Traffic Charts (Daily)
+    const days: { date: string; visitors: number; views: number }[] = [];
+    const byDay = new Map<string, { visitors: number; views: number }>();
+    for (let i = 29; i >= 0; i--) {
+      const d = new Date(now - i * 24 * 60 * 60 * 1000);
+      const key = d.toISOString().slice(0, 10);
+      byDay.set(key, { visitors: 0, views: 0 });
+    }
+    
+    sessions?.forEach(s => {
+      const k = s.first_seen.slice(0, 10);
+      const e = byDay.get(k);
+      if (e) e.visitors += 1;
+    });
+
+    views?.forEach(v => {
+      const k = v.created_at.slice(0, 10);
+      const e = byDay.get(k);
+      if (e) e.views += 1;
+    });
+
+    for (const [date, v] of byDay) days.push({ date, ...v });
+
+    return {
+      overview: {
+        totalVisitors,
+        totalVisits,
+        returningVisitors,
+        newVisitorsToday,
+        activeVisitors,
+        avgSessionDuration,
+      },
+      geography,
+      device: { mobile, desktop, tablet },
+      topPages,
+      traffic: days,
+      visitors: sessions?.map(s => {
+        const geoMatch = (s.user_agent || "").match(/\[GEO:(.*?)\]/);
+        return {
+          id: s.session_id,
+          country: geoMatch ? geoMatch[1].split(',')[0] : "Unknown",
+          device: (s.user_agent || "").match(/tablet|ipad/i) ? "Tablet" : (s.user_agent || "").match(/Mobile/) ? "Mobile" : "Desktop",
+          first_visit: s.first_seen,
+          last_visit: s.last_seen,
+          visit_count: s.view_count || 1
+        };
+      }).sort((a, b) => new Date(b.last_visit).getTime() - new Date(a.last_visit).getTime()) || []
+    };
+  });
+
 export const adminSaveFounderSpotlight = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((input: unknown) => {

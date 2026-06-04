@@ -140,9 +140,17 @@ function RootShell({ children }: { children: React.ReactNode }) {
 }
 
 import { PageTransitionProvider, PageTransitionOverlay } from "@/components/ui/PageTransition";
+import { Toaster } from "sonner";
+import { useEffect } from "react";
+import { trackPage } from "@/lib/analytics";
 
 function RootComponent() {
   const { queryClient } = Route.useRouteContext();
+  const router = useRouter();
+
+  useEffect(() => {
+    trackPage();
+  }, [router.state.location.pathname]);
 
   return (
     <QueryClientProvider client={queryClient}>
@@ -150,6 +158,7 @@ function RootComponent() {
         <Outlet />
         <PageTransitionOverlay />
       </PageTransitionProvider>
+      <Toaster position="bottom-right" theme="dark" />
     </QueryClientProvider>
   );
 }

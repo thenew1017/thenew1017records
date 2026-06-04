@@ -24,23 +24,66 @@ export function getSessionId(): string {
 }
 
 let sessionEnsured = false;
+let cachedGeo = "";
+
+async function getGeoString() {
+  if (cachedGeo) return cachedGeo;
+  try {
+    const res = await fetch("https://get.geojs.io/v1/ip/geo.json");
+    if (res.ok) {
+      const data = await res.json();
+      if (data.country && data.city) {
+        cachedGeo = `[GEO:${data.country}, ${data.city}]`;
+        return cachedGeo;
+      }
+    }
+  } catch {
+    /* ignore network errors for tracking */
+  }
+  return "[GEO:Unknown, Unknown]";
+}
 
 export async function ensureSession() {
   if (sessionEnsured || typeof window === "undefined") return;
   sessionEnsured = true;
   const session_id = getSessionId();
   try {
+    const geo = await getGeoString();
+    const uaBase = navigator.userAgent?.slice(0, 200) ?? "Unknown";
+    const user_agent = `${uaBase} ${geo}`;
+    
     await supabase.from("artist_sessions").upsert(
       {
         session_id,
         last_seen: new Date().toISOString(),
-        user_agent: navigator.userAgent?.slice(0, 255) ?? null,
+        user_agent,
         referrer: document.referrer?.slice(0, 500) || null,
       },
       { onConflict: "session_id", ignoreDuplicates: false },
     );
   } catch {
     /* tracking is best-effort */
+  }
+}
+
+export async function trackPage() {
+  if (typeof window === "undefined") return;
+  await ensureSession();
+  try {
+    const path = window.location.pathname;
+    // Debounce basic page views so we don't spam db on fast navigation
+    const lastTrack = sessionStorage.getItem(`track_${path}`);
+    if (lastTrack && Date.now() - parseInt(lastTrack) < 5000) return;
+    sessionStorage.setItem(`track_${path}`, Date.now().toString());
+
+    await supabase.from("artist_views").insert({
+      artist_id: "00000000-0000-0000-0000-000000000000", // Generic UUID for pages
+      session_id: getSessionId(),
+      source: `page:${path}`,
+    });
+    void bumpSession("view_count");
+  } catch {
+    // best-effort
   }
 }
 
