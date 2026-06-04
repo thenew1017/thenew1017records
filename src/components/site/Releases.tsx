@@ -600,7 +600,7 @@ export function Releases({ settings }: { settings?: Record<string, any> }) {
                           <span className="text-white/20 font-black tracking-widest text-[9px] ml-auto font-mono">1017 SIGNATURE DISK</span>
                         </p>
 
-                        {renderFeaturedStats(r, hasStats)}
+
 
                         {r.description && (
                           <p className="text-xs font-mono text-muted-foreground/80 leading-relaxed max-w-2xl border-l-2 border-red-500/20 pl-4 py-0.5 uppercase tracking-[0.08em]">
@@ -731,7 +731,7 @@ export function Releases({ settings }: { settings?: Record<string, any> }) {
                         <span className="text-white/20 font-black tracking-widest text-[9px] ml-auto font-mono">1017 SIGNATURE DISK</span>
                       </p>
 
-                      {renderFeaturedStats(r, hasStats)}
+
 
                       {r.description && (
                         <p className="text-xs font-mono text-muted-foreground/80 leading-relaxed max-w-2xl border-l-2 border-red-500/20 pl-4 py-0.5 uppercase tracking-[0.08em]">

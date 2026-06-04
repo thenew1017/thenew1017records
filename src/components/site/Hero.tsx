@@ -18,8 +18,8 @@ type HeroSettings = {
 
 const HERO_FALLBACK: HeroSettings = {
   eyebrow: "Est. 2017",
-  title: "A New Era of Sound",
-  subtitle: "Where Culture, Talent And Legacy Converge.",
+  title: "The New Standard in Global Music",
+  subtitle: "Defining the Future of Culture.",
   banner_url: "",
 };
 
@@ -79,29 +79,7 @@ export function Hero({ settings }: { settings?: Record<string, any> }) {
             {hero.subtitle}
           </motion.p>
 
-          {/* Curated stats indicators - luxury music layout */}
-          <motion.div 
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            transition={{ delay: 0.3, duration: 0.9 }}
-            className="mt-8 grid grid-cols-3 gap-6 font-mono text-[9px] uppercase tracking-[0.2em] text-zinc-500 border-t border-b border-white/5 py-4 w-full max-w-xl text-left bg-transparent rounded-none backdrop-blur-none"
-          >
-            <div>
-              <span className="block text-zinc-600 mb-1 font-bold">ROSTER</span>
-              <span className="text-white font-semibold">1017 ALUMNI</span>
-            </div>
-            <div>
-              <span className="block text-zinc-600 mb-1 font-bold">NETWORKS</span>
-              <span className="text-white font-semibold">GLOBAL DSPs</span>
-            </div>
-            <div>
-              <span className="block text-zinc-600 mb-1 font-bold">A&R STATUS</span>
-              <span className="text-white font-semibold flex items-center gap-1.5">
-                <span className="h-1.5 w-1.5 rounded-full bg-green-500 animate-pulse" />
-                ACTIVE QUEUE
-              </span>
-            </div>
-          </motion.div>
+
 
           {/* Dual Action CTAs */}
           <motion.div
@@ -110,12 +88,12 @@ export function Hero({ settings }: { settings?: Record<string, any> }) {
             transition={{ delay: 0.4, duration: 0.9 }}
             className="mt-14 lg:mt-16 flex flex-col sm:flex-row items-center justify-center lg:justify-start gap-5 w-full sm:w-auto"
           >
-            {/* Primary APPLY FOR REVIEW Button */}
+            {/* Primary Submit Button */}
             <TransitionLink
               to="/about-1017"
               className="relative w-full sm:w-auto overflow-hidden inline-flex items-center justify-center bg-[#E5D5C0] hover:bg-[#F1E5D1] text-black px-10 py-4.5 text-[10px] sm:text-xs font-bold uppercase tracking-[0.3em] transition-all duration-500 hover:scale-[1.01] active:scale-[0.99] hover:shadow-[0_12px_30px_rgba(229,213,192,0.12)] rounded-[32px] text-center border border-[#E5D5C0]/20"
             >
-              APPLY FOR REVIEW
+              SUBMIT YOUR SOUND
             </TransitionLink>
 
             {/* Secondary VIEW ROSTER Button */}
@@ -187,8 +165,8 @@ function LogoEmblem({ displayBanner, title }: { displayBanner: string; title: st
     const rect = cardRef.current.getBoundingClientRect();
     const x = e.clientX - rect.left - rect.width / 2;
     const y = e.clientY - rect.top - rect.height / 2;
-    setRotateX(-y / (rect.height / 15));
-    setRotateY(x / (rect.width / 15));
+    setRotateX(-y / (rect.height / 6));
+    setRotateY(x / (rect.width / 6));
   };
 
   const handleMouseLeave = () => {

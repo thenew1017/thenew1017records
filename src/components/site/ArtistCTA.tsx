@@ -37,7 +37,7 @@ export function ArtistCTA() {
             style={{ fontFamily: "'Bebas Neue', sans-serif" }}
             className="text-6xl sm:text-7xl md:text-8xl lg:text-[8rem] uppercase leading-[0.8] text-white font-black tracking-wide"
           >
-            The Next Artist <span className="text-stroke font-black block sm:inline">Could Be You</span>
+            Define the Next Generation <span className="text-stroke font-black block sm:inline">Of Sound</span>
           </motion.h2>
 
           {/* Elegant descriptive subheadline */}
@@ -48,8 +48,8 @@ export function ArtistCTA() {
             transition={{ delay: 0.2, duration: 0.8 }}
             className="max-w-xl text-zinc-300 text-sm sm:text-base leading-relaxed tracking-wide font-light border-t border-white/5 pt-6 mt-4"
           >
-            Exceptional talent deserves exceptional opportunities. <br className="hidden sm:inline" />
-            Submit your profile for evaluation by our discovery network scouts.
+            We are always listening for the next wave of independent talent. <br className="hidden sm:inline" />
+            Submit your unreleased tracks and let's shape the culture.
           </motion.p>
         </div>
 
@@ -66,7 +66,7 @@ export function ArtistCTA() {
             to="/about-1017"
             className="relative w-full sm:w-auto overflow-hidden inline-flex items-center justify-center bg-[#E5D5C0] hover:bg-[#F1E5D1] text-black px-10 py-5 text-[10px] sm:text-xs font-bold uppercase tracking-[0.3em] transition-all duration-500 hover:scale-[1.03] active:scale-[0.98] hover:shadow-[0_12px_35px_rgba(229,213,192,0.18)] rounded-full text-center border border-[#E5D5C0]/20 min-w-[240px]"
           >
-            APPLY FOR REVIEW
+            SUBMIT YOUR SOUND
           </TransitionLink>
 
           {/* Secondary Action Button */}

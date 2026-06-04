@@ -97,12 +97,10 @@ export function Nav() {
     return () => media.removeEventListener("change", listener);
   }, []);
 
-  // Scroll logic for premium Apple-like header transformation
+  // Scroll logic for premium persistent header
   useMotionValueEvent(scrollY, "change", (y) => {
     setScrolled(y > 20);
-    // Hide header on down-scroll past 160px, reveal instantly on scroll-up
-    if (y > last && y > 160) setHidden(true);
-    else setHidden(false);
+    setHidden(false);
     setLast(y);
   });
 
@@ -268,18 +266,18 @@ export function Nav() {
             
             {/* Outline Secondary CTA (Inner Circle) */}
             <a
-              href="#artist-cta"
+              href="#artists"
               className="inline-flex items-center justify-center border border-white/10 hover:border-lux-gold bg-white/5 hover:bg-white/[0.08] text-white/80 hover:text-white px-5 py-2.5 text-[9px] font-bold uppercase tracking-[0.25em] transition-all duration-300 active:scale-[0.98] rounded-full"
             >
-              Inner Circle
+              View Roster
             </a>
 
-            {/* Premium Gold Gradient Primary CTA (Apply for Review) */}
+            {/* Premium Gold Gradient Primary CTA */}
             <TransitionLink
               to="/about-1017"
               className="relative overflow-hidden inline-flex items-center justify-center bg-gradient-to-r from-[#E5D5C0] via-[#F1E5D1] to-[#C9B9A5] text-black px-6 py-2.5 text-[9px] font-black uppercase tracking-[0.25em] transition-all duration-300 hover:scale-[1.03] active:scale-[0.98] hover:shadow-[0_0_20px_rgba(229,213,192,0.35)] rounded-full"
             >
-              Apply for Review
+              Submit Your Sound
             </TransitionLink>
           </motion.div>
 
@@ -372,11 +370,11 @@ export function Nav() {
               
               <div className="grid grid-cols-2 gap-4 cta-buttons">
                 <a
-                  href="#artist-cta"
+                  href="#artists"
                   onClick={() => setOpen(false)}
                   className="text-center border border-white/10 hover:border-lux-gold bg-white/5 py-4 text-[9px] font-bold uppercase tracking-[0.25em] text-white rounded-full transition-all duration-300"
                 >
-                  Inner Circle
+                  View Roster
                 </a>
                 
                 <TransitionLink
@@ -384,7 +382,7 @@ export function Nav() {
                   onClick={() => setOpen(false)}
                   className="text-center bg-gradient-to-r from-[#E5D5C0] via-[#F1E5D1] to-[#C9B9A5] py-4 text-[9px] font-black uppercase tracking-[0.25em] text-black rounded-full transition-all duration-300"
                 >
-                  Apply for Review
+                  Submit Your Sound
                 </TransitionLink>
               </div>
             </motion.div>

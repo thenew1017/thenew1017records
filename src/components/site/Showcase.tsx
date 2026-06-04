@@ -20,7 +20,7 @@ const SHOWCASE_DEFAULT: ShowcaseSetting = {
   image_url: "",
   title: "Turn Your Music",
   subtitle: "Into Momentum.",
-  description: "Submit your sound, build your audience, and connect with opportunities across the modern music industry.",
+  description: "Submit your demos. Connect with a team that puts the artist first, and take your music to the world.",
   button_label: "Submit Your Sound",
   button_url: "/about-1017"
 };
@@ -186,7 +186,7 @@ export function Showcase({ settings }: { settings?: Record<string, any> }) {
               { k: "2017", v: "Established" },
               { k: "13+", v: "Artists Signed" },
               { k: "40M", v: "Monthly Listeners" },
-              { k: "∞", v: "The Energy" },
+              { k: "1B+", v: "Global Streams" },
             ].map((s, i) => (
               <motion.div
                 key={s.v}

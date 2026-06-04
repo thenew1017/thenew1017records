@@ -105,8 +105,8 @@ export function CinematicArtistImage({
     const normX = (x / rect.width) - 0.5;
     const normY = (y / rect.height) - 0.5;
     
-    setRotateX(-normY * 9);
-    setRotateY(normX * 9);
+    setRotateX(-normY * 3);
+    setRotateY(normX * 3);
     
     setLightX((x / rect.width) * 100);
     setLightY((y / rect.height) * 100);
@@ -188,7 +188,7 @@ export function CinematicArtistImage({
         className="relative w-full h-full rounded-sm transition-all duration-300 ease-out will-change-transform transform-gpu artist-photo-container artist-photo-inner"
         style={{
           transform: (isHovered && !isMobile) 
-            ? `rotateX(${rotateX}deg) rotateY(${rotateY}deg) scale3d(1.06, 1.06, 1.06) translateZ(0)` 
+            ? `rotateX(${rotateX}deg) rotateY(${rotateY}deg) scale3d(1.02, 1.02, 1.02) translateZ(0)` 
             : "rotateX(0deg) rotateY(0deg) scale3d(1, 1, 1) translateZ(0)",
           boxShadow: (isHovered && !isMobile)
             ? "0 25px 50px -12px rgba(0, 0, 0, 0.75), 0 0 35px rgba(255, 255, 255, 0.04)"
