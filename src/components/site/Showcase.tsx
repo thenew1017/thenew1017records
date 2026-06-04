@@ -175,26 +175,49 @@ export function Showcase({ settings }: { settings?: Record<string, any> }) {
         </div>
       </div>
 
-      <div className="border-y border-white/5 bg-[#000000]">
-        <div className="mx-auto grid max-w-[1600px] grid-cols-2 divide-x divide-white/5 md:grid-cols-4">
-          {[
-            { k: "2017", v: "Established" },
-            { k: "13+", v: "Artists Signed" },
-            { k: "40M", v: "Monthly Listeners" },
-            { k: "∞", v: "The Energy" },
-          ].map((s, i) => (
-            <motion.div
-              key={s.v}
-              initial={{ opacity: 0, y: 20 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
-              transition={{ duration: 0.6, delay: i * 0.08 }}
-              className="px-6 py-10 md:px-10 md:py-14"
-            >
-              <p className="font-display text-4xl uppercase leading-none md:text-6xl">{s.k}</p>
-              <p className="mt-3 text-[10px] font-semibold uppercase tracking-[0.35em] text-muted-foreground">{s.v}</p>
-            </motion.div>
-          ))}
+      <div className="relative border-b border-white/[0.04] bg-[#000000] px-4 py-8 md:px-10 md:py-12 overflow-hidden">
+        {/* Subtle gold ambient glow in the background */}
+        <div aria-hidden className="absolute -left-1/4 top-1/2 -z-10 h-[500px] w-[500px] -translate-y-1/2 rounded-full bg-[#E5D5C0]/[0.015] blur-[150px] pointer-events-none" />
+        <div aria-hidden className="absolute -right-1/4 top-1/2 -z-10 h-[500px] w-[500px] -translate-y-1/2 rounded-full bg-[#E5D5C0]/[0.01] blur-[150px] pointer-events-none" />
+
+        <div className="mx-auto max-w-[1600px]">
+          <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6">
+            {[
+              { k: "2017", v: "Established" },
+              { k: "13+", v: "Artists Signed" },
+              { k: "40M", v: "Monthly Listeners" },
+              { k: "∞", v: "The Energy" },
+            ].map((s, i) => (
+              <motion.div
+                key={s.v}
+                initial={{ opacity: 0, y: 30 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true, margin: "-50px" }}
+                transition={{ duration: 0.8, delay: i * 0.1, ease: [0.16, 1, 0.3, 1] }}
+                whileHover={{ scale: 1.02, y: -4 }}
+                className="group relative overflow-hidden rounded-lg bg-white/[0.01] hover:bg-white/[0.03] backdrop-blur-md border border-white/[0.05] hover:border-[#E5D5C0]/20 p-6 py-10 md:p-8 md:py-12 transition-all duration-500 shadow-[0_12px_30px_rgba(0,0,0,0.5)] hover:shadow-[0_20px_40px_rgba(229,213,192,0.04)] gold-sweep-slow"
+              >
+                {/* Accent mini corner lines for a premium, custom engineered tech/luxury look */}
+                <div className="absolute top-2 left-2 w-2 h-2 border-t border-l border-white/[0.08] group-hover:border-[#E5D5C0]/40 transition-colors duration-500" />
+                <div className="absolute top-2 right-2 w-2 h-2 border-t border-r border-white/[0.08] group-hover:border-[#E5D5C0]/40 transition-colors duration-500" />
+                <div className="absolute bottom-2 left-2 w-2 h-2 border-b border-l border-white/[0.08] group-hover:border-[#E5D5C0]/40 transition-colors duration-500" />
+                <div className="absolute bottom-2 right-2 w-2 h-2 border-b border-r border-white/[0.08] group-hover:border-[#E5D5C0]/40 transition-colors duration-500" />
+
+                {/* Subtle soft gold spotlight reflection on hover */}
+                <div className="pointer-events-none absolute inset-0 -z-10 bg-[radial-gradient(circle_at_center,rgba(229,213,192,0.02),transparent_70%)] opacity-0 group-hover:opacity-100 transition-opacity duration-700" />
+
+                {/* Stat Number - Dominant focal point */}
+                <h3 className="font-display text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-black tracking-tight text-white group-hover:text-gradient-gold transition-all duration-500 leading-none">
+                  {s.k}
+                </h3>
+                
+                {/* Stat Label - Secondary metadata */}
+                <p className="mt-4 text-[9px] sm:text-[10px] font-medium font-mono uppercase tracking-[0.3em] text-muted-foreground group-hover:text-[#E5D5C0]/80 transition-colors duration-500">
+                  {s.v}
+                </p>
+              </motion.div>
+            ))}
+          </div>
         </div>
       </div>
     </section>

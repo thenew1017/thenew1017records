@@ -423,4 +423,76 @@
   }
 }
 
+/* Luxury Gold Light Sweep Animation */
+.gold-sweep-container {
+  position: relative;
+  overflow: hidden;
+}
+.gold-sweep-container::after {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: -150%;
+  width: 50%;
+  height: 100%;
+  background: linear-gradient(
+    to right,
+    rgba(229, 213, 192, 0) 0%,
+    rgba(229, 213, 192, 0.08) 50%,
+    rgba(229, 213, 192, 0) 100%
+  );
+  transform: skewX(-25deg);
+  pointer-events: none;
+}
+.gold-sweep-container:hover::after {
+  animation: gold-sweep-anim 1.5s ease-in-out;
+}
+
+@keyframes gold-sweep-anim {
+  0% {
+    left: -150%;
+  }
+  100% {
+    left: 150%;
+  }
+}
+
+/* Infinite slow sweep for ambient feel */
+.gold-sweep-slow {
+  position: relative;
+  overflow: hidden;
+}
+.gold-sweep-slow::after {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: -150%;
+  width: 60%;
+  height: 100%;
+  background: linear-gradient(
+    to right,
+    rgba(229, 213, 192, 0) 0%,
+    rgba(229, 213, 192, 0.03) 30%,
+    rgba(229, 213, 192, 0.1) 50%,
+    rgba(229, 213, 192, 0.03) 70%,
+    rgba(229, 213, 192, 0) 100%
+  );
+  transform: skewX(-25deg);
+  pointer-events: none;
+  animation: gold-sweep-loop 8s infinite linear;
+}
+
+@keyframes gold-sweep-loop {
+  0% {
+    left: -200%;
+  }
+  30% {
+    left: 150%;
+  }
+  100% {
+    left: 150%;
+  }
+}
+
+
 

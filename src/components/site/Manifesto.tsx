@@ -10,13 +10,16 @@ export function Manifesto() {
   const words = "A new era of sound. Built in the dark, delivered to the world.".split(" ");
 
   return (
-    <section id="manifesto" ref={ref} className="relative overflow-hidden px-6 py-44 md:px-10 border-t border-white/5">
+    <section id="manifesto" ref={ref} className="relative overflow-hidden px-6 pt-16 pb-28 md:px-10 md:pt-20 md:pb-40">
+      {/* Top subtle fading gradient to blend from statistics section */}
+      <div aria-hidden className="pointer-events-none absolute inset-x-0 top-0 h-32 bg-gradient-to-b from-[#000000] via-[#000000]/60 to-transparent" />
+
       {/* Gigantic backing 1017 watermark */}
       <motion.div
         style={{ y }}
         className="pointer-events-none absolute inset-0 -z-10 flex items-center justify-center select-none"
       >
-        <span className="font-display text-[26vw] uppercase leading-none text-white/[0.015] font-black tracking-tighter">
+        <span className="font-display text-[26vw] uppercase leading-none text-white/[0.012] font-black tracking-tighter">
           1017
         </span>
       </motion.div>
