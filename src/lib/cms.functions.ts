@@ -815,39 +815,36 @@ export const adminGetVisitorAnalytics = createServerFn({ method: "GET" })
     const since1 = new Date(now - 24 * 60 * 60 * 1000).toISOString();
     const activeThreshold = new Date(now - 5 * 60 * 1000).toISOString();
 
-    const { data: sessions, error: sErr } = await admin
-      .from("artist_sessions")
-      .select("*")
-      .gte("last_seen", since30);
+    const { data: siteSettings, error: sErr } = await admin
+      .from("site_settings")
+      .select("value")
+      .like("key", "analytics:session:%");
 
     const { data: artistsData, error: aErr } = await admin
       .from("artists")
       .select("id,name");
 
-    const { data: views, error: vErr } = await admin
-      .from("artist_views")
-      .select("artist_id,created_at,source")
-      .gte("created_at", since30);
-
-    if (sErr || aErr || vErr) {
+    if (sErr || aErr) {
       throw new Error("Failed to fetch analytics data");
     }
 
+    const sessions = (siteSettings || []).map(s => s.value as any).filter(s => s && s.first_seen >= since30);
+
     // Process overview
-    const totalVisitors = sessions?.length || 0;
-    const activeVisitors = sessions?.filter(s => s.last_seen >= activeThreshold).length || 0;
-    const newVisitorsToday = sessions?.filter(s => s.first_seen >= since1).length || 0;
-    const returningVisitors = sessions?.filter(s => {
+    const totalVisitors = sessions.length;
+    const activeVisitors = sessions.filter(s => s.last_seen >= activeThreshold).length;
+    const newVisitorsToday = sessions.filter(s => s.first_seen >= since1).length;
+    const returningVisitors = sessions.filter(s => {
       const first = new Date(s.first_seen).getTime();
       const last = new Date(s.last_seen).getTime();
       return (last - first) > 24 * 60 * 60 * 1000;
-    }).length || 0;
+    }).length;
 
-    const totalVisits = sessions?.reduce((acc, s) => acc + (s.view_count || 1), 0) || 0;
+    const totalVisits = sessions.reduce((acc, s) => acc + (s.view_count || 1), 0);
 
     let avgSessionDuration = 0;
     let durationCount = 0;
-    sessions?.forEach(s => {
+    sessions.forEach(s => {
       const first = new Date(s.first_seen).getTime();
       const last = new Date(s.last_seen).getTime();
       if (last > first) {
@@ -863,7 +860,7 @@ export const adminGetVisitorAnalytics = createServerFn({ method: "GET" })
     const geoMap = new Map<string, number>();
     let mobile = 0, desktop = 0, tablet = 0;
 
-    sessions?.forEach(s => {
+    sessions.forEach(s => {
       const ua = s.user_agent || "";
       if (ua.match(/Mobile|Android|iP(hone|od)|IEMobile|BlackBerry|Kindle|Silk-Accelerated|(hpw|web)OS|Opera M(obi|ini)/)) {
         if (ua.match(/tablet|ipad|playbook|silk/i)) tablet++;
@@ -891,13 +888,17 @@ export const adminGetVisitorAnalytics = createServerFn({ method: "GET" })
     artistsData?.forEach(a => artistNameMap.set(a.id, a.name));
 
     const pageViewCount = new Map<string, number>();
-    views?.forEach(v => {
-      if (v.source?.startsWith("page:")) {
-        const path = v.source.replace("page:", "");
-        pageViewCount.set(path, (pageViewCount.get(path) || 0) + 1);
-      } else {
-        const name = artistNameMap.get(v.artist_id) || "Unknown Artist";
-        pageViewCount.set(name, (pageViewCount.get(name) || 0) + 1);
+    
+    sessions.forEach(s => {
+      if (s.pages && typeof s.pages === 'object') {
+        Object.entries(s.pages).forEach(([path, count]) => {
+          let name = path;
+          if (path.startsWith("artist:")) {
+            const id = path.replace("artist:", "");
+            name = artistNameMap.get(id) || "Unknown Artist";
+          }
+          pageViewCount.set(name, (pageViewCount.get(name) || 0) + (count as number));
+        });
       }
     });
 
@@ -915,16 +916,13 @@ export const adminGetVisitorAnalytics = createServerFn({ method: "GET" })
       byDay.set(key, { visitors: 0, views: 0 });
     }
     
-    sessions?.forEach(s => {
-      const k = s.first_seen.slice(0, 10);
+    sessions.forEach(s => {
+      const k = s.first_seen?.slice(0, 10);
       const e = byDay.get(k);
-      if (e) e.visitors += 1;
-    });
-
-    views?.forEach(v => {
-      const k = v.created_at.slice(0, 10);
-      const e = byDay.get(k);
-      if (e) e.views += 1;
+      if (e) {
+        e.visitors += 1;
+        e.views += (s.view_count || 1);
+      }
     });
 
     for (const [date, v] of byDay) days.push({ date, ...v });
@@ -942,7 +940,7 @@ export const adminGetVisitorAnalytics = createServerFn({ method: "GET" })
       device: { mobile, desktop, tablet },
       topPages,
       traffic: days,
-      visitors: sessions?.map(s => {
+      visitors: sessions.map(s => {
         const geoMatch = (s.user_agent || "").match(/\[GEO:(.*?)\]/);
         return {
           id: s.session_id,
@@ -952,7 +950,7 @@ export const adminGetVisitorAnalytics = createServerFn({ method: "GET" })
           last_visit: s.last_seen,
           visit_count: s.view_count || 1
         };
-      }).sort((a, b) => new Date(b.last_visit).getTime() - new Date(a.last_visit).getTime()) || []
+      }).sort((a, b) => new Date(b.last_visit).getTime() - new Date(a.last_visit).getTime())
     };
   });
 

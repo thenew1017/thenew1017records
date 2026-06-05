@@ -43,100 +43,87 @@ async function getGeoString() {
   return "[GEO:Unknown, Unknown]";
 }
 
-export async function ensureSession() {
-  if (sessionEnsured || typeof window === "undefined") return;
-  sessionEnsured = true;
+async function updateSession(updater: (val: any) => void) {
+  if (typeof window === "undefined") return;
   const session_id = getSessionId();
+  const key = `analytics:session:${session_id}`;
   try {
-    const geo = await getGeoString();
-    const uaBase = navigator.userAgent?.slice(0, 200) ?? "Unknown";
-    const user_agent = `${uaBase} ${geo}`;
-    
-    await supabase.from("artist_sessions").upsert(
-      {
+    const { data } = await supabase
+      .from("site_settings")
+      .select("value")
+      .eq("key", key)
+      .maybeSingle();
+
+    let val: any = data?.value;
+
+    if (!val || typeof val !== 'object') {
+      const geo = await getGeoString();
+      const uaBase = navigator.userAgent?.slice(0, 200) ?? "Unknown";
+      val = {
         session_id,
+        first_seen: new Date().toISOString(),
         last_seen: new Date().toISOString(),
-        user_agent,
+        user_agent: `${uaBase} ${geo}`,
         referrer: document.referrer?.slice(0, 500) || null,
-      },
-      { onConflict: "session_id", ignoreDuplicates: false },
+        view_count: 0,
+        click_count: 0,
+        hover_count: 0,
+        pages: {}
+      };
+    }
+
+    updater(val);
+    val.last_seen = new Date().toISOString();
+
+    await supabase.from("site_settings").upsert(
+      { key, value: val },
+      { onConflict: "key" }
     );
   } catch {
     /* tracking is best-effort */
   }
 }
 
+export async function ensureSession() {
+  if (sessionEnsured || typeof window === "undefined") return;
+  sessionEnsured = true;
+  await updateSession(() => {});
+}
+
 export async function trackPage() {
   if (typeof window === "undefined") return;
   await ensureSession();
-  try {
-    const path = window.location.pathname;
-    // Debounce basic page views so we don't spam db on fast navigation
-    const lastTrack = sessionStorage.getItem(`track_${path}`);
-    if (lastTrack && Date.now() - parseInt(lastTrack) < 5000) return;
-    sessionStorage.setItem(`track_${path}`, Date.now().toString());
+  
+  const path = window.location.pathname;
+  // Debounce basic page views so we don't spam db on fast navigation
+  const lastTrack = sessionStorage.getItem(`track_${path}`);
+  if (lastTrack && Date.now() - parseInt(lastTrack) < 5000) return;
+  sessionStorage.setItem(`track_${path}`, Date.now().toString());
 
-    await supabase.from("artist_views").insert({
-      artist_id: "00000000-0000-0000-0000-000000000000", // Generic UUID for pages
-      session_id: getSessionId(),
-      source: `page:${path}`,
-    });
-    void bumpSession("view_count");
-  } catch {
-    // best-effort
-  }
-}
-
-async function bumpSession(field: "view_count" | "click_count" | "hover_count") {
-  if (typeof window === "undefined") return;
-  const session_id = getSessionId();
-  try {
-    const { data } = await supabase
-      .from("artist_sessions")
-      .select("view_count,click_count,hover_count")
-      .eq("session_id", session_id)
-      .maybeSingle();
-    const current = (data?.[field] as number | null) ?? 0;
-    const patch =
-      field === "view_count"
-        ? { view_count: current + 1, last_seen: new Date().toISOString() }
-        : field === "click_count"
-        ? { click_count: current + 1, last_seen: new Date().toISOString() }
-        : { hover_count: current + 1, last_seen: new Date().toISOString() };
-    await supabase.from("artist_sessions").update(patch).eq("session_id", session_id);
-  } catch {
-    /* best-effort */
-  }
+  await updateSession((val) => {
+    val.view_count = (val.view_count || 0) + 1;
+    val.pages = val.pages || {};
+    val.pages[path] = (val.pages[path] || 0) + 1;
+  });
 }
 
 export async function trackView(artistId: string, source = "card") {
   if (typeof window === "undefined" || !artistId) return;
   await ensureSession();
-  try {
-    await supabase.from("artist_views").insert({
-      artist_id: artistId,
-      session_id: getSessionId(),
-      source,
-    });
-    void bumpSession("view_count");
-  } catch {
-    /* best-effort */
-  }
+  await updateSession((val) => {
+    val.view_count = (val.view_count || 0) + 1;
+    val.pages = val.pages || {};
+    const p = `artist:${artistId}`;
+    val.pages[p] = (val.pages[p] || 0) + 1;
+  });
 }
 
 export async function trackClick(artistId: string, link_type: string) {
   if (typeof window === "undefined" || !artistId) return;
   await ensureSession();
-  try {
-    await supabase.from("artist_clicks").insert({
-      artist_id: artistId,
-      session_id: getSessionId(),
-      link_type,
-    });
-    void bumpSession("click_count");
-  } catch {
-    /* best-effort */
-  }
+  await updateSession((val) => {
+    val.click_count = (val.click_count || 0) + 1;
+  });
 }
 
 // Hover tracking is debounced per-artist to avoid spam
@@ -147,5 +134,8 @@ export function trackHover(artistId: string) {
   const last = hoverDebounce.get(artistId) ?? 0;
   if (now - last < 1500) return;
   hoverDebounce.set(artistId, now);
-  void bumpSession("hover_count");
+  
+  void updateSession((val) => {
+    val.hover_count = (val.hover_count || 0) + 1;
+  });
 }
