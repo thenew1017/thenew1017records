@@ -80,7 +80,7 @@ export function Nav() {
 
   const handleContactClick = (e: React.MouseEvent) => {
     e.preventDefault();
-    window.location.href = "mailto:1017recordsoffcial@gmail.com";
+    window.location.href = "mailto:contact@thenew1017records.us";
   };
 
   const [last, setLast] = useState(0);
@@ -205,7 +205,7 @@ export function Nav() {
               const linkContent = isContact ? (
                  <a
                    key={l.href}
-                   href="mailto:1017recordsoffcial@gmail.com"
+                   href="mailto:contact@thenew1017records.us"
                    onClick={handleContactClick}
                    className="relative py-2 text-[11px] font-bold uppercase tracking-[0.25em] text-white/45 hover:text-white transition-colors duration-300 select-none cursor-pointer"
                 >
@@ -328,7 +328,7 @@ export function Nav() {
                      transition={{ delay: i * 0.04, duration: 0.6, ease: [0.16, 1, 0.3, 1] }}
                    >
                       <a
-                        href={isContact ? "mailto:1017recordsoffcial@gmail.com" : l.href}
+                        href={isContact ? "mailto:contact@thenew1017records.us" : l.href}
                         onClick={(e) => {
                           if (isContact) {
                             handleContactClick(e);

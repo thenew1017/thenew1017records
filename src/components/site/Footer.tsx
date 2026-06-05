@@ -50,7 +50,7 @@ export function Footer() {
             </a>
 
             <a
-              href="mailto:1017recordsoffcial@gmail.com"
+              href="mailto:contact@thenew1017records.us"
               aria-label="Email"
               title="Email"
               onMouseEnter={() => setIsEmailHovered(true)}
