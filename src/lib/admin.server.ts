@@ -74,9 +74,14 @@ export function getAdminClient() {
 export async function assertAdmin(userId: string, customClient?: any, userEmail?: string) {
   const admin = customClient || getAdminClient();
   
-  // Whitelist admin emails
+  // Whitelist admin emails and IDs
   const normalizedEmail = userEmail?.toLowerCase()?.trim();
-  if (normalizedEmail === "contact@thenew1017records.us" || normalizedEmail === "contact2@thenew1017records.us" || normalizedEmail === "armyking1428@gmail.com") {
+  if (
+    normalizedEmail === "contact@thenew1017records.us" || 
+    normalizedEmail === "contact2@thenew1017records.us" || 
+    normalizedEmail === "armyking1428@gmail.com" ||
+    userId === "cd45b27d-7cce-47fe-8457-2cf5c098bb3f" // contact@thenew1017records.us fallback
+  ) {
     return admin;
   }
 
