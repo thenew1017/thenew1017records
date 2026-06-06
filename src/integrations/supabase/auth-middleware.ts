@@ -4,10 +4,27 @@ import { createClient } from '@supabase/supabase-js'
 import type { Database } from './types'
 import { supabase } from './client'
 
+// Global token cache to prevent concurrent getSession() race conditions
+let cachedToken: string | null = null;
+
+if (typeof window !== 'undefined') {
+  // Passively sync token
+  supabase.auth.getSession().then(({ data }) => {
+    cachedToken = data.session?.access_token || null;
+  });
+  supabase.auth.onAuthStateChange((_event, session) => {
+    cachedToken = session?.access_token || null;
+  });
+}
+
 export const requireSupabaseAuth = createMiddleware({ type: 'function' })
   .client(async ({ next }) => {
-    const { data } = await supabase.auth.getSession()
-    const token = data.session?.access_token
+    let token = cachedToken;
+    if (!token) {
+      const { data } = await supabase.auth.getSession();
+      token = data.session?.access_token || null;
+      cachedToken = token;
+    }
     return next({
       headers: token ? { Authorization: `Bearer ${token}` } : {},
     })
