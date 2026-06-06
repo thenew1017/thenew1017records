@@ -95,9 +95,13 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
       { name: "author", content: "The New 1017 Records" },
       { name: "theme-color", content: "#000000" },
       { property: "og:title", content: "The New 1017 Records" },
-      { property: "og:description", content: "A new era of sound." },
+      { property: "og:description", content: "Official Artist Applications Open" },
       { property: "og:type", content: "website" },
+      { property: "og:image", content: "https://vveslmalxlprmlfcdjae.supabase.co/storage/v1/object/public/media/founder/spotlight-1780301297380.jpg" },
       { name: "twitter:card", content: "summary_large_image" },
+      { name: "twitter:title", content: "The New 1017 Records" },
+      { name: "twitter:description", content: "Official Artist Applications Open" },
+      { name: "twitter:image", content: "https://vveslmalxlprmlfcdjae.supabase.co/storage/v1/object/public/media/founder/spotlight-1780301297380.jpg" },
     ],
     links: [
       {

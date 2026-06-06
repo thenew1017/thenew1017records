@@ -37,12 +37,8 @@ export const Route = createFileRoute("/")({
   },
   head: () => ({
     meta: [
-      { title: "The New 1017 Records — A New Era of Sound" },
-      { name: "description", content: "Official home of The New 1017 Records. Discover the roster, latest releases, tour dates and the official store." },
-      { property: "og:title", content: "The New 1017 Records" },
-      { property: "og:description", content: "A new era of sound — artists, releases and merchandise." },
-      { property: "og:type", content: "website" },
-      { property: "og:url", content: "/" },
+      { title: "The New 1017 Records" },
+      { name: "description", content: "Official Artist Applications Open" },
     ],
     links: [{ rel: "canonical", href: "/" }],
   }),
