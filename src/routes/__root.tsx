@@ -89,8 +89,8 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
   head: () => ({
     meta: [
       { charSet: "utf-8" },
+      { title: "The Official Website Of The New 1017 Records" },
       { name: "viewport", content: "width=device-width, initial-scale=1" },
-      { title: "The New 1017 Records" },
       { name: "description", content: "Official home of The New 1017 Records — artists, releases, artist discovery system and the official store." },
       { name: "author", content: "The New 1017 Records" },
       { name: "theme-color", content: "#000000" },
