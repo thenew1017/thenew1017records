@@ -33,7 +33,7 @@ export function AdminShell({ children, title }: { children: ReactNode; title: st
       navigate({ to: "/admin/login" });
       return;
     }
-    check({ token: session?.access_token })
+    check({ data: { token: session?.access_token } })
       .then((r) => setAuthState(r.isAdmin ? "ok" : "denied"))
       .catch((err) => {
         console.error("checkIsAdmin failed:", err);
