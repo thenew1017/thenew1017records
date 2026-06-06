@@ -15,7 +15,7 @@ import {
 
 export const Route = createFileRoute("/admin/analytics")({
   component: AnalyticsAdmin,
-  head: () => ({ meta: [{ title: "Admin · Visitor Analytics" }, { name: "robots", content: "noindex" }] }),
+  head: () => ({ meta: [{ name: "robots", content: "noindex" }] }),
 });
 
 function formatDuration(ms: number) {

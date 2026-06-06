@@ -7,7 +7,7 @@ import { Trash2, Download } from "lucide-react";
 
 export const Route = createFileRoute("/admin/subscribers")({
   component: SubsAdmin,
-  head: () => ({ meta: [{ title: "Admin · Subscribers" }, { name: "robots", content: "noindex" }] }),
+  head: () => ({ meta: [{ name: "robots", content: "noindex" }] }),
 });
 
 function SubsAdmin() {

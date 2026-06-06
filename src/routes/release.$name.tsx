@@ -340,7 +340,6 @@ export const Route = createFileRoute("/release/$name")({
     const release = loaderData?.release;
     return {
       meta: [
-        { title: release ? `${release.title} — ${release.artist} | The New 1017 Records` : "Release Signature Locked — The New 1017 Records" },
         { name: "description", content: release?.description || "High-fidelity release campaign dossier catalog portal." },
         { property: "og:title", content: release ? `${release.title} — ${release.artist}` : "Release Profile" },
         { property: "og:description", content: release?.description || "High-fidelity release campaign dossier catalog portal." },

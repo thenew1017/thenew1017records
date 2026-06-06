@@ -37,7 +37,6 @@ export const Route = createFileRoute("/")({
   },
   head: () => ({
     meta: [
-      { title: "The New 1017 Records" },
       { name: "description", content: "Official Artist Applications Open" },
     ],
     links: [{ rel: "canonical", href: "/" }],

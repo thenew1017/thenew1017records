@@ -35,7 +35,6 @@ export const Route = createFileRoute("/about-1017")({
   },
   head: () => ({
     meta: [
-      { title: "Artist Recruitment Portal — The New 1017 Records" },
       { name: "description", content: "Submit your sound to the elite artist recruitment portal overseen by Gucci Mane's 1017 Records network." },
       { property: "og:title", content: "Artist Recruitment Portal — The New 1017 Records" },
       { property: "og:description", content: "Join the talent pipeline responsible for launching independent creators into global recognition." },

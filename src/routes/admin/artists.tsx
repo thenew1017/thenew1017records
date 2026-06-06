@@ -16,7 +16,7 @@ import { Plus, Pencil, Trash2, Upload, X, Image, Star, ArrowUp, ArrowDown } from
 
 export const Route = createFileRoute("/admin/artists")({
   component: ArtistsAdmin,
-  head: () => ({ meta: [{ title: "Admin · Artists" }, { name: "robots", content: "noindex" }] }),
+  head: () => ({ meta: [{ name: "robots", content: "noindex" }] }),
 });
 
 type Artist = {

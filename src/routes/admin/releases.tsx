@@ -9,7 +9,7 @@ import { Plus, Pencil, Trash2, Upload, X, Search, ChevronUp, ChevronDown, Music,
 
 export const Route = createFileRoute("/admin/releases")({
   component: ReleasesAdmin,
-  head: () => ({ meta: [{ title: "Admin · Release Manager" }, { name: "robots", content: "noindex" }] }),
+  head: () => ({ meta: [{ name: "robots", content: "noindex" }] }),
 });
 
 export type BadgeTemplate = {

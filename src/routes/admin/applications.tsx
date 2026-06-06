@@ -13,7 +13,7 @@ import { Trash2, Eye, Search, Filter, RefreshCw, X, ArrowUpRight, Archive, Rotat
 
 export const Route = createFileRoute("/admin/applications")({
   component: ApplicationsAdmin,
-  head: () => ({ meta: [{ title: "Admin · Applications" }, { name: "robots", content: "noindex" }] }),
+  head: () => ({ meta: [{ name: "robots", content: "noindex" }] }),
 });
 
 type Application = {

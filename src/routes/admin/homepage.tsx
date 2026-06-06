@@ -9,7 +9,7 @@ import { Upload } from "lucide-react";
 
 export const Route = createFileRoute("/admin/homepage")({
   component: HomepageAdmin,
-  head: () => ({ meta: [{ title: "Admin · Homepage" }, { name: "robots", content: "noindex" }] }),
+  head: () => ({ meta: [{ name: "robots", content: "noindex" }] }),
 });
 
 type Hero = { eyebrow: string; title: string; subtitle: string; cta_label: string; cta_href: string; banner_url: string };

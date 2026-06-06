@@ -7,7 +7,7 @@ import { Users, Mail, Image as ImageIcon, Home, BarChart3 } from "lucide-react";
 
 export const Route = createFileRoute("/admin/dashboard")({
   component: Dashboard,
-  head: () => ({ meta: [{ title: "Admin · Dashboard" }, { name: "robots", content: "noindex" }] }),
+  head: () => ({ meta: [{ name: "robots", content: "noindex" }] }),
 });
 
 function Dashboard() {

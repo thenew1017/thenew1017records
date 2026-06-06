@@ -9,7 +9,7 @@ import { Upload, Trash2, Copy, Check } from "lucide-react";
 
 export const Route = createFileRoute("/admin/media")({
   component: MediaAdmin,
-  head: () => ({ meta: [{ title: "Admin · Media" }, { name: "robots", content: "noindex" }] }),
+  head: () => ({ meta: [{ name: "robots", content: "noindex" }] }),
 });
 
 function MediaAdmin() {

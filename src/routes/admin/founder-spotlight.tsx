@@ -9,7 +9,7 @@ import { Upload } from "lucide-react";
 
 export const Route = createFileRoute("/admin/founder-spotlight")({
   component: FounderSpotlightAdmin,
-  head: () => ({ meta: [{ title: "Admin · Founder Spotlight" }, { name: "robots", content: "noindex" }] }),
+  head: () => ({ meta: [{ name: "robots", content: "noindex" }] }),
 });
 
 type FounderSpotlightData = {

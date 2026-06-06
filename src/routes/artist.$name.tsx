@@ -31,7 +31,6 @@ export const Route = createFileRoute("/artist/$name")({
     const artist = loaderData?.artist;
     return {
       meta: [
-        { title: artist ? `${artist.name} — The New 1017 Records` : "Artist Profile — The New 1017 Records" },
         { name: "description", content: artist?.bio || "Decrypted artist profile and discography database." },
         { property: "og:title", content: artist ? `${artist.name} — The New 1017 Records` : "Artist Profile" },
         { property: "og:description", content: artist?.bio || "Decrypted artist profile and discography database." },
