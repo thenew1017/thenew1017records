@@ -1,6 +1,6 @@
 async function run() {
   const url = "https://vveslmalxlprmlfcdjae.supabase.co/auth/v1/token?grant_type=password";
-  const apiKey = "sb_publishable_jjJ_rgamG9H9cTmsq176qA__qlPZSE6";
+  const apiKey = process.env.VITE_SUPABASE_ANON_KEY || "";
   
   console.log(`Sending POST to: ${url}`);
   try {
@@ -11,8 +11,8 @@ async function run() {
         "apikey": apiKey
       },
       body: JSON.stringify({
-        email: "armyking1428@gmail.com",
-        password: "4*nk%Dw6$KkwBp"
+        email: process.env.ADMIN_EMAIL || "",
+        password: process.env.ADMIN_PASSWORD || ""
       })
     });
     

@@ -4,6 +4,7 @@ import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 import { assertAdmin, getAdminClient, getClientIp, logActivity } from "./admin.server";
 import { rateLimit } from "./rate-limit";
 import { supabase } from "@/integrations/supabase/client";
+import { Resend } from "resend";
 
 type Json = string | number | boolean | null | { [k: string]: Json } | Json[];
 
@@ -148,7 +149,7 @@ export const subscribeNewsletter = createServerFn({ method: "POST" })
 export const adminListArtists = createServerFn({ method: "GET" })
   .middleware([requireSupabaseAuth])
   .handler(async ({ context }) => {
-    const admin = await assertAdmin(context.userId, context.supabase);
+    const admin = await assertAdmin(context.userId, context.supabase, context.userEmail);
     const { data, error } = await admin.from("artists").select("*").order("sort_order").order("created_at");
     if (error) throw new Error(error.message);
     return { artists: data ?? [] };
@@ -158,7 +159,7 @@ export const adminUpsertArtist = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((input: unknown) => ArtistSchema.parse(input))
   .handler(async ({ data, context }) => {
-    const admin = await assertAdmin(context.userId, context.supabase);
+    const admin = await assertAdmin(context.userId, context.supabase, context.userEmail);
     if (data.id) {
       const { id, ...rest } = data;
       const { error } = await admin.from("artists").update(rest).eq("id", id);
@@ -180,7 +181,7 @@ export const adminDeleteArtist = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((input: unknown) => z.object({ id: z.string().uuid() }).parse(input))
   .handler(async ({ data, context }) => {
-    const admin = await assertAdmin(context.userId, context.supabase);
+    const admin = await assertAdmin(context.userId, context.supabase, context.userEmail);
     const { error } = await admin.from("artists").delete().eq("id", data.id);
     if (error) throw new Error(error.message);
     clearPublicCaches();
@@ -192,7 +193,7 @@ export const adminDeleteArtist = createServerFn({ method: "POST" })
 export const adminGetSettings = createServerFn({ method: "GET" })
   .middleware([requireSupabaseAuth])
   .handler(async ({ context }) => {
-    const admin = await assertAdmin(context.userId, context.supabase);
+    const admin = await assertAdmin(context.userId, context.supabase, context.userEmail);
     const { data, error } = await admin.from("site_settings").select("key,value");
     if (error) throw new Error(error.message);
     const map: Record<string, Json> = {};
@@ -209,7 +210,7 @@ export const adminSetSetting = createServerFn({ method: "POST" })
     }).parse(input),
   )
   .handler(async ({ data, context }) => {
-    const admin = await assertAdmin(context.userId, context.supabase);
+    const admin = await assertAdmin(context.userId, context.supabase, context.userEmail);
     const { error } = await admin
       .from("site_settings")
       .upsert({ key: data.key, value: data.value as Json }, { onConflict: "key" });
@@ -223,7 +224,7 @@ export const adminSetSetting = createServerFn({ method: "POST" })
 export const adminListSubscribers = createServerFn({ method: "GET" })
   .middleware([requireSupabaseAuth])
   .handler(async ({ context }) => {
-    const admin = await assertAdmin(context.userId, context.supabase);
+    const admin = await assertAdmin(context.userId, context.supabase, context.userEmail);
     const { data, error } = await admin
       .from("newsletter_subscribers")
       .select("*")
@@ -236,7 +237,7 @@ export const adminDeleteSubscriber = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((input: unknown) => z.object({ id: z.string().uuid() }).parse(input))
   .handler(async ({ data, context }) => {
-    const admin = await assertAdmin(context.userId, context.supabase);
+    const admin = await assertAdmin(context.userId, context.supabase, context.userEmail);
     const { error } = await admin.from("newsletter_subscribers").delete().eq("id", data.id);
     if (error) throw new Error(error.message);
     await logActivity(context.userId, "admin_delete_subscriber", { id: data.id });
@@ -285,7 +286,7 @@ async function listAllStorageFilesRecursive(
 export const adminListMedia = createServerFn({ method: "GET" })
   .middleware([requireSupabaseAuth])
   .handler(async ({ context }) => {
-    const admin = await assertAdmin(context.userId, context.supabase);
+    const admin = await assertAdmin(context.userId, context.supabase, context.userEmail);
     const files = await listAllStorageFilesRecursive(admin, "media");
     
     // Sort files by created_at desc (newest first)
@@ -302,7 +303,7 @@ export const adminDeleteMedia = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((input: unknown) => z.object({ name: z.string().min(1).max(255) }).parse(input))
   .handler(async ({ data, context }) => {
-    const admin = await assertAdmin(context.userId, context.supabase);
+    const admin = await assertAdmin(context.userId, context.supabase, context.userEmail);
     const { error } = await admin.storage.from("media").remove([data.name]);
     if (error) throw new Error(error.message);
     await logActivity(context.userId, "admin_delete_media", { name: data.name });
@@ -322,6 +323,7 @@ export const checkIsAdmin = createServerFn({ method: "GET" })
       }
 
       let userId = context?.userId;
+      let userEmail = context?.userEmail;
       let client: any = null;
 
       if (data?.token) {
@@ -348,6 +350,7 @@ export const checkIsAdmin = createServerFn({ method: "GET" })
         const { data: userData, error: userError } = await client.auth.getUser(data.token);
         if (!userError && userData?.user) {
           userId = userData.user.id;
+          userEmail = userData.user.email;
         }
       }
 
@@ -355,7 +358,7 @@ export const checkIsAdmin = createServerFn({ method: "GET" })
         throw new Error("Unauthorized: No user ID found");
       }
 
-      await assertAdmin(userId, client || context?.supabase);
+      console.log('checkIsAdmin -> userId:', userId, 'userEmail:', userEmail); await assertAdmin(userId, client || context?.supabase, userEmail);
       return { isAdmin: true };
     } catch (err) {
       console.error("[checkIsAdmin Error]:", err);
@@ -371,7 +374,7 @@ type ClickRow = { artist_id: string; link_type: string; created_at: string };
 export const adminGetAnalytics = createServerFn({ method: "GET" })
   .middleware([requireSupabaseAuth])
   .handler(async ({ context }) => {
-    const admin = await assertAdmin(context.userId, context.supabase);
+    const admin = await assertAdmin(context.userId, context.supabase, context.userEmail);
     const now = Date.now();
     const since30 = new Date(now - 30 * 24 * 60 * 60 * 1000).toISOString();
     const since7 = new Date(now - 7 * 24 * 60 * 60 * 1000).toISOString();
@@ -582,6 +585,67 @@ export const submitArtistApplication = createServerFn({ method: "POST" })
     }
     
     await logActivity(null, "public_application_submitted", { email: sanitized.email, artist_name: sanitized.artist_name });
+
+    // Send email notification via Resend
+    if (process.env.RESEND_API_KEY) {
+      try {
+        const resend = new Resend(process.env.RESEND_API_KEY);
+        await resend.emails.send({
+          from: "The New 1017 Records <notifications@thenew1017records.us>",
+          to: "contact@thenew1017records.us",
+          subject: "New Artist Application Received",
+          html: `
+            <div style="font-family: sans-serif; max-width: 600px; margin: 0 auto;">
+              <h2 style="color: #D4AF37;">New Artist Application Received</h2>
+              <table style="width: 100%; border-collapse: collapse; margin-top: 20px;">
+                <tr style="border-bottom: 1px solid #eee;">
+                  <td style="padding: 10px 0; font-weight: bold; width: 30%;">Full Name</td>
+                  <td style="padding: 10px 0;">${sanitized.full_name}</td>
+                </tr>
+                <tr style="border-bottom: 1px solid #eee;">
+                  <td style="padding: 10px 0; font-weight: bold;">Email</td>
+                  <td style="padding: 10px 0;">
+                    <a href="mailto:${sanitized.email}" style="color: #000;">${sanitized.email}</a>
+                  </td>
+                </tr>
+                <tr style="border-bottom: 1px solid #eee;">
+                  <td style="padding: 10px 0; font-weight: bold;">Artist Name</td>
+                  <td style="padding: 10px 0;">${sanitized.artist_name}</td>
+                </tr>
+                <tr style="border-bottom: 1px solid #eee;">
+                  <td style="padding: 10px 0; font-weight: bold;">Spotify Link</td>
+                  <td style="padding: 10px 0;">
+                    ${sanitized.spotify_link ? `<a href="${sanitized.spotify_link}" target="_blank" style="color: #000;">${sanitized.spotify_link}</a>` : "Not provided"}
+                  </td>
+                </tr>
+                <tr style="border-bottom: 1px solid #eee;">
+                  <td style="padding: 10px 0; font-weight: bold;">Photo URL</td>
+                  <td style="padding: 10px 0;">
+                    ${sanitized.artist_photo_url ? `<a href="${sanitized.artist_photo_url}" target="_blank" style="color: #000;">View Photo</a>` : "Not provided"}
+                  </td>
+                </tr>
+                <tr style="border-bottom: 1px solid #eee;">
+                  <td style="padding: 10px 0; font-weight: bold;">EPK URL</td>
+                  <td style="padding: 10px 0;">
+                    ${sanitized.epk_url ? `<a href="${sanitized.epk_url}" target="_blank" style="color: #000;">View EPK</a>` : "Not provided"}
+                  </td>
+                </tr>
+              </table>
+              <div style="margin-top: 20px;">
+                <h3 style="margin-bottom: 10px; font-size: 16px;">Biography / Campaign Details:</h3>
+                <div style="background-color: #f9f9f9; padding: 15px; border-radius: 5px; white-space: pre-wrap; font-size: 14px; line-height: 1.5;">${sanitized.campaign_details || "Not provided"}</div>
+              </div>
+            </div>
+          `
+        });
+        console.log("✅ [Resend] Application notification email sent successfully");
+      } catch (emailErr: any) {
+        console.error("❌ [Resend] Failed to send email notification:", emailErr?.message || emailErr);
+      }
+    } else {
+      console.warn("⚠️ [Resend] RESEND_API_KEY not set. Skipping email notification.");
+    }
+
     return { ok: true };
   });
 
@@ -589,7 +653,7 @@ export const submitArtistApplication = createServerFn({ method: "POST" })
 export const adminListApplications = createServerFn({ method: "GET" })
   .middleware([requireSupabaseAuth])
   .handler(async ({ context }) => {
-    const admin = await assertAdmin(context.userId, context.supabase);
+    const admin = await assertAdmin(context.userId, context.supabase, context.userEmail);
     const { data, error } = await admin
       .from("artist_applications")
       .select("*")
@@ -608,7 +672,7 @@ export const adminUpdateApplicationStatus = createServerFn({ method: "POST" })
     }).parse(input)
   )
   .handler(async ({ data, context }) => {
-    const admin = await assertAdmin(context.userId, context.supabase);
+    const admin = await assertAdmin(context.userId, context.supabase, context.userEmail);
     const { error } = await admin
       .from("artist_applications")
       .update({ status: data.status })
@@ -642,7 +706,7 @@ export const adminDeleteApplication = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((input: unknown) => z.object({ id: z.string().uuid() }).parse(input))
   .handler(async ({ data, context }) => {
-    const admin = await assertAdmin(context.userId, context.supabase);
+    const admin = await assertAdmin(context.userId, context.supabase, context.userEmail);
     
     // 1. Retrieve application record before deletion to locate storage paths
     const { data: record, error: getError } = await admin
@@ -791,7 +855,7 @@ async function getOrCreateFounderSpotlight(admin: any) {
 export const adminGetFounderSpotlight = createServerFn({ method: "GET" })
   .middleware([requireSupabaseAuth])
   .handler(async ({ context }) => {
-    const admin = await assertAdmin(context.userId, context.supabase);
+    const admin = await assertAdmin(context.userId, context.supabase, context.userEmail);
     const data = await getOrCreateFounderSpotlight(admin);
     return { data };
   });
@@ -799,7 +863,7 @@ export const adminGetFounderSpotlight = createServerFn({ method: "GET" })
 export const adminRegenerateAdminTokens = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .handler(async ({ context }) => {
-    const admin = await assertAdmin(context.userId, context.supabase);
+    const admin = await assertAdmin(context.userId, context.supabase, context.userEmail);
     await logActivity(context.userId, "admin_security_token_refresh", {});
     return { ok: true };
   });
@@ -807,7 +871,7 @@ export const adminRegenerateAdminTokens = createServerFn({ method: "POST" })
 export const adminGetVisitorAnalytics = createServerFn({ method: "GET" })
   .middleware([requireSupabaseAuth])
   .handler(async ({ context }) => {
-    const admin = await assertAdmin(context.userId, context.supabase);
+    const admin = await assertAdmin(context.userId, context.supabase, context.userEmail);
     
     const now = Date.now();
     // Fetch last 30 days of data
@@ -963,7 +1027,7 @@ export const adminSaveFounderSpotlight = createServerFn({ method: "POST" })
     return FounderSpotlightSchema.parse(input);
   })
   .handler(async ({ data, context }) => {
-    const admin = await assertAdmin(context.userId, context.supabase);
+    const admin = await assertAdmin(context.userId, context.supabase, context.userEmail);
     const sanitized = sanitizeSpotlightData(data);
     try {
       if (sanitized.id) {
@@ -1027,7 +1091,7 @@ export const adminUpsertGalleryImage = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((input: unknown) => GalleryImageSchema.parse(input))
   .handler(async ({ data, context }) => {
-    const admin = await assertAdmin(context.userId, context.supabase);
+    const admin = await assertAdmin(context.userId, context.supabase, context.userEmail);
     if (data.id) {
       const { id, ...rest } = data;
       const { error } = await admin.from("media_gallery").update(rest).eq("id", id);
@@ -1045,7 +1109,7 @@ export const adminDeleteGalleryImage = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((input: unknown) => z.object({ id: z.string().uuid() }).parse(input))
   .handler(async ({ data, context }) => {
-    const admin = await assertAdmin(context.userId, context.supabase);
+    const admin = await assertAdmin(context.userId, context.supabase, context.userEmail);
     const { error } = await admin.from("media_gallery").delete().eq("id", data.id);
     if (error) throw new Error(error.message);
     return { ok: true };

@@ -30,8 +30,8 @@ const supabase = createClient(url, key);
 async function run() {
   console.log("Logging in as armyking1428@gmail.com...");
   const { data: authData, error: authError } = await supabase.auth.signInWithPassword({
-    email: "armyking1428@gmail.com",
-    password: "4*nk%Dw6$KkwBp"
+    email: process.env.ADMIN_EMAIL || "",
+    password: process.env.ADMIN_PASSWORD || ""
   });
   
   if (authError) {

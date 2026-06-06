@@ -24,7 +24,7 @@ async function run() {
       const text = await res.text();
       console.log(` - Length: ${text.length}`);
       console.log(` - Contains project ID 'vveslmalxlprmlfcdjae':`, text.includes("vveslmalxlprmlfcdjae"));
-      console.log(` - Contains publishable key:`, text.includes("sb_publishable_jjJ_rgamG9H9cTmsq176qA__qlPZSE6") || text.includes("sb_publishable"));
+      console.log(` - Contains publishable key:`, text.includes(process.env.VITE_SUPABASE_ANON_KEY || "") || text.includes("sb_publishable"));
     }
   } catch (err) {
     console.error("Scan error:", err);

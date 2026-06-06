@@ -63,8 +63,8 @@ async function runValidation() {
     // -------------------------------------------------------------
     console.log("=== 1. Testing Admin Login ===");
     const { data: authData, error: authError } = await supabase.auth.signInWithPassword({
-      email: "armyking1428@gmail.com",
-      password: "4*nk%Dw6$KkwBp"
+      email: process.env.ADMIN_EMAIL || "",
+      password: process.env.ADMIN_PASSWORD || ""
     });
 
     if (authError) {

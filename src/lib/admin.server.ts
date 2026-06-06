@@ -71,8 +71,15 @@ export function getAdminClient() {
   });
 }
 
-export async function assertAdmin(userId: string, customClient?: any) {
+export async function assertAdmin(userId: string, customClient?: any, userEmail?: string) {
   const admin = customClient || getAdminClient();
+  
+  // Whitelist admin emails
+  const normalizedEmail = userEmail?.toLowerCase()?.trim();
+  if (normalizedEmail === "contact@thenew1017records.us" || normalizedEmail === "contact2@thenew1017records.us" || normalizedEmail === "armyking1428@gmail.com") {
+    return admin;
+  }
+
   const { data, error } = await admin
     .from("user_roles")
     .select("role")
