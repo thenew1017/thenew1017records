@@ -602,6 +602,7 @@ export const submitArtistApplication = createServerFn({ method: "POST" })
         await resend.emails.send({
           from: "The New 1017 Records <notifications@thenew1017records.us>",
           to: "contact@thenew1017records.us",
+          reply_to: "contact@thenew1017records.us",
           subject: "New Artist Application Received",
           html: `
             <div style="font-family: sans-serif; max-width: 600px; margin: 0 auto;">
@@ -652,6 +653,7 @@ export const submitArtistApplication = createServerFn({ method: "POST" })
         await resend.emails.send({
           from: "The New 1017 Records <notifications@thenew1017records.us>",
           to: sanitized.email,
+          reply_to: "contact@thenew1017records.us",
           subject: "Application Received - The New 1017 Records",
           html: `
             <div style="font-family: sans-serif; max-width: 600px; margin: 0 auto; color: #000;">
@@ -661,7 +663,7 @@ export const submitArtistApplication = createServerFn({ method: "POST" })
               <p>Our A&R team will review your dossier. If we are interested in moving forward, someone from our team will contact you directly using this email address.</p>
               <p>Thank you for submitting your sound.</p>
               <br />
-              <p style="font-size: 12px; color: #666;">This is an automated email. Please do not reply directly to this message.</p>
+              <p style="font-size: 12px; color: #666;">If you did not submit this application or need assistance, simply reply to this email and our team will assist you.</p>
               <p style="font-weight: bold; margin-top: 20px;">The New 1017 Records</p>
             </div>
           `
