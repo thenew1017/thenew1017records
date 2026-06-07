@@ -85,26 +85,14 @@ export async function assertAdmin(userId: string, customClient?: any, userEmail?
     return serviceClient;
   }
 
-  const { data, error } = await authClient
-    .from("user_roles")
-    .select("role")
-    .eq("user_id", userId)
-    .eq("role", "admin")
-    .maybeSingle();
-    
-  if (error) throw new Error(error.message);
-  
-  if (!data) {
-    // Foolproof local development bypass (Evaluated purely at runtime securely)
-    const isDev = process.env.NODE_ENV === "development";
-    if (process.env.BYPASS_ADMIN === "true" || isDev) {
-      console.warn("🛡️ [Admin Bypass] Admin check bypassed automatically in local development!");
-      return serviceClient;
-    }
-
-    throw new Error("Forbidden: admin role required");
+  // Foolproof local development bypass (Evaluated purely at runtime securely)
+  const isDev = process.env.NODE_ENV === "development";
+  if (process.env.BYPASS_ADMIN === "true" || isDev) {
+    console.warn("🛡️ [Admin Bypass] Admin check bypassed automatically in local development!");
+    return serviceClient;
   }
-  return serviceClient;
+
+  throw new Error("Forbidden: admin role required");
 }
 
 /**
