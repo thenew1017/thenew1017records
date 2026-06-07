@@ -602,7 +602,7 @@ export const submitArtistApplication = createServerFn({ method: "POST" })
         await resend.emails.send({
           from: "The New 1017 Records <notifications@thenew1017records.us>",
           to: "contact@thenew1017records.us",
-          reply_to: "contact@thenew1017records.us",
+          replyTo: "contact@thenew1017records.us",
           subject: "New Artist Application Received",
           html: `
             <div style="font-family: sans-serif; max-width: 600px; margin: 0 auto;">
@@ -653,7 +653,7 @@ export const submitArtistApplication = createServerFn({ method: "POST" })
         await resend.emails.send({
           from: "The New 1017 Records <notifications@thenew1017records.us>",
           to: sanitized.email,
-          reply_to: "contact@thenew1017records.us",
+          replyTo: "contact@thenew1017records.us",
           subject: "Application Received - The New 1017 Records",
           html: `
             <div style="font-family: sans-serif; max-width: 600px; margin: 0 auto; color: #000;">
