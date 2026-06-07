@@ -597,6 +597,8 @@ export const submitArtistApplication = createServerFn({ method: "POST" })
     if (process.env.RESEND_API_KEY) {
       try {
         const resend = new Resend(process.env.RESEND_API_KEY);
+        
+        // 1. Send notification to Admin
         await resend.emails.send({
           from: "The New 1017 Records <notifications@thenew1017records.us>",
           to: "contact@thenew1017records.us",
@@ -645,7 +647,27 @@ export const submitArtistApplication = createServerFn({ method: "POST" })
             </div>
           `
         });
-        console.log("✅ [Resend] Application notification email sent successfully");
+
+        // 2. Send confirmation to Applicant
+        await resend.emails.send({
+          from: "The New 1017 Records <notifications@thenew1017records.us>",
+          to: sanitized.email,
+          subject: "Application Received - The New 1017 Records",
+          html: `
+            <div style="font-family: sans-serif; max-width: 600px; margin: 0 auto; color: #000;">
+              <h2 style="color: #D4AF37;">Application Received</h2>
+              <p>Hello ${sanitized.artist_name},</p>
+              <p>We have successfully received your artist application to The New 1017 Records.</p>
+              <p>Our A&R team will review your dossier. If we are interested in moving forward, someone from our team will contact you directly using this email address.</p>
+              <p>Thank you for submitting your sound.</p>
+              <br />
+              <p style="font-size: 12px; color: #666;">This is an automated email. Please do not reply directly to this message.</p>
+              <p style="font-weight: bold; margin-top: 20px;">The New 1017 Records</p>
+            </div>
+          `
+        });
+
+        console.log("✅ [Resend] Application notification emails sent successfully");
       } catch (emailErr: any) {
         console.error("❌ [Resend] Failed to send email notification:", emailErr?.message || emailErr);
       }
