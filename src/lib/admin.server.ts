@@ -6,6 +6,7 @@ import path from "path";
 
 // Light-weight custom .env file parser to populate process.env in server context (SSR/Server functions)
 function loadEnv() {
+  if (process.env.NODE_ENV === "production") return;
   try {
     const envPath = path.resolve(process.cwd(), ".env");
     if (fs.existsSync(envPath)) {
@@ -93,28 +94,13 @@ export async function assertAdmin(userId: string, customClient?: any, userEmail?
   if (error) throw new Error(error.message);
   
   if (!data) {
-    // Foolproof local development bypass (Automatically active in local development!)
-    const isDev = process.env.NODE_ENV === "development" || import.meta.env.DEV;
-    if (process.env.BYPASS_ADMIN === "true" || import.meta.env.VITE_BYPASS_ADMIN === "true" || isDev) {
+    // Foolproof local development bypass (Evaluated purely at runtime securely)
+    const isDev = process.env.NODE_ENV === "development";
+    if (process.env.BYPASS_ADMIN === "true" || isDev) {
       console.warn("⚠️ [Admin Bypass] Admin check bypassed automatically in local development!");
       return admin;
     }
 
-    // Auto-promote if service key is active and we're initializing
-    const serviceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
-    if (serviceRoleKey) {
-      console.log(`[Admin Autopromote] User ${userId} is not an admin. Auto-assigning app_role...`);
-      const { error: insertError } = await admin
-        .from("user_roles")
-        .insert({ user_id: userId, role: "admin" });
-      
-      if (!insertError) {
-        console.log(`[Admin Autopromote] Successfully assigned admin role to ${userId}`);
-        return admin;
-      } else {
-        console.error(`[Admin Autopromote] Failed to auto-assign admin role:`, insertError.message);
-      }
-    }
     throw new Error("Forbidden: admin role required");
   }
   return admin;

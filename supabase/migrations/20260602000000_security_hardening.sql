@@ -47,6 +47,7 @@ CREATE POLICY "public upload artist photos" ON storage.objects
   WITH CHECK (
     bucket_id = 'artist-photos' 
     AND (LOWER(storage.extension(name)) IN ('jpg', 'jpeg', 'png', 'webp'))
+    AND (metadata->>'mimetype' IN ('image/jpeg', 'image/png', 'image/webp'))
   );
 
 CREATE POLICY "public upload artist portfolios" ON storage.objects
@@ -54,6 +55,7 @@ CREATE POLICY "public upload artist portfolios" ON storage.objects
   WITH CHECK (
     bucket_id = 'artist-portfolios' 
     AND (LOWER(storage.extension(name)) = 'pdf')
+    AND (metadata->>'mimetype' = 'application/pdf')
   );
 
 -- Force PostgREST to reload schema

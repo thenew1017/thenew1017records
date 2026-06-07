@@ -25,20 +25,16 @@ const ArtistSchema = z.object({
   published: z.boolean().default(true),
 });
 
-// Public reads (no auth) in-memory caches
-let publicArtistsCache: { artists: any[] } | null = null;
-let publicSettingsCache: { settings: Record<string, Json> } | null = null;
+// Public reads (no auth) in-memory caches removed for serverless compatibility.
 
 export function clearPublicCaches() {
-  console.log("⚡ [Server Cache] Clearing public artists and settings caches!");
-  publicArtistsCache = null;
-  publicSettingsCache = null;
+  console.log("⚡ [Server Cache] Caches are now managed externally, skipped internal clear.");
 }
 
 export const listPublicArtists = createServerFn({ method: "GET" }).handler(async () => {
-  if (publicArtistsCache) {
-    console.log("⚡ [Server Cache] Serving public artists list from in-memory cache!");
-    return publicArtistsCache;
+  const ip = getClientIp();
+  if (!rateLimit(ip, "public_artists", 60, 60)) {
+    throw new Error("Too many requests. Please try again later.");
   }
   
   const resolvedUrl = process.env.SUPABASE_URL || process.env.VITE_SUPABASE_URL || import.meta.env.VITE_SUPABASE_URL;
@@ -68,33 +64,31 @@ export const listPublicArtists = createServerFn({ method: "GET" }).handler(async
     
   if (error) {
     console.error("❌ [Supabase Server Roster Query Failure] Error:", error.message);
-    throw new Error(error.message);
+    throw new Error("A database transaction error occurred. Operation aborted safely.");
   }
   
   console.log(`✅ [Supabase Server Roster Query Success] Fetched ${data?.length ?? 0} artists from database:`);
   console.dir(data, { depth: null });
   
-  publicArtistsCache = { artists: data ?? [] };
-  return publicArtistsCache;
+  return { artists: data ?? [] };
 });
 
 export const getPublicSettings = createServerFn({ method: "GET" }).handler(async () => {
-  if (publicSettingsCache) {
-    console.log("⚡ [Server Cache] Serving public settings from in-memory cache!");
-    return publicSettingsCache;
+  const ip = getClientIp();
+  if (!rateLimit(ip, "public_settings", 60, 60)) {
+    throw new Error("Too many requests. Please try again later.");
   }
   console.log("⚡ [Supabase Server Settings Query] Executing: supabase.from('site_settings').select('key,value')");
   const { supabase } = await import("@/integrations/supabase/client");
   const { data, error } = await supabase.from("site_settings").select("key,value");
   if (error) {
     console.error("❌ [Supabase Server Settings Query Failure] Error:", error.message);
-    throw new Error(error.message);
+    throw new Error("A database transaction error occurred. Operation aborted safely.");
   }
   console.log(`✅ [Supabase Server Settings Query Success] Fetched ${data?.length ?? 0} settings keys.`);
   const map: Record<string, Json> = {};
   for (const row of data ?? []) map[row.key] = row.value as Json;
-  publicSettingsCache = { settings: map };
-  return publicSettingsCache;
+  return { settings: map };
 });
 
 export function slugify(text: string): string {
@@ -138,7 +132,7 @@ export const subscribeNewsletter = createServerFn({ method: "POST" })
     const admin = getAdminClient();
     const { error } = await admin.from("newsletter_subscribers").insert({ email: data.email });
     if (error && !error.message.toLowerCase().includes("duplicate")) {
-      throw new Error(error.message);
+      throw new Error("A database transaction error occurred. Operation aborted safely.");
     }
     
     await logActivity(null, "public_newsletter_subscribed", { email: data.email });
@@ -151,7 +145,7 @@ export const adminListArtists = createServerFn({ method: "GET" })
   .handler(async ({ context }) => {
     const admin = await assertAdmin(context.userId, context.supabase, context.userEmail);
     const { data, error } = await admin.from("artists").select("*").order("sort_order").order("created_at");
-    if (error) throw new Error(error.message);
+    if (error) throw new Error("A database transaction error occurred. Operation aborted safely.");
     return { artists: data ?? [] };
   });
 
@@ -163,14 +157,14 @@ export const adminUpsertArtist = createServerFn({ method: "POST" })
     if (data.id) {
       const { id, ...rest } = data;
       const { error } = await admin.from("artists").update(rest).eq("id", id);
-      if (error) throw new Error(error.message);
+      if (error) throw new Error("A database transaction error occurred. Operation aborted safely.");
       clearPublicCaches();
       await logActivity(context.userId, "admin_update_artist", { id, name: data.name });
       return { id };
     } else {
       const { id: _ignore, ...rest } = data;
       const { data: row, error } = await admin.from("artists").insert(rest).select("id").single();
-      if (error) throw new Error(error.message);
+      if (error) throw new Error("A database transaction error occurred. Operation aborted safely.");
       clearPublicCaches();
       await logActivity(context.userId, "admin_create_artist", { id: row.id, name: data.name });
       return { id: row.id };
@@ -183,11 +177,23 @@ export const adminDeleteArtist = createServerFn({ method: "POST" })
   .handler(async ({ data, context }) => {
     const admin = await assertAdmin(context.userId, context.supabase, context.userEmail);
     const { error } = await admin.from("artists").delete().eq("id", data.id);
-    if (error) throw new Error(error.message);
+    if (error) throw new Error("A database transaction error occurred. Operation aborted safely.");
     clearPublicCaches();
     await logActivity(context.userId, "admin_delete_artist", { id: data.id });
     return { ok: true };
   });
+
+// Helper to strip basic script tags from unknown JSON recursively
+function sanitizeJsonDeep(obj: any): any {
+  if (typeof obj === "string") return obj.replace(/<script\b[^<]*(?:(?!<\/script>)<[^<]*)*<\/script>/gi, "");
+  if (Array.isArray(obj)) return obj.map(sanitizeJsonDeep);
+  if (obj !== null && typeof obj === "object") {
+    const sanitized: any = {};
+    for (const k in obj) sanitized[k] = sanitizeJsonDeep(obj[k]);
+    return sanitized;
+  }
+  return obj;
+}
 
 // Admin: settings
 export const adminGetSettings = createServerFn({ method: "GET" })
@@ -195,7 +201,7 @@ export const adminGetSettings = createServerFn({ method: "GET" })
   .handler(async ({ context }) => {
     const admin = await assertAdmin(context.userId, context.supabase, context.userEmail);
     const { data, error } = await admin.from("site_settings").select("key,value");
-    if (error) throw new Error(error.message);
+    if (error) throw new Error("A database transaction error occurred. Operation aborted safely.");
     const map: Record<string, Json> = {};
     for (const row of data ?? []) map[row.key] = row.value as Json;
     return { settings: map };
@@ -211,10 +217,11 @@ export const adminSetSetting = createServerFn({ method: "POST" })
   )
   .handler(async ({ data, context }) => {
     const admin = await assertAdmin(context.userId, context.supabase, context.userEmail);
+    const sanitizedValue = sanitizeJsonDeep(data.value);
     const { error } = await admin
       .from("site_settings")
-      .upsert({ key: data.key, value: data.value as Json }, { onConflict: "key" });
-    if (error) throw new Error(error.message);
+      .upsert({ key: data.key, value: sanitizedValue as Json }, { onConflict: "key" });
+    if (error) throw new Error("A database transaction error occurred. Operation aborted safely.");
     clearPublicCaches();
     await logActivity(context.userId, "admin_set_setting", { key: data.key });
     return { ok: true };
@@ -229,7 +236,7 @@ export const adminListSubscribers = createServerFn({ method: "GET" })
       .from("newsletter_subscribers")
       .select("*")
       .order("created_at", { ascending: false });
-    if (error) throw new Error(error.message);
+    if (error) throw new Error("A database transaction error occurred. Operation aborted safely.");
     return { subscribers: data ?? [] };
   });
 
@@ -239,7 +246,7 @@ export const adminDeleteSubscriber = createServerFn({ method: "POST" })
   .handler(async ({ data, context }) => {
     const admin = await assertAdmin(context.userId, context.supabase, context.userEmail);
     const { error } = await admin.from("newsletter_subscribers").delete().eq("id", data.id);
-    if (error) throw new Error(error.message);
+    if (error) throw new Error("A database transaction error occurred. Operation aborted safely.");
     await logActivity(context.userId, "admin_delete_subscriber", { id: data.id });
     return { ok: true };
   });
@@ -305,7 +312,7 @@ export const adminDeleteMedia = createServerFn({ method: "POST" })
   .handler(async ({ data, context }) => {
     const admin = await assertAdmin(context.userId, context.supabase, context.userEmail);
     const { error } = await admin.storage.from("media").remove([data.name]);
-    if (error) throw new Error(error.message);
+    if (error) throw new Error("A database transaction error occurred. Operation aborted safely.");
     await logActivity(context.userId, "admin_delete_media", { name: data.name });
     return { ok: true };
   });
@@ -581,7 +588,7 @@ export const submitArtistApplication = createServerFn({ method: "POST" })
     const admin = getAdminClient();
     const { error } = await admin.from("artist_applications").insert(sanitized);
     if (error) {
-      throw new Error(error.message);
+      throw new Error("A database transaction error occurred. Operation aborted safely.");
     }
     
     await logActivity(null, "public_application_submitted", { email: sanitized.email, artist_name: sanitized.artist_name });
@@ -658,7 +665,7 @@ export const adminListApplications = createServerFn({ method: "GET" })
       .from("artist_applications")
       .select("*")
       .order("submitted_at", { ascending: false });
-    if (error) throw new Error(error.message);
+    if (error) throw new Error("A database transaction error occurred. Operation aborted safely.");
     return { applications: data ?? [] };
   });
 
@@ -677,7 +684,7 @@ export const adminUpdateApplicationStatus = createServerFn({ method: "POST" })
       .from("artist_applications")
       .update({ status: data.status })
       .eq("id", data.id);
-    if (error) throw new Error(error.message);
+    if (error) throw new Error("A database transaction error occurred. Operation aborted safely.");
     await logActivity(context.userId, "admin_update_application_status", { id: data.id, status: data.status });
     return { ok: true };
   });
@@ -1095,12 +1102,12 @@ export const adminUpsertGalleryImage = createServerFn({ method: "POST" })
     if (data.id) {
       const { id, ...rest } = data;
       const { error } = await admin.from("media_gallery").update(rest).eq("id", id);
-      if (error) throw new Error(error.message);
+      if (error) throw new Error("A database transaction error occurred. Operation aborted safely.");
       return { id };
     } else {
       const { id: _ignore, ...rest } = data;
       const { data: row, error } = await admin.from("media_gallery").insert(rest).select("id").single();
-      if (error) throw new Error(error.message);
+      if (error) throw new Error("A database transaction error occurred. Operation aborted safely.");
       return { id: row.id };
     }
   });
@@ -1111,6 +1118,6 @@ export const adminDeleteGalleryImage = createServerFn({ method: "POST" })
   .handler(async ({ data, context }) => {
     const admin = await assertAdmin(context.userId, context.supabase, context.userEmail);
     const { error } = await admin.from("media_gallery").delete().eq("id", data.id);
-    if (error) throw new Error(error.message);
+    if (error) throw new Error("A database transaction error occurred. Operation aborted safely.");
     return { ok: true };
   });

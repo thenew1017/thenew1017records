@@ -755,9 +755,15 @@ function BookingForm({ triggerFocus = 0 }: { triggerFocus?: number }) {
       const fileName = `${Date.now()}-${Math.random().toString(36).substring(2, 12)}.jpg`;
       const filePath = `applications/${fileName}`;
 
-      const { data, error } = await supabase.storage
+      const uploadPromise = supabase.storage
         .from("artist-photos")
         .upload(filePath, compressedBlob, { contentType: "image/jpeg" });
+
+      const timeoutPromise = new Promise<{data: any, error: any}>((_, reject) => 
+        setTimeout(() => reject(new Error("Portrait upload transmission timed out. Please check your network connection.")), 20000)
+      );
+
+      const { data, error } = await Promise.race([uploadPromise, timeoutPromise]);
         
       clearInterval(interval);
 
@@ -784,6 +790,18 @@ function BookingForm({ triggerFocus = 0 }: { triggerFocus?: number }) {
       alert("Please upload a valid PDF document for your EPK.");
       return;
     }
+    
+    try {
+      const arrayBuffer = await file.slice(0, 5).arrayBuffer();
+      const bytes = new Uint8Array(arrayBuffer);
+      const isPDF = bytes[0] === 0x25 && bytes[1] === 0x50 && bytes[2] === 0x44 && bytes[3] === 0x46 && bytes[4] === 0x2D; // %PDF-
+      if (!isPDF) {
+        alert("Invalid file signature. Only genuine PDF files are allowed.");
+        return;
+      }
+    } catch (err) {
+      console.warn("Could not verify file signature", err);
+    }
     if (file.size > 10 * 1024 * 1024) {
       alert("EPK file size exceeds the 10 MB limit.");
       return;
@@ -806,9 +824,15 @@ function BookingForm({ triggerFocus = 0 }: { triggerFocus?: number }) {
       const fileName = `${Date.now()}-${Math.random().toString(36).substring(2, 12)}.pdf`;
       const filePath = `applications/${fileName}`;
 
-      const { data, error } = await supabase.storage
+      const uploadPromise = supabase.storage
         .from("artist-portfolios")
         .upload(filePath, file, { contentType: "application/pdf" });
+
+      const timeoutPromise = new Promise<{data: any, error: any}>((_, reject) => 
+        setTimeout(() => reject(new Error("EPK document upload timed out. Please check your network connection.")), 30000)
+      );
+
+      const { data, error } = await Promise.race([uploadPromise, timeoutPromise]);
         
       clearInterval(interval);
 

@@ -53,9 +53,9 @@ export const requireSupabaseAuth = createMiddleware({ type: 'function' })
         throw new Error(message);
       }
 
-      // Foolproof local development bypass (Automatically active in local development!)
-      const isDev = process.env.NODE_ENV === "development" || import.meta.env.DEV;
-      if (process.env.BYPASS_ADMIN === "true" || import.meta.env.VITE_BYPASS_ADMIN === "true" || isDev) {
+      // Foolproof local development bypass (Evaluated purely at runtime securely)
+      const isDev = process.env.NODE_ENV === "development";
+      if (process.env.BYPASS_ADMIN === "true" || isDev) {
         console.warn("⚠️ [Admin Bypass] requireSupabaseAuth bypassed automatically in local development!");
         return next({
           context: {

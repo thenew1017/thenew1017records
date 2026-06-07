@@ -42,9 +42,14 @@ export function AdminShell({ children, title }: { children: ReactNode; title: st
   }, [session, user, loading, check, navigate]);
 
   const signOut = async () => {
-    await supabase.auth.signOut();
-    router.invalidate();
-    navigate({ to: "/admin/login" });
+    try {
+      await supabase.auth.signOut();
+    } catch (err) {
+      console.warn("Sign out encountered an error, clearing session regardless.", err);
+    } finally {
+      router.invalidate();
+      navigate({ to: "/admin/login" });
+    }
   };
 
   if (loading || authState === "checking") {
