@@ -586,7 +586,7 @@ export const submitArtistApplication = createServerFn({ method: "POST" })
     }
 
     const admin = getAdminClient();
-    const { error } = await admin.from("artist_applications").insert(sanitized);
+    const { data: insertedData, error } = await admin.from("artist_applications").insert(sanitized).select("id").single();
     if (error) {
       throw new Error("A database transaction error occurred. Operation aborted safely.");
     }
@@ -597,6 +597,7 @@ export const submitArtistApplication = createServerFn({ method: "POST" })
     if (process.env.RESEND_API_KEY) {
       try {
         const resend = new Resend(process.env.RESEND_API_KEY);
+        const appId = insertedData?.id ? insertedData.id.slice(0, 8).toUpperCase() : `1017-${Date.now().toString().slice(-6)}`;
         
         // 1. Send notification to Admin
         await resend.emails.send({
@@ -656,16 +657,91 @@ export const submitArtistApplication = createServerFn({ method: "POST" })
           replyTo: "contact@thenew1017records.us",
           subject: "Application Received - The New 1017 Records",
           html: `
-            <div style="font-family: sans-serif; max-width: 600px; margin: 0 auto; color: #000;">
-              <h2 style="color: #D4AF37;">Application Received</h2>
-              <p>Hello ${sanitized.artist_name},</p>
-              <p>We have successfully received your artist application to The New 1017 Records.</p>
-              <p>Our A&R team will review your dossier. If we are interested in moving forward, someone from our team will contact you directly using this email address.</p>
-              <p>Thank you for submitting your sound.</p>
-              <br />
-              <p style="font-size: 12px; color: #666;">If you did not submit this application or need assistance, simply reply to this email and our team will assist you.</p>
-              <p style="font-weight: bold; margin-top: 20px;">The New 1017 Records</p>
-            </div>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Application Received</title>
+</head>
+<body style="margin: 0; padding: 0; background-color: #0A0A0A; font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; color: #E5E5E5; -webkit-font-smoothing: antialiased;">
+  <div style="max-width: 600px; margin: 0 auto; padding: 40px 20px;">
+    
+    <div style="text-align: center; margin-bottom: 40px;">
+      <img src="https://thenew1017records.us/official_logo.png" alt="The New 1017 Records" width="120" style="display: inline-block; width: 120px; height: auto;" />
+    </div>
+    
+    <div style="background-color: #111111; border: 1px solid #333333; border-radius: 8px; padding: 40px;">
+      <div style="text-align: center; margin-bottom: 30px;">
+        <h1 style="color: #D4AF37; font-size: 24px; font-weight: 600; margin: 0 0 10px 0; text-transform: uppercase; letter-spacing: 2px;">Application Received</h1>
+        <p style="color: #888888; font-size: 14px; margin: 0; letter-spacing: 1px;">OFFICIAL ARTIST SUBMISSION</p>
+      </div>
+
+      <table style="width: 100%; border-collapse: collapse; margin-bottom: 35px;">
+        <tr>
+          <td style="padding: 15px 0; border-bottom: 1px solid #222222; color: #888888; font-size: 14px; width: 40%;">Application ID</td>
+          <td style="padding: 15px 0; border-bottom: 1px solid #222222; color: #FFFFFF; font-weight: 500; font-size: 14px; text-align: right;">\${appId}</td>
+        </tr>
+        <tr>
+          <td style="padding: 15px 0; border-bottom: 1px solid #222222; color: #888888; font-size: 14px;">Artist</td>
+          <td style="padding: 15px 0; border-bottom: 1px solid #222222; color: #FFFFFF; font-weight: 500; font-size: 14px; text-align: right;">\${sanitized.artist_name}</td>
+        </tr>
+        <tr>
+          <td style="padding: 15px 0; border-bottom: 1px solid #222222; color: #888888; font-size: 14px;">Date Submitted</td>
+          <td style="padding: 15px 0; border-bottom: 1px solid #222222; color: #FFFFFF; font-weight: 500; font-size: 14px; text-align: right;">\${new Date().toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })}</td>
+        </tr>
+      </table>
+
+      <div style="margin: 0 0 35px 0; padding: 20px; background-color: #0A0A0A; border-radius: 6px; border: 1px solid #1A1A1A;">
+        <table style="width: 100%; border-collapse: collapse;">
+          <tr>
+            <td style="padding-bottom: 20px;">
+              <span style="display: inline-block; width: 10px; height: 10px; background-color: #D4AF37; border-radius: 50%; margin-right: 15px; box-shadow: 0 0 8px rgba(212, 175, 55, 0.6);"></span>
+              <span style="color: #D4AF37; font-size: 15px; font-weight: 600;">1. Application Received</span>
+            </td>
+          </tr>
+          <tr>
+            <td style="padding-bottom: 20px;">
+              <span style="display: inline-block; width: 10px; height: 10px; background-color: #333333; border-radius: 50%; margin-right: 15px;"></span>
+              <span style="color: #666666; font-size: 15px; font-weight: 500;">2. Under Review</span>
+            </td>
+          </tr>
+          <tr>
+            <td style="padding-bottom: 20px;">
+              <span style="display: inline-block; width: 10px; height: 10px; background-color: #333333; border-radius: 50%; margin-right: 15px;"></span>
+              <span style="color: #666666; font-size: 15px; font-weight: 500;">3. Shortlist Review</span>
+            </td>
+          </tr>
+          <tr>
+            <td>
+              <span style="display: inline-block; width: 10px; height: 10px; background-color: #333333; border-radius: 50%; margin-right: 15px;"></span>
+              <span style="color: #666666; font-size: 15px; font-weight: 500;">4. Final Decision</span>
+            </td>
+          </tr>
+        </table>
+      </div>
+
+      <div style="font-size: 15px; line-height: 1.6; color: #CCCCCC;">
+        <p style="margin: 0 0 15px 0;">Your dossier has been securely received by our A&R team. We will carefully review your sound and campaign details.</p>
+        <p style="margin: 0;">Due to the high volume of submissions, only artists selected to move forward will be contacted directly via this email address.</p>
+      </div>
+    </div>
+
+    <div style="text-align: center; margin-top: 40px; padding-top: 20px; border-top: 1px solid #222222;">
+      <div style="margin-bottom: 20px;">
+        <a href="https://thenew1017records.us" style="color: #D4AF37; text-decoration: none; font-size: 13px; margin: 0 15px; font-weight: 500;">Website</a>
+        <a href="mailto:contact@thenew1017records.us" style="color: #D4AF37; text-decoration: none; font-size: 13px; margin: 0 15px; font-weight: 500;">Support Email</a>
+      </div>
+      <p style="color: #666666; font-size: 12px; line-height: 1.5; margin: 0 0 10px 0;">
+        If you did not submit this application or need assistance, simply reply to this email and our team will assist you.
+      </p>
+      <p style="color: #444444; font-size: 12px; margin: 0;">
+        &copy; \${new Date().getFullYear()} The New 1017 Records. All rights reserved.
+      </p>
+    </div>
+  </div>
+</body>
+</html>
           `
         });
 
