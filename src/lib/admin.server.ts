@@ -73,7 +73,8 @@ export function getAdminClient() {
 }
 
 export async function assertAdmin(userId: string, customClient?: any, userEmail?: string) {
-  const admin = customClient || getAdminClient();
+  const serviceClient = getAdminClient();
+  const authClient = customClient || serviceClient;
   
   // Whitelist admin emails and IDs
   const normalizedEmail = userEmail?.toLowerCase()?.trim();
@@ -81,10 +82,10 @@ export async function assertAdmin(userId: string, customClient?: any, userEmail?
     normalizedEmail === "contact@thenew1017records.us" || 
     userId === "cd45b27d-7cce-47fe-8457-2cf5c098bb3f" // contact@thenew1017records.us fallback
   ) {
-    return admin;
+    return serviceClient;
   }
 
-  const { data, error } = await admin
+  const { data, error } = await authClient
     .from("user_roles")
     .select("role")
     .eq("user_id", userId)
@@ -97,13 +98,13 @@ export async function assertAdmin(userId: string, customClient?: any, userEmail?
     // Foolproof local development bypass (Evaluated purely at runtime securely)
     const isDev = process.env.NODE_ENV === "development";
     if (process.env.BYPASS_ADMIN === "true" || isDev) {
-      console.warn("⚠️ [Admin Bypass] Admin check bypassed automatically in local development!");
-      return admin;
+      console.warn("🛡️ [Admin Bypass] Admin check bypassed automatically in local development!");
+      return serviceClient;
     }
 
     throw new Error("Forbidden: admin role required");
   }
-  return admin;
+  return serviceClient;
 }
 
 /**
