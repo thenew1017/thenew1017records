@@ -586,7 +586,7 @@ export const submitArtistApplication = createServerFn({ method: "POST" })
     }
 
     const admin = getAdminClient();
-    const { data: insertedData, error } = await admin.from("artist_applications").insert(sanitized).select("id, application_id").single();
+    const { data: insertedData, error } = await admin.from("artist_applications").insert(sanitized).select("id, application_number").single();
     if (error) {
       throw new Error("A database transaction error occurred. Operation aborted safely.");
     }
@@ -597,7 +597,7 @@ export const submitArtistApplication = createServerFn({ method: "POST" })
     if (process.env.RESEND_API_KEY) {
       try {
         const resend = new Resend(process.env.RESEND_API_KEY);
-        const appId = insertedData?.application_id ? insertedData.application_id : `The New 1017 Records-34333`;
+        const appId = insertedData?.application_number ? insertedData.application_number.toString() : `34333`;
         
         // 1. Send notification to Admin
         await resend.emails.send({
