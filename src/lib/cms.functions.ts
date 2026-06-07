@@ -780,12 +780,131 @@ export const adminUpdateApplicationStatus = createServerFn({ method: "POST" })
   )
   .handler(async ({ data, context }) => {
     const admin = await assertAdmin(context.userId, context.supabase, context.userEmail);
+
+    // 1. Fetch current application details
+    const { data: currentApp, error: fetchError } = await admin
+      .from("artist_applications")
+      .select("status, artist_name, email, application_number, submitted_at")
+      .eq("id", data.id)
+      .single();
+    
+    if (fetchError || !currentApp) {
+      throw new Error("Application not found.");
+    }
+
+    // 2. Prevent duplicate emails if the status is exactly the same
+    if (currentApp.status === data.status) {
+      return { ok: true };
+    }
+
+    // 3. Perform database update
     const { error } = await admin
       .from("artist_applications")
       .update({ status: data.status })
       .eq("id", data.id);
     if (error) throw new Error("A database transaction error occurred. Operation aborted safely.");
+
     await logActivity(context.userId, "admin_update_application_status", { id: data.id, status: data.status });
+
+    // 4. Send email notification using Resend
+    const shouldSendEmail = ["Pending", "Reviewing", "Approved", "Rejected"].includes(data.status);
+    if (process.env.RESEND_API_KEY && shouldSendEmail) {
+      try {
+        const resend = new Resend(process.env.RESEND_API_KEY);
+        const appId = currentApp.application_number ? currentApp.application_number.toString() : "Unknown ID";
+        const submittedDate = new Date(currentApp.submitted_at || Date.now()).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' });
+        
+        let statusTitle = "Status Update";
+        let statusDesc = "Your application status has been updated.";
+        let statusColor = "#D4AF37"; // Gold default
+
+        if (data.status === "Pending") {
+            statusTitle = "Application Re-opened";
+            statusDesc = "Your application has been moved back to Pending status and is queued for future review.";
+            statusColor = "#888888"; // Gray
+        } else if (data.status === "Reviewing") {
+            statusTitle = "Application Under Review";
+            statusDesc = "Our A&R team is currently reviewing your submission. We will notify you once a final decision is made.";
+            statusColor = "#D4AF37"; // Gold
+        } else if (data.status === "Approved") {
+            statusTitle = "Application Approved";
+            statusDesc = "Congratulations, your application has been approved. A member of our team will be in touch shortly with next steps.";
+            statusColor = "#10B981"; // Emerald Green
+        } else if (data.status === "Rejected") {
+            statusTitle = "Application Update";
+            statusDesc = "Thank you for submitting your music. Unfortunately, we are passing on your submission at this time. We wish you the best in your career.";
+            statusColor = "#EF4444"; // Red
+        }
+
+        const emailHtml = `<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>${statusTitle}</title>
+</head>
+<body style="margin: 0; padding: 0; background-color: #0A0A0A; font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; color: #E5E5E5; -webkit-font-smoothing: antialiased;">
+  <div style="max-width: 600px; margin: 0 auto; padding: 40px 20px;">
+    
+    <div style="text-align: center; margin-bottom: 40px;">
+      <img src="https://thenew1017records.us/official_logo.png" alt="The New 1017 Records" width="120" style="display: inline-block; width: 120px; height: auto;" />
+    </div>
+    
+    <div style="background-color: #111111; border: 1px solid #333333; border-radius: 8px; padding: 40px;">
+      <div style="text-align: center; margin-bottom: 30px;">
+        <h1 style="color: ${statusColor}; font-size: 24px; font-weight: 600; margin: 0 0 10px 0; text-transform: uppercase; letter-spacing: 2px;">${statusTitle}</h1>
+        <p style="color: #888888; font-size: 14px; margin: 0; letter-spacing: 1px;">OFFICIAL ARTIST SUBMISSION</p>
+      </div>
+
+      <p style="color: #E5E5E5; font-size: 16px; line-height: 1.6; margin-bottom: 25px;">
+        ${statusDesc}
+      </p>
+
+      <table style="width: 100%; border-collapse: collapse; margin-bottom: 35px;">
+        <tr>
+          <td style="padding: 15px 0; border-bottom: 1px solid #222222; color: #888888; font-size: 14px; width: 40%;">Application ID</td>
+          <td style="padding: 15px 0; border-bottom: 1px solid #222222; color: #FFFFFF; font-weight: 500; font-size: 14px; text-align: right;">${appId}</td>
+        </tr>
+        <tr>
+          <td style="padding: 15px 0; border-bottom: 1px solid #222222; color: #888888; font-size: 14px;">Artist</td>
+          <td style="padding: 15px 0; border-bottom: 1px solid #222222; color: #FFFFFF; font-weight: 500; font-size: 14px; text-align: right;">${currentApp.artist_name}</td>
+        </tr>
+        <tr>
+          <td style="padding: 15px 0; border-bottom: 1px solid #222222; color: #888888; font-size: 14px;">Date Submitted</td>
+          <td style="padding: 15px 0; border-bottom: 1px solid #222222; color: #FFFFFF; font-weight: 500; font-size: 14px; text-align: right;">${submittedDate}</td>
+        </tr>
+        <tr>
+          <td style="padding: 15px 0; border-bottom: 1px solid #222222; color: #888888; font-size: 14px;">Current Status</td>
+          <td style="padding: 15px 0; border-bottom: 1px solid #222222; color: ${statusColor}; font-weight: 600; font-size: 14px; text-align: right; text-transform: uppercase;">${data.status}</td>
+        </tr>
+      </table>
+
+      <div style="text-align: center; border-top: 1px solid #222222; padding-top: 30px;">
+        <a href="https://thenew1017records.us" style="color: #D4AF37; text-decoration: none; font-size: 14px; font-weight: 500; letter-spacing: 1px; margin: 0 15px;">WEBSITE</a>
+        <a href="mailto:contact@thenew1017records.us" style="color: #D4AF37; text-decoration: none; font-size: 14px; font-weight: 500; letter-spacing: 1px; margin: 0 15px;">SUPPORT</a>
+      </div>
+    </div>
+    
+    <div style="text-align: center; margin-top: 30px; color: #666666; font-size: 12px; line-height: 1.5;">
+      <p style="margin: 0 0 10px 0;">&copy; ${new Date().getFullYear()} The New 1017 Records. All rights reserved.</p>
+      <p style="margin: 0;">If you did not submit this application or need assistance, simply reply to this email and our team will assist you.</p>
+    </div>
+  </div>
+</body>
+</html>`;
+
+        await resend.emails.send({
+          from: "The New 1017 Records <notifications@thenew1017records.us>",
+          replyTo: "contact@thenew1017records.us",
+          to: [currentApp.email],
+          subject: `Application Update: ${currentApp.artist_name} - ${data.status}`,
+          html: emailHtml,
+        });
+      } catch (err) {
+        console.error("Failed to send status update email:", err);
+      }
+    }
+
     return { ok: true };
   });
 
