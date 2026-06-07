@@ -680,15 +680,15 @@ export const submitArtistApplication = createServerFn({ method: "POST" })
       <table style="width: 100%; border-collapse: collapse; margin-bottom: 35px;">
         <tr>
           <td style="padding: 15px 0; border-bottom: 1px solid #222222; color: #888888; font-size: 14px; width: 40%;">Application ID</td>
-          <td style="padding: 15px 0; border-bottom: 1px solid #222222; color: #FFFFFF; font-weight: 500; font-size: 14px; text-align: right;">\${appId}</td>
+          <td style="padding: 15px 0; border-bottom: 1px solid #222222; color: #FFFFFF; font-weight: 500; font-size: 14px; text-align: right;">${appId}</td>
         </tr>
         <tr>
           <td style="padding: 15px 0; border-bottom: 1px solid #222222; color: #888888; font-size: 14px;">Artist</td>
-          <td style="padding: 15px 0; border-bottom: 1px solid #222222; color: #FFFFFF; font-weight: 500; font-size: 14px; text-align: right;">\${sanitized.artist_name}</td>
+          <td style="padding: 15px 0; border-bottom: 1px solid #222222; color: #FFFFFF; font-weight: 500; font-size: 14px; text-align: right;">${sanitized.artist_name}</td>
         </tr>
         <tr>
           <td style="padding: 15px 0; border-bottom: 1px solid #222222; color: #888888; font-size: 14px;">Date Submitted</td>
-          <td style="padding: 15px 0; border-bottom: 1px solid #222222; color: #FFFFFF; font-weight: 500; font-size: 14px; text-align: right;">\${new Date().toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })}</td>
+          <td style="padding: 15px 0; border-bottom: 1px solid #222222; color: #FFFFFF; font-weight: 500; font-size: 14px; text-align: right;">${new Date().toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })}</td>
         </tr>
       </table>
 
@@ -736,7 +736,7 @@ export const submitArtistApplication = createServerFn({ method: "POST" })
         If you did not submit this application or need assistance, simply reply to this email and our team will assist you.
       </p>
       <p style="color: #444444; font-size: 12px; margin: 0;">
-        &copy; \${new Date().getFullYear()} The New 1017 Records. All rights reserved.
+        &copy; ${new Date().getFullYear()} The New 1017 Records. All rights reserved.
       </p>
     </div>
   </div>
