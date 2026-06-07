@@ -18,6 +18,7 @@ export const Route = createFileRoute("/admin/applications")({
 
 type Application = {
   id: string;
+  application_id: string;
   full_name: string;
   email: string;
   artist_name: string;
@@ -569,6 +570,7 @@ function ApplicationsAdmin() {
             <div className="space-y-1.5">
               <span className="text-[10px] font-mono uppercase tracking-[0.3em] text-[#FFD700]">STAGE IDENTITY</span>
               <h3 className="font-display text-3xl uppercase text-white font-black tracking-tight">{selectedApp.artist_name}</h3>
+              <p className="text-muted-foreground font-mono text-[10px] uppercase tracking-wider">{selectedApp.application_id || `ID: ${selectedApp.id.slice(0, 8).toUpperCase()}`}</p>
             </div>
 
             {/* Technical Specifications */}
