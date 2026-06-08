@@ -338,14 +338,44 @@ export const Route = createFileRoute("/release/$name")({
   },
   head: ({ loaderData }) => {
     const release = loaderData?.release;
+    const title = release ? `${release.title} by ${release.artist} | 1017 Records` : "Release Profile";
+    const desc = release?.description || "High-fidelity release campaign dossier catalog portal.";
+    const img = release?.cover_url || "";
+    const url = release ? `https://www.thenew1017records.in/release/${slugify(release.title)}` : "https://www.thenew1017records.in";
+
     return {
       meta: [
-        { name: "description", content: release?.description || "High-fidelity release campaign dossier catalog portal." },
-        { property: "og:title", content: release ? `${release.title} — ${release.artist}` : "Release Profile" },
-        { property: "og:description", content: release?.description || "High-fidelity release campaign dossier catalog portal." },
-        { property: "og:image", content: release?.cover_url || "" },
+        { title },
+        { name: "description", content: desc },
+        { property: "og:title", content: title },
+        { property: "og:description", content: desc },
+        { property: "og:image", content: img },
+        { property: "og:url", content: url },
         { property: "og:type", content: "music.album" },
+        { name: "twitter:card", content: "summary_large_image" },
+        { name: "twitter:title", content: title },
+        { name: "twitter:description", content: desc },
+        { name: "twitter:image", content: img },
       ],
+      links: [{ rel: "canonical", href: url }],
+      scripts: release ? [
+        {
+          type: "application/ld+json",
+          children: JSON.stringify({
+            "@context": "https://schema.org",
+            "@type": "MusicAlbum",
+            "name": release.title,
+            "byArtist": {
+              "@type": "MusicGroup",
+              "name": release.artist
+            },
+            "image": img,
+            "description": desc,
+            "url": url,
+            "datePublished": release.release_date || undefined
+          })
+        }
+      ] : []
     };
   },
 });

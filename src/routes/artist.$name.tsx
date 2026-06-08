@@ -29,14 +29,39 @@ export const Route = createFileRoute("/artist/$name")({
   },
   head: ({ loaderData }) => {
     const artist = loaderData?.artist;
+    const title = artist ? `${artist.name} — The New 1017 Records` : "Artist Profile";
+    const desc = artist?.bio || "Decrypted artist profile and discography database.";
+    const img = artist?.image_url || "";
+    const url = artist ? `https://www.thenew1017records.in/artist/${slugify(artist.name)}` : "https://www.thenew1017records.in";
+    
     return {
       meta: [
-        { name: "description", content: artist?.bio || "Decrypted artist profile and discography database." },
-        { property: "og:title", content: artist ? `${artist.name} — The New 1017 Records` : "Artist Profile" },
-        { property: "og:description", content: artist?.bio || "Decrypted artist profile and discography database." },
-        { property: "og:image", content: artist?.image_url || "" },
+        { title },
+        { name: "description", content: desc },
+        { property: "og:title", content: title },
+        { property: "og:description", content: desc },
+        { property: "og:image", content: img },
+        { property: "og:url", content: url },
         { property: "og:type", content: "profile" },
+        { name: "twitter:card", content: "summary_large_image" },
+        { name: "twitter:title", content: title },
+        { name: "twitter:description", content: desc },
+        { name: "twitter:image", content: img },
       ],
+      links: [{ rel: "canonical", href: url }],
+      scripts: artist ? [
+        {
+          type: "application/ld+json",
+          children: JSON.stringify({
+            "@context": "https://schema.org",
+            "@type": "MusicGroup",
+            "name": artist.name,
+            "image": img,
+            "description": desc,
+            "url": url
+          })
+        }
+      ] : []
     };
   },
 });
