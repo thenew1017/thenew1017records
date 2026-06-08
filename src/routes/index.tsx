@@ -39,7 +39,7 @@ export const Route = createFileRoute("/")({
     meta: [
       { title: "The Official Website Of The New 1017 Records" },
       { name: "description", content: "Official home of The New 1017 Records — artists, releases, artist discovery system and the official store." },
-      { property: "og:url", content: "https://www.thenew1017records.in/" },
+      { property: "og:url", content: "https://www.thenew1017records.us/" },
       { property: "og:site_name", content: "The New 1017 Records" },
       {
         name: "jsonld",
@@ -47,7 +47,7 @@ export const Route = createFileRoute("/")({
           "@context": "https://schema.org",
           "@type": "Organization",
           "name": "The New 1017 Records",
-          "url": "https://www.thenew1017records.in",
+          "url": "https://www.thenew1017records.us",
           "logo": "https://vveslmalxlprmlfcdjae.supabase.co/storage/v1/object/public/media/founder/spotlight-1780301297380.jpg",
           "sameAs": [
             "https://www.instagram.com/1017records",
@@ -56,7 +56,7 @@ export const Route = createFileRoute("/")({
         })
       }
     ],
-    links: [{ rel: "canonical", href: "https://www.thenew1017records.in/" }],
+    links: [{ rel: "canonical", href: "https://www.thenew1017records.us/" }],
   }),
 });
 

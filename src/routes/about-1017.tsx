@@ -40,10 +40,10 @@ export const Route = createFileRoute("/about-1017")({
       { property: "og:title", content: "Artist Recruitment Portal — The New 1017 Records" },
       { property: "og:description", content: "Join the talent pipeline responsible for launching independent creators into global recognition." },
       { property: "og:type", content: "website" },
-      { property: "og:url", content: "https://www.thenew1017records.in/about-1017" },
+      { property: "og:url", content: "https://www.thenew1017records.us/about-1017" },
     ],
     links: [
-      { rel: "canonical", href: "https://www.thenew1017records.in/about-1017" },
+      { rel: "canonical", href: "https://www.thenew1017records.us/about-1017" },
       {
         rel: "preload",
         href: "https://vveslmalxlprmlfcdjae.supabase.co/storage/v1/object/public/media/founder/spotlight-1780301297380.jpg",

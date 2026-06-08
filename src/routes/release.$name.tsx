@@ -341,7 +341,7 @@ export const Route = createFileRoute("/release/$name")({
     const title = release ? `${release.title} by ${release.artist} — The New 1017 Records` : "Release";
     const desc = release?.description || `Listen to ${release?.title} by ${release?.artist}. Official release from The New 1017 Records.`;
     const img = release?.cover_url || "";
-    const url = release ? `https://www.thenew1017records.in/release/${slugify(release.title)}` : "https://www.thenew1017records.in";
+    const url = release ? `https://www.thenew1017records.us/release/${slugify(release.title)}` : "https://www.thenew1017records.us";
     
     return {
       meta: [
@@ -368,7 +368,7 @@ export const Route = createFileRoute("/release/$name")({
             },
             "image": release.cover_url || "",
             "description": release.description || "",
-            "url": `https://www.thenew1017records.in/release/${slugify(release.title)}`,
+            "url": `https://www.thenew1017records.us/release/${slugify(release.title)}`,
             "datePublished": release.release_date || undefined
           }) : ""
         }

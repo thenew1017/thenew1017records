@@ -4,6 +4,19 @@
   "regions": [
     "iad1"
   ],
+  "redirects": [
+    {
+      "source": "/(.*)",
+      "has": [
+        {
+          "type": "host",
+          "value": "(www\\.)?thenew1017records\\.in"
+        }
+      ],
+      "destination": "https://www.thenew1017records.us/$1",
+      "permanent": true
+    }
+  ],
   "headers": [
     {
       "source": "/assets/(.*)",

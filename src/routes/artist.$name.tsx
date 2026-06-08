@@ -32,7 +32,7 @@ export const Route = createFileRoute("/artist/$name")({
     const title = artist ? `${artist.name} — The New 1017 Records` : "Artist Profile";
     const desc = artist?.bio || "Decrypted artist profile and discography database.";
     const img = artist?.image_url || "";
-    const url = artist ? `https://www.thenew1017records.in/artist/${slugify(artist.name)}` : "https://www.thenew1017records.in";
+    const url = artist ? `https://www.thenew1017records.us/artist/${slugify(artist.name)}` : "https://www.thenew1017records.us";
     
     return {
       meta: [
@@ -52,7 +52,7 @@ export const Route = createFileRoute("/artist/$name")({
             "@context": "https://schema.org",
             "@type": "MusicGroup",
             "name": artist.name,
-            "url": `https://www.thenew1017records.in/artist/${slugify(artist.name)}`,
+            "url": `https://www.thenew1017records.us/artist/${slugify(artist.name)}`,
             "image": artist.image_url || "https://vveslmalxlprmlfcdjae.supabase.co/storage/v1/object/public/media/founder/spotlight-1780301297380.jpg",
             "description": artist.bio,
             "sameAs": [
