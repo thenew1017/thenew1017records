@@ -185,9 +185,11 @@ export const adminDeleteArtist = createServerFn({ method: "POST" })
     return { ok: true };
   });
 
-// Helper to strip basic script tags from unknown JSON recursively
+import DOMPurify from "isomorphic-dompurify";
+
+// Helper to sanitize unknown JSON recursively against XSS
 function sanitizeJsonDeep(obj: any): any {
-  if (typeof obj === "string") return obj.replace(/<script\b[^<]*(?:(?!<\/script>)<[^<]*)*<\/script>/gi, "");
+  if (typeof obj === "string") return DOMPurify.sanitize(obj);
   if (Array.isArray(obj)) return obj.map(sanitizeJsonDeep);
   if (obj !== null && typeof obj === "object") {
     const sanitized: any = {};

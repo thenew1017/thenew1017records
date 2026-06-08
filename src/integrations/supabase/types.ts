@@ -228,6 +228,18 @@ export type Database = {
         }
         Relationships: []
       }
+      activity_logs: {
+        Row: any; Insert: any; Update: any; Relationships: any[];
+      }
+      artist_applications: {
+        Row: any; Insert: any; Update: any; Relationships: any[];
+      }
+      media_gallery: {
+        Row: any; Insert: any; Update: any; Relationships: any[];
+      }
+      founder_spotlight: {
+        Row: any; Insert: any; Update: any; Relationships: any[];
+      }
     }
     Views: {
       [_ in never]: never
