@@ -756,7 +756,16 @@ function ReleaseForm({
     setUploading(true);
     setErr(null);
     try {
-      const ext = file.name.split(".").pop() ?? "jpg";
+      // Validate file type
+      const validTypes = ["image/jpeg", "image/png", "image/webp", "image/gif"];
+      if (!validTypes.includes(file.type)) {
+        throw new Error("Invalid file type. Only JPEG, PNG, WEBP, and GIF are allowed.");
+      }
+      const ext = file.name.split(".").pop()?.toLowerCase() ?? "jpg";
+      const validExts = ["jpg", "jpeg", "png", "webp", "gif"];
+      if (!validExts.includes(ext)) {
+        throw new Error("Invalid file extension.");
+      }
       const path = `releases/${Date.now()}-${Math.random().toString(36).slice(2, 8)}.${ext}`;
       const { error } = await supabase.storage.from("media").upload(path, file, { cacheControl: "31536000", upsert: false });
       if (error) throw error;

@@ -48,19 +48,12 @@ export function getAdminClient() {
     
   // Strictly process.env is checked for the service role key. 
   // We NEVER look up a VITE_ prefixed variable for the secret to prevent bundler leakage to the client-side.
-  let key = 
+  const key = 
     process.env.SUPABASE_SERVICE_ROLE_KEY || 
     process.env.SUPABASE_ROLE_KEY;
     
   if (!key) {
-    console.warn("⚠️ [Supabase Server Client] SUPABASE_SERVICE_ROLE_KEY is missing! Falling back to publishable key for public reads.");
-    key = 
-      process.env.SUPABASE_PUBLISHABLE_KEY || 
-      process.env.SUPABASE_ANON_KEY || 
-      import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY ||
-      import.meta.env.VITE_SUPABASE_ANON_KEY ||
-      process.env.VITE_SUPABASE_PUBLISHABLE_KEY ||
-      process.env.VITE_SUPABASE_ANON_KEY;
+    console.error("⚠️ [Supabase Server Client] SUPABASE_SERVICE_ROLE_KEY is missing! Failing closed to prevent privilege escalation.");
   }
     
   if (!url || !key) {
@@ -82,13 +75,6 @@ export async function assertAdmin(userId: string, customClient?: any, userEmail?
     normalizedEmail === "contact@thenew1017records.us" || 
     userId === "cd45b27d-7cce-47fe-8457-2cf5c098bb3f" // contact@thenew1017records.us fallback
   ) {
-    return serviceClient;
-  }
-
-  // Foolproof local development bypass (Evaluated purely at runtime securely)
-  const isDev = process.env.NODE_ENV === "development";
-  if (process.env.BYPASS_ADMIN === "true" || isDev) {
-    console.warn("🛡️ [Admin Bypass] Admin check bypassed automatically in local development!");
     return serviceClient;
   }
 

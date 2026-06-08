@@ -53,19 +53,6 @@ export const requireSupabaseAuth = createMiddleware({ type: 'function' })
         throw new Error(message);
       }
 
-      // Foolproof local development bypass (Evaluated purely at runtime securely)
-      const isDev = process.env.NODE_ENV === "development";
-      if (process.env.BYPASS_ADMIN === "true" || isDev) {
-        console.warn("⚠️ [Admin Bypass] requireSupabaseAuth bypassed automatically in local development!");
-        return next({
-          context: {
-            supabase: createClient<Database>(SUPABASE_URL, SUPABASE_PUBLISHABLE_KEY),
-            userId: "bd9699b1-ab63-4d16-86a7-cee0cc9e0173", // Use the validated admin UUID
-            claims: {},
-          },
-        });
-      }
-      
       const request = getRequest();
 
       if (!request?.headers) {

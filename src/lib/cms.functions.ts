@@ -33,7 +33,8 @@ export function clearPublicCaches() {
 
 export const listPublicArtists = createServerFn({ method: "GET" }).handler(async () => {
   const ip = getClientIp();
-  if (!rateLimit(ip, "public_artists", 60, 60)) {
+  const allowed = await rateLimit(ip, "public_artists", 60, 60);
+  if (!allowed) {
     throw new Error("Too many requests. Please try again later.");
   }
   
@@ -75,7 +76,8 @@ export const listPublicArtists = createServerFn({ method: "GET" }).handler(async
 
 export const getPublicSettings = createServerFn({ method: "GET" }).handler(async () => {
   const ip = getClientIp();
-  if (!rateLimit(ip, "public_settings", 60, 60)) {
+  const allowed = await rateLimit(ip, "public_settings", 60, 60);
+  if (!allowed) {
     throw new Error("Too many requests. Please try again later.");
   }
   console.log("⚡ [Supabase Server Settings Query] Executing: supabase.from('site_settings').select('key,value')");
@@ -124,7 +126,7 @@ export const subscribeNewsletter = createServerFn({ method: "POST" })
   .inputValidator((input: unknown) => z.object({ email: z.string().email().max(255) }).parse(input))
   .handler(async ({ data }) => {
     const ip = getClientIp();
-    const allowed = rateLimit(ip, "subscribe_newsletter", 5, 3600);
+    const allowed = await rateLimit(ip, "subscribe_newsletter", 5, 3600);
     if (!allowed) {
       throw new Error("Too many subscription requests from this IP. Please try again in an hour.");
     }
@@ -324,11 +326,6 @@ export const checkIsAdmin = createServerFn({ method: "GET" })
   )
   .handler(async ({ data, context }) => {
     try {
-      const isDev = process.env.NODE_ENV === "development" || import.meta.env.DEV;
-      if (process.env.BYPASS_ADMIN === "true" || import.meta.env.VITE_BYPASS_ADMIN === "true" || isDev) {
-        return { isAdmin: true };
-      }
-
       let userId = context?.userId;
       let userEmail = context?.userEmail;
       let client: any = null;
@@ -560,7 +557,7 @@ export const submitArtistApplication = createServerFn({ method: "POST" })
   )
   .handler(async ({ data }) => {
     const ip = getClientIp();
-    const allowed = rateLimit(ip, "submit_application", 3, 3600);
+    const allowed = await rateLimit(ip, "submit_application", 3, 3600);
     if (!allowed) {
       throw new Error("Artist application rate limit exceeded (max 3 submissions per hour). Please try again later.");
     }

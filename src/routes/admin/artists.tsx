@@ -146,7 +146,17 @@ function ArtistForm({ initial, onClose, onSave }: { initial: Artist; onClose: ()
     setUploading(true);
     setErr(null);
     try {
-      const ext = file.name.split(".").pop() ?? "jpg";
+      // Validate file type
+      const validTypes = ["image/jpeg", "image/png", "image/webp", "image/gif"];
+      if (!validTypes.includes(file.type)) {
+        throw new Error("Invalid file type. Only JPEG, PNG, WEBP, and GIF are allowed.");
+      }
+      const ext = file.name.split(".").pop()?.toLowerCase() ?? "jpg";
+      const validExts = ["jpg", "jpeg", "png", "webp", "gif"];
+      if (!validExts.includes(ext)) {
+        throw new Error("Invalid file extension.");
+      }
+      
       const path = `artists/${Date.now()}-${Math.random().toString(36).slice(2, 8)}.${ext}`;
       const { error } = await supabase.storage.from("media").upload(path, file, { upsert: false, cacheControl: "31536000" });
       if (error) throw error;
@@ -298,7 +308,15 @@ function MediaGalleryManager({ artistId, artistName, onClose }: { artistId: stri
     setUploading(true);
     setErr(null);
     try {
-      const ext = file.name.split(".").pop() ?? "jpg";
+      const validTypes = ["image/jpeg", "image/png", "image/webp", "image/gif"];
+      if (!validTypes.includes(file.type)) {
+        throw new Error("Invalid file type. Only JPEG, PNG, WEBP, and GIF are allowed.");
+      }
+      const ext = file.name.split(".").pop()?.toLowerCase() ?? "jpg";
+      const validExts = ["jpg", "jpeg", "png", "webp", "gif"];
+      if (!validExts.includes(ext)) {
+        throw new Error("Invalid file extension.");
+      }
       const path = `gallery/${artistId}/${Date.now()}-${Math.random().toString(36).slice(2, 8)}.${ext}`;
       const { error } = await supabase.storage.from("media").upload(path, file, { upsert: false, cacheControl: "31536000" });
       if (error) throw error;

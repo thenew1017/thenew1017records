@@ -1,50 +1,54 @@
-type RateLimitRecord = {
-  tokens: number;
-  lastRefill: number;
-};
-
-// In-memory token store mapped by "limitKey:ip"
-const limits = new Map<string, RateLimitRecord>();
+import { getAdminClient } from "./admin.server";
 
 /**
- * Token Bucket Rate Limiter
+ * DB-backed Token Bucket Rate Limiter (Serverless Safe)
  * 
  * @param ip Client IP address to rate limit
  * @param limitKey Key describing the action (e.g. 'submit_application')
  * @param maxTokens Maximum capacity of the token bucket
  * @param refillRateSec Time in seconds required to refill a single token
- * @returns boolean True if the request is allowed, false if rate limited
+ * @returns Promise<boolean> True if the request is allowed, false if rate limited
  */
-export function rateLimit(
+export async function rateLimit(
   ip: string,
   limitKey: string,
   maxTokens: number = 3,
   refillRateSec: number = 1200 // Default: 20 minutes per token (3 tokens max = 1 hour window)
-): boolean {
-  const now = Date.now();
-  const key = `${limitKey}:${ip}`;
-  let record = limits.get(key);
+): Promise<boolean> {
+  const admin = getAdminClient();
+  const windowSec = maxTokens * refillRateSec;
+  const since = new Date(Date.now() - windowSec * 1000).toISOString();
 
-  if (!record) {
-    record = { tokens: maxTokens, lastRefill: now };
-  } else {
-    // Calculate refilled tokens since last access
-    const elapsedMs = now - record.lastRefill;
-    const refillTokens = Math.floor(elapsedMs / (refillRateSec * 1000));
-    
-    if (refillTokens > 0) {
-      record.tokens = Math.min(maxTokens, record.tokens + refillTokens);
-      // Keep fractional time for accurate sliding windows
-      record.lastRefill = record.lastRefill + refillTokens * refillRateSec * 1000;
-    }
-  }
+  // For high-volume public endpoints, we could use a dedicated rate limit table
+  // but activity_logs works well enough for forms and newsletters.
+  // We look for 'rate_limit_consume' events.
+  const { data, error } = await admin
+    .from("activity_logs")
+    .select("created_at")
+    .eq("ip_address", ip)
+    .eq("action", `rate_limit:${limitKey}`)
+    .gte("created_at", since);
 
-  if (record.tokens <= 0) {
+  if (error) {
+    console.error("[Rate Limit DB Error]:", error.message);
+    // Fail closed on DB error for critical routes
     return false;
   }
 
-  // Consume a token
-  record.tokens -= 1;
-  limits.set(key, record);
+  // Count how many tokens have been consumed in the rolling window
+  const consumed = data ? data.length : 0;
+
+  if (consumed >= maxTokens) {
+    return false; // Bucket is empty
+  }
+
+  // Consume a token by logging it
+  await admin.from("activity_logs").insert({
+    user_id: null,
+    action: `rate_limit:${limitKey}`,
+    details: { windowSec, maxTokens },
+    ip_address: ip,
+  });
+
   return true;
 }
