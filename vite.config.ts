@@ -28,6 +28,22 @@ export default defineConfig(({ command }) => ({
           nitro({
             preset: deployTarget === "cloudflare-workers" ? "cloudflare-workers" : "vercel",
           }),
+          {
+            name: "copy-public-to-vercel",
+            closeBundle: async () => {
+              const fs = await import("fs");
+              try {
+                if (fs.existsSync(".vercel/output/static")) {
+                  fs.cpSync("public", ".vercel/output/static", { recursive: true, force: true });
+                  console.log("SUCCESSFULLY COPIED PUBLIC DIRECTORY TO .vercel/output/static!");
+                } else {
+                  console.log(".vercel/output/static DOES NOT EXIST YET");
+                }
+              } catch (e) {
+                console.error("Failed to copy public directory:", e);
+              }
+            }
+          }
         ]
       : []),
   ],
