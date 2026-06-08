@@ -43,25 +43,30 @@ export const Route = createFileRoute("/artist/$name")({
         { property: "og:image", content: img },
         { property: "og:url", content: url },
         { property: "og:type", content: "profile" },
-        { name: "twitter:card", content: "summary_large_image" },
         { name: "twitter:title", content: title },
         { name: "twitter:description", content: desc },
         { name: "twitter:image", content: img },
-      ],
-      links: [{ rel: "canonical", href: url }],
-      scripts: artist ? [
         {
-          type: "application/ld+json",
-          children: JSON.stringify({
+          name: "jsonld",
+          content: artist ? JSON.stringify({
             "@context": "https://schema.org",
             "@type": "MusicGroup",
             "name": artist.name,
-            "image": img,
-            "description": desc,
-            "url": url
-          })
+            "url": `https://www.thenew1017records.in/artist/${slugify(artist.name)}`,
+            "image": artist.image_url || "https://vveslmalxlprmlfcdjae.supabase.co/storage/v1/object/public/media/founder/spotlight-1780301297380.jpg",
+            "description": artist.bio,
+            "sameAs": [
+              artist.spotify_url,
+              artist.apple_url,
+              artist.youtube_url,
+              artist.instagram_url,
+              artist.twitter_url,
+              artist.website_url
+            ].filter(Boolean)
+          }) : ""
         }
-      ] : []
+      ],
+      links: [{ rel: "canonical", href: url }],
     };
   },
 });

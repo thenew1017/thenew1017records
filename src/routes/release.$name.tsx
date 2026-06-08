@@ -338,11 +338,11 @@ export const Route = createFileRoute("/release/$name")({
   },
   head: ({ loaderData }) => {
     const release = loaderData?.release;
-    const title = release ? `${release.title} by ${release.artist} | 1017 Records` : "Release Profile";
-    const desc = release?.description || "High-fidelity release campaign dossier catalog portal.";
+    const title = release ? `${release.title} by ${release.artist} — The New 1017 Records` : "Release";
+    const desc = release?.description || `Listen to ${release?.title} by ${release?.artist}. Official release from The New 1017 Records.`;
     const img = release?.cover_url || "";
     const url = release ? `https://www.thenew1017records.in/release/${slugify(release.title)}` : "https://www.thenew1017records.in";
-
+    
     return {
       meta: [
         { title },
@@ -356,12 +356,9 @@ export const Route = createFileRoute("/release/$name")({
         { name: "twitter:title", content: title },
         { name: "twitter:description", content: desc },
         { name: "twitter:image", content: img },
-      ],
-      links: [{ rel: "canonical", href: url }],
-      scripts: release ? [
         {
-          type: "application/ld+json",
-          children: JSON.stringify({
+          name: "jsonld",
+          content: release ? JSON.stringify({
             "@context": "https://schema.org",
             "@type": "MusicAlbum",
             "name": release.title,
@@ -369,13 +366,14 @@ export const Route = createFileRoute("/release/$name")({
               "@type": "MusicGroup",
               "name": release.artist
             },
-            "image": img,
-            "description": desc,
-            "url": url,
+            "image": release.cover_url || "",
+            "description": release.description || "",
+            "url": `https://www.thenew1017records.in/release/${slugify(release.title)}`,
             "datePublished": release.release_date || undefined
-          })
+          }) : ""
         }
-      ] : []
+      ],
+      links: [{ rel: "canonical", href: url }],
     };
   },
 });

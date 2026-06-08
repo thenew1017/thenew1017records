@@ -41,12 +41,9 @@ export const Route = createFileRoute("/")({
       { name: "description", content: "Official home of The New 1017 Records — artists, releases, artist discovery system and the official store." },
       { property: "og:url", content: "https://www.thenew1017records.in/" },
       { property: "og:site_name", content: "The New 1017 Records" },
-    ],
-    links: [{ rel: "canonical", href: "https://www.thenew1017records.in/" }],
-    scripts: [
       {
-        type: "application/ld+json",
-        children: JSON.stringify({
+        name: "jsonld",
+        content: JSON.stringify({
           "@context": "https://schema.org",
           "@type": "Organization",
           "name": "The New 1017 Records",
@@ -58,7 +55,8 @@ export const Route = createFileRoute("/")({
           ]
         })
       }
-    ]
+    ],
+    links: [{ rel: "canonical", href: "https://www.thenew1017records.in/" }],
   }),
 });
 
@@ -98,6 +96,7 @@ function HomepagePendingComponent() {
 
 function Index() {
   const loaderData = Route.useLoaderData();
+
   return (
     <main id="top" className="relative min-h-screen bg-background text-foreground grain-overlay overflow-x-hidden w-full max-w-full">
       <Nav />

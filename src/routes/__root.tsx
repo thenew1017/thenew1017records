@@ -169,11 +169,22 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
   errorComponent: ErrorComponent,
 });
 
+import { useRouterState } from "@tanstack/react-router";
+
 function RootShell({ children }: { children: React.ReactNode }) {
+  const routerState = useRouterState();
+  const jsonLds = routerState.matches
+    .flatMap((m) => m.meta?.filter((meta: any) => meta.name === "jsonld") || [])
+    .map((meta: any) => meta.content)
+    .filter(Boolean);
+
   return (
     <html lang="en" className="overflow-x-hidden w-full max-w-full">
       <head>
         <HeadContent />
+        {jsonLds.map((content, i) => (
+           <script key={i} type="application/ld+json" dangerouslySetInnerHTML={{ __html: content as string }} />
+        ))}
       </head>
       <body className="overflow-x-hidden w-full max-w-full">
         {children}
