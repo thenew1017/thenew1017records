@@ -1,7 +1,7 @@
 const puppeteer = require('puppeteer');
 
 (async () => {
-  console.log("🚀 Starting Production Smoke Test on https://www.thenew1017records.in...");
+  console.log("🚀 Starting Production Smoke Test on https://www.thenew1017records.us...");
   
   let failedChecks = [];
   let consoleErrors = [];
@@ -39,7 +39,7 @@ const puppeteer = require('puppeteer');
   try {
     // 1 & 8. Homepage loads successfully & SSL
     console.log("Checking Homepage & SSL...");
-    const response = await page.goto('https://www.thenew1017records.in', { waitUntil: 'networkidle2' });
+    const response = await page.goto('https://www.thenew1017records.us', { waitUntil: 'networkidle2' });
     
     if (!response.ok()) {
       failedChecks.push(`Homepage Load Failed: Status ${response.status()}`);
@@ -52,7 +52,7 @@ const puppeteer = require('puppeteer');
 
     // 3. Admin Authentication check
     console.log("Checking Admin Login page...");
-    const loginResponse = await page.goto('https://www.thenew1017records.in/admin/login', { waitUntil: 'networkidle2' });
+    const loginResponse = await page.goto('https://www.thenew1017records.us/admin/login', { waitUntil: 'networkidle2' });
     if (!loginResponse.ok()) failedChecks.push(`Admin Login Load Failed: Status ${loginResponse.status()}`);
     
     await page.waitForSelector('form', { timeout: 5000 }).catch(() => failedChecks.push("Admin login form missing."));

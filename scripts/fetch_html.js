@@ -25,7 +25,7 @@ async function fetchUrl(url) {
 async function run() {
   await fetchUrl("https://thenew1017records.vercel.app");
   console.log("\n=========================\n");
-  await fetchUrl("https://thenew1017records.in");
+  await fetchUrl("https://thenew1017records.us");
 }
 
 run();
