@@ -174,11 +174,9 @@ export const adminDeleteArtist = createServerFn({ method: "POST" })
     return { ok: true };
   });
 
-import DOMPurify from "isomorphic-dompurify";
-
-// Helper to sanitize unknown JSON recursively against XSS
+// Helper to strip basic script tags from unknown JSON recursively
 function sanitizeJsonDeep(obj: any): any {
-  if (typeof obj === "string") return DOMPurify.sanitize(obj);
+  if (typeof obj === "string") return obj.replace(/<script\b[^<]*(?:(?!<\/script>)<[^<]*)*<\/script>/gi, "");
   if (Array.isArray(obj)) return obj.map(sanitizeJsonDeep);
   if (obj !== null && typeof obj === "object") {
     const sanitized: any = {};
