@@ -633,18 +633,18 @@ function ApplicationsAdmin() {
                 <h4 className="font-mono text-[9px] uppercase tracking-widest text-white/30">ADMINISTRATION STATUS ACTION</h4>
                 
                 <div className="grid grid-cols-2 gap-3 font-mono text-[9px]">
-                  {["Pending", "Reviewed", "Approved", "Rejected"].map((st) => (
+                  {["Pending", "Reviewing", "Approved", "Rejected"].map((st) => (
                     <button
                       key={st}
                       disabled={updatingId !== null}
                       onClick={() => handleStatusChange(selectedApp.id, st as any)}
                       className={`px-3 py-2.5 border rounded-lg uppercase tracking-wider text-center cursor-pointer transition-all duration-300 ${
-                        selectedApp.status === st
+                        (selectedApp.status === st || (selectedApp.status === "Reviewed" && st === "Reviewing"))
                           ? "bg-[#FFD700] text-black border-[#FFD700] font-bold shadow-[0_0_15px_rgba(255,215,0,0.3)]"
                           : "bg-black/40 border-white/10 text-muted-foreground hover:border-white/20 hover:text-white hover:bg-white/[0.05]"
                       }`}
                     >
-                      {updatingId === selectedApp.id && selectedApp.status === st ? "Saving..." : (st === "Reviewed" ? "Reviewing" : st)}
+                      {updatingId === selectedApp.id && (selectedApp.status === st || (selectedApp.status === "Reviewed" && st === "Reviewing")) ? "Saving..." : st}
                     </button>
                   ))}
                 </div>
