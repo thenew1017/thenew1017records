@@ -32,12 +32,6 @@ export function clearPublicCaches() {
 }
 
 export const listPublicArtists = createServerFn({ method: "GET" }).handler(async () => {
-  const ip = getClientIp();
-  const allowed = await rateLimit(ip, "public_artists", 60, 60);
-  if (!allowed) {
-    throw new Error("Too many requests. Please try again later.");
-  }
-  
   const resolvedUrl = process.env.SUPABASE_URL || process.env.VITE_SUPABASE_URL || import.meta.env.VITE_SUPABASE_URL;
   const resolvedKey = 
     process.env.SUPABASE_PUBLISHABLE_KEY || 
@@ -75,11 +69,6 @@ export const listPublicArtists = createServerFn({ method: "GET" }).handler(async
 });
 
 export const getPublicSettings = createServerFn({ method: "GET" }).handler(async () => {
-  const ip = getClientIp();
-  const allowed = await rateLimit(ip, "public_settings", 60, 60);
-  if (!allowed) {
-    throw new Error("Too many requests. Please try again later.");
-  }
   console.log("⚡ [Supabase Server Settings Query] Executing: supabase.from('site_settings').select('key,value')");
   const { supabase } = await import("@/integrations/supabase/client");
   const { data, error } = await supabase.from("site_settings").select("key,value");
