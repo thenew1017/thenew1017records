@@ -591,49 +591,82 @@ export const submitArtistApplication = createServerFn({ method: "POST" })
           to: "contact@thenew1017records.us",
           replyTo: "contact@thenew1017records.us",
           subject: "New Artist Application Received",
-          html: `
-            <div style="font-family: sans-serif; max-width: 600px; margin: 0 auto;">
-              <h2 style="color: #D4AF37;">New Artist Application Received</h2>
-              <table style="width: 100%; border-collapse: collapse; margin-top: 20px;">
-                <tr style="border-bottom: 1px solid #eee;">
-                  <td style="padding: 10px 0; font-weight: bold; width: 30%;">Full Name</td>
-                  <td style="padding: 10px 0;">${sanitized.full_name}</td>
-                </tr>
-                <tr style="border-bottom: 1px solid #eee;">
-                  <td style="padding: 10px 0; font-weight: bold;">Email</td>
-                  <td style="padding: 10px 0;">
-                    <a href="mailto:${sanitized.email}" style="color: #000;">${sanitized.email}</a>
-                  </td>
-                </tr>
-                <tr style="border-bottom: 1px solid #eee;">
-                  <td style="padding: 10px 0; font-weight: bold;">Artist Name</td>
-                  <td style="padding: 10px 0;">${sanitized.artist_name}</td>
-                </tr>
-                <tr style="border-bottom: 1px solid #eee;">
-                  <td style="padding: 10px 0; font-weight: bold;">Spotify Link</td>
-                  <td style="padding: 10px 0;">
-                    ${sanitized.spotify_link ? `<a href="${sanitized.spotify_link}" target="_blank" style="color: #000;">${sanitized.spotify_link}</a>` : "Not provided"}
-                  </td>
-                </tr>
-                <tr style="border-bottom: 1px solid #eee;">
-                  <td style="padding: 10px 0; font-weight: bold;">Photo URL</td>
-                  <td style="padding: 10px 0;">
-                    ${sanitized.artist_photo_url ? `<a href="${sanitized.artist_photo_url}" target="_blank" style="color: #000;">View Photo</a>` : "Not provided"}
-                  </td>
-                </tr>
-                <tr style="border-bottom: 1px solid #eee;">
-                  <td style="padding: 10px 0; font-weight: bold;">EPK URL</td>
-                  <td style="padding: 10px 0;">
-                    ${sanitized.epk_url ? `<a href="${sanitized.epk_url}" target="_blank" style="color: #000;">View EPK</a>` : "Not provided"}
-                  </td>
-                </tr>
-              </table>
-              <div style="margin-top: 20px;">
-                <h3 style="margin-bottom: 10px; font-size: 16px;">Biography / Campaign Details:</h3>
-                <div style="background-color: #f9f9f9; padding: 15px; border-radius: 5px; white-space: pre-wrap; font-size: 14px; line-height: 1.5;">${sanitized.campaign_details || "Not provided"}</div>
-              </div>
-            </div>
-          `
+          html: `<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>New Dossier Intake</title>
+</head>
+<body style="margin: 0; padding: 0; background-color: #050505; font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; color: #E5E5E5; -webkit-font-smoothing: antialiased;">
+  <div style="max-width: 600px; margin: 0 auto; padding: 40px 20px;">
+    
+    <!-- Luxury Text Header -->
+    <div style="text-align: center; margin-bottom: 40px; padding-bottom: 25px; border-bottom: 1px solid #222222;">
+      <h1 style="color: #FFFFFF; font-size: 22px; font-weight: 800; margin: 0; letter-spacing: 5px; text-transform: uppercase;">THE NEW 1017 RECORDS</h1>
+      <p style="color: #888888; font-size: 11px; margin: 10px 0 0 0; letter-spacing: 3px; text-transform: uppercase;">Artist Development & A&R Division</p>
+      <p style="color: #D4AF37; font-size: 10px; margin: 6px 0 0 0; letter-spacing: 2px; text-transform: uppercase;">Executive Dossier Alert</p>
+    </div>
+    
+    <div style="background-color: #0A0A0A; border: 1px solid #1A1A1A; border-radius: 4px; padding: 40px;">
+      <div style="text-align: center; margin-bottom: 35px;">
+        <h2 style="color: #D4AF37; font-size: 20px; font-weight: 600; margin: 0 0 10px 0; text-transform: uppercase; letter-spacing: 3px;">New Dossier Intake</h2>
+        <p style="color: #666666; font-size: 12px; margin: 0; letter-spacing: 2px;">PRIORITY A&R REVIEW REQUIRED</p>
+      </div>
+
+      <table style="width: 100%; border-collapse: collapse; margin-bottom: 40px;">
+        <tr>
+          <td style="padding: 15px 0; border-bottom: 1px solid #1A1A1A; color: #666666; font-size: 13px; font-weight: 500; text-transform: uppercase; letter-spacing: 1px; width: 35%;">Artist Identity</td>
+          <td style="padding: 15px 0; border-bottom: 1px solid #1A1A1A; color: #FFFFFF; font-weight: 600; font-size: 14px; text-align: right;">${sanitized.artist_name}</td>
+        </tr>
+        <tr>
+          <td style="padding: 15px 0; border-bottom: 1px solid #1A1A1A; color: #666666; font-size: 13px; font-weight: 500; text-transform: uppercase; letter-spacing: 1px;">Legal Name</td>
+          <td style="padding: 15px 0; border-bottom: 1px solid #1A1A1A; color: #CCCCCC; font-weight: 500; font-size: 14px; text-align: right;">${sanitized.full_name}</td>
+        </tr>
+        <tr>
+          <td style="padding: 15px 0; border-bottom: 1px solid #1A1A1A; color: #666666; font-size: 13px; font-weight: 500; text-transform: uppercase; letter-spacing: 1px;">Contact Email</td>
+          <td style="padding: 15px 0; border-bottom: 1px solid #1A1A1A; color: #D4AF37; font-weight: 500; font-size: 14px; text-align: right;">
+            <a href="mailto:${sanitized.email}" style="color: #D4AF37; text-decoration: none;">${sanitized.email}</a>
+          </td>
+        </tr>
+        <tr>
+          <td style="padding: 15px 0; border-bottom: 1px solid #1A1A1A; color: #666666; font-size: 13px; font-weight: 500; text-transform: uppercase; letter-spacing: 1px;">Spotify Link</td>
+          <td style="padding: 15px 0; border-bottom: 1px solid #1A1A1A; font-weight: 500; font-size: 14px; text-align: right;">
+            ${sanitized.spotify_link ? `<a href="${sanitized.spotify_link}" target="_blank" style="color: #10B981; text-decoration: none;">Review Catalog</a>` : "<span style='color: #666666;'>Not Provided</span>"}
+          </td>
+        </tr>
+        <tr>
+          <td style="padding: 15px 0; border-bottom: 1px solid #1A1A1A; color: #666666; font-size: 13px; font-weight: 500; text-transform: uppercase; letter-spacing: 1px;">Photo Asset</td>
+          <td style="padding: 15px 0; border-bottom: 1px solid #1A1A1A; font-weight: 500; font-size: 14px; text-align: right;">
+            ${sanitized.artist_photo_url ? `<a href="${sanitized.artist_photo_url}" target="_blank" style="color: #3B82F6; text-decoration: none;">View Asset</a>` : "<span style='color: #666666;'>Not Provided</span>"}
+          </td>
+        </tr>
+        <tr>
+          <td style="padding: 15px 0; border-bottom: 1px solid #1A1A1A; color: #666666; font-size: 13px; font-weight: 500; text-transform: uppercase; letter-spacing: 1px;">EPK URL</td>
+          <td style="padding: 15px 0; border-bottom: 1px solid #1A1A1A; font-weight: 500; font-size: 14px; text-align: right;">
+            ${sanitized.epk_url ? `<a href="${sanitized.epk_url}" target="_blank" style="color: #8B5CF6; text-decoration: none;">View EPK</a>` : "<span style='color: #666666;'>Not Provided</span>"}
+          </td>
+        </tr>
+      </table>
+
+      <div style="margin-bottom: 20px;">
+        <h3 style="color: #888888; font-size: 11px; text-transform: uppercase; letter-spacing: 2px; margin-bottom: 15px;">Biography / Campaign Strategy</h3>
+        <div style="background-color: #050505; border: 1px solid #1A1A1A; padding: 20px; border-left: 2px solid #D4AF37; font-size: 13px; line-height: 1.8; color: #AAAAAA; white-space: pre-wrap; font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;">${sanitized.campaign_details || "No strategy provided."}</div>
+      </div>
+      
+      <div style="text-align: center; margin-top: 40px;">
+        <a href="https://thenew1017records.us/admin" style="display: inline-block; background-color: #D4AF37; color: #000000; text-decoration: none; font-size: 12px; font-weight: 700; text-transform: uppercase; letter-spacing: 2px; padding: 15px 30px; border-radius: 2px;">Access Admin Portal</a>
+      </div>
+    </div>
+    
+    <!-- Confidentiality Section -->
+    <div style="margin-top: 40px; padding: 20px; border: 1px solid #1A1A1A; background-color: #0A0A0A; border-radius: 4px;">
+      <p style="color: #D4AF37; font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 2px; margin: 0 0 10px 0; text-align: center;">Strictly Confidential</p>
+      <p style="color: #555555; font-size: 10px; line-height: 1.6; margin: 0; text-align: justify;">This executive alert contains highly confidential talent evaluation data intended solely for the A&R division. Any unauthorized review or disclosure is prohibited.</p>
+    </div>
+  </div>
+</body>
+</html>`
         });
 
         // 2. Send confirmation to Applicant
