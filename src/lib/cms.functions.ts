@@ -546,9 +546,9 @@ export const submitArtistApplication = createServerFn({ method: "POST" })
   )
   .handler(async ({ data }) => {
     const ip = getClientIp();
-    const allowed = await rateLimit(ip, "submit_application", 3, 3600);
+    const allowed = await rateLimit(ip, "submit_application_v2", 20, 3600);
     if (!allowed) {
-      throw new Error("Artist application rate limit exceeded (max 3 submissions per hour). Please try again later.");
+      throw new Error("Artist application rate limit exceeded (max 20 submissions per hour). Please try again later.");
     }
     
     // Dynamically ensure required storage buckets exist
@@ -572,7 +572,11 @@ export const submitArtistApplication = createServerFn({ method: "POST" })
     }
 
     const admin = getAdminClient();
-    const { data: insertedData, error } = await admin.from("artist_applications").insert(sanitized).select("id, application_number").single();
+    const { data: insertedData, error } = await admin
+      .from("artist_applications")
+      .upsert(sanitized, { onConflict: "email" })
+      .select("id, application_number")
+      .single();
     if (error) {
       throw new Error("A database transaction error occurred. Operation aborted safely.");
     }
