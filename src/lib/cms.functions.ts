@@ -721,13 +721,12 @@ export const submitArtistApplication = createServerFn({ method: "POST" })
         <a href="mailto:contact@thenew1017records.us" style="color: #888888; text-decoration: none; font-size: 12px; margin: 0 15px; letter-spacing: 1px;">Contact</a>
       </div>
       <p style="color: #444444; font-size: 10px; margin: 0; letter-spacing: 1px;">
-        &copy; \${new Date().getFullYear()} The New 1017 Records. All Rights Reserved.
+        &copy; ${new Date().getFullYear()} The New 1017 Records. All Rights Reserved.
       </p>
     </div>
   </div>
 </body>
-</html>`ml>
-          `
+</html>`
         });
 
         console.log("✅ [Resend] Application notification emails sent successfully");
