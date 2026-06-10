@@ -669,109 +669,66 @@ export const submitArtistApplication = createServerFn({ method: "POST" })
 </html>`
         });
 
-        // 2. Send confirmation to Applicant
         await resend.emails.send({
           from: "The New 1017 Records <notifications@thenew1017records.us>",
           to: sanitized.email,
           replyTo: "contact@thenew1017records.us",
-          subject: "Application Received - The New 1017 Records",
-          html: `
-<!DOCTYPE html>
+          subject: "Artist Submission Received - The New 1017 Records",
+          html: `<!DOCTYPE html>
 <html lang="en">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Dossier Received</title>
+<title>Artist Submission Received</title>
 </head>
 <body style="margin: 0; padding: 0; background-color: #050505; font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; color: #E5E5E5; -webkit-font-smoothing: antialiased;">
-  <div style="max-width: 600px; margin: 0 auto; padding: 40px 20px;">
+  <div style="max-width: 600px; margin: 0 auto; padding: 60px 20px;">
     
-    <!-- Luxury Text Header -->
-    <div style="text-align: center; margin-bottom: 40px; padding-bottom: 25px; border-bottom: 1px solid #222222;">
-      <h1 style="color: #FFFFFF; font-size: 22px; font-weight: 800; margin: 0; letter-spacing: 5px; text-transform: uppercase;">THE NEW 1017 RECORDS</h1>
-      <p style="color: #888888; font-size: 11px; margin: 10px 0 0 0; letter-spacing: 3px; text-transform: uppercase;">Artist Development & A&R Division</p>
-      <p style="color: #D4AF37; font-size: 10px; margin: 6px 0 0 0; letter-spacing: 2px; text-transform: uppercase;">Confidential Talent Evaluation Portal</p>
+    <div style="text-align: center; margin-bottom: 50px;">
+      <h1 style="color: #FFFFFF; font-size: 20px; font-weight: 800; margin: 0; letter-spacing: 4px; text-transform: uppercase;">THE NEW 1017 RECORDS</h1>
+      <p style="color: #888888; font-size: 11px; margin: 12px 0 0 0; letter-spacing: 2px; text-transform: uppercase;">Artist & Repertoire</p>
     </div>
     
-    <div style="background-color: #0A0A0A; border: 1px solid #1A1A1A; border-radius: 4px; padding: 40px;">
-      <div style="text-align: center; margin-bottom: 35px;">
-        <h2 style="color: #D4AF37; font-size: 20px; font-weight: 600; margin: 0 0 10px 0; text-transform: uppercase; letter-spacing: 3px;">Dossier Received</h2>
-        <p style="color: #666666; font-size: 12px; margin: 0; letter-spacing: 2px;">OFFICIAL INTAKE CONFIRMATION</p>
-      </div>
+    <div style="margin-bottom: 40px; text-align: center;">
+      <h2 style="color: #D4AF37; font-size: 16px; font-weight: 400; margin: 0 0 15px 0; letter-spacing: 2px; text-transform: uppercase;">Artist Submission Received</h2>
+    </div>
 
-      <table style="width: 100%; border-collapse: collapse; margin-bottom: 40px;">
+    <div style="margin-bottom: 50px; border-top: 1px solid #1A1A1A; border-bottom: 1px solid #1A1A1A; padding: 30px 0;">
+      <table style="width: 100%; border-collapse: collapse;">
         <tr>
-          <td style="padding: 15px 0; border-bottom: 1px solid #1A1A1A; color: #666666; font-size: 13px; font-weight: 500; text-transform: uppercase; letter-spacing: 1px; width: 45%;">Artist Dossier ID</td>
-          <td style="padding: 15px 0; border-bottom: 1px solid #1A1A1A; color: #FFFFFF; font-weight: 600; font-size: 14px; text-align: right; font-family: monospace;">${appId}</td>
+          <td style="padding: 10px 0; color: #666666; font-size: 13px; font-weight: 500; letter-spacing: 1px; width: 40%;">Submission ID</td>
+          <td style="padding: 10px 0; color: #FFFFFF; font-size: 14px; text-align: right; font-family: monospace;">\${appId}</td>
         </tr>
         <tr>
-          <td style="padding: 15px 0; border-bottom: 1px solid #1A1A1A; color: #666666; font-size: 13px; font-weight: 500; text-transform: uppercase; letter-spacing: 1px;">Stage Identity</td>
-          <td style="padding: 15px 0; border-bottom: 1px solid #1A1A1A; color: #FFFFFF; font-weight: 600; font-size: 14px; text-align: right;">${sanitized.artist_name}</td>
+          <td style="padding: 10px 0; color: #666666; font-size: 13px; font-weight: 500; letter-spacing: 1px;">Artist Name</td>
+          <td style="padding: 10px 0; color: #FFFFFF; font-size: 14px; text-align: right;">\${sanitized.artist_name}</td>
         </tr>
         <tr>
-          <td style="padding: 15px 0; border-bottom: 1px solid #1A1A1A; color: #666666; font-size: 13px; font-weight: 500; text-transform: uppercase; letter-spacing: 1px;">Intake Date</td>
-          <td style="padding: 15px 0; border-bottom: 1px solid #1A1A1A; color: #FFFFFF; font-weight: 600; font-size: 14px; text-align: right;">${new Date().toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })}</td>
+          <td style="padding: 10px 0; color: #666666; font-size: 13px; font-weight: 500; letter-spacing: 1px;">Submission Date</td>
+          <td style="padding: 10px 0; color: #FFFFFF; font-size: 14px; text-align: right;">\${new Date().toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })}</td>
         </tr>
       </table>
-
-      <div style="margin: 0 0 40px 0; padding: 25px; background-color: #050505; border-radius: 4px; border: 1px solid #111111;">
-        <p style="color: #888888; font-size: 11px; text-transform: uppercase; letter-spacing: 2px; margin: 0 0 20px 0; text-align: center;">Evaluation Timeline</p>
-        <table style="width: 100%; border-collapse: collapse;">
-          <tr>
-            <td style="padding-bottom: 20px;">
-              <span style="display: inline-block; width: 8px; height: 8px; background-color: #D4AF37; border-radius: 50%; margin-right: 15px; box-shadow: 0 0 10px rgba(212, 175, 55, 0.8);"></span>
-              <span style="color: #D4AF37; font-size: 14px; font-weight: 600; letter-spacing: 1px; text-transform: uppercase;">1. Dossier Received</span>
-            </td>
-          </tr>
-          <tr>
-            <td style="padding-bottom: 20px;">
-              <span style="display: inline-block; width: 8px; height: 8px; background-color: #222222; border-radius: 50%; margin-right: 15px;"></span>
-              <span style="color: #555555; font-size: 14px; font-weight: 500; letter-spacing: 1px; text-transform: uppercase;">2. A&R Evaluation</span>
-            </td>
-          </tr>
-          <tr>
-            <td style="padding-bottom: 20px;">
-              <span style="display: inline-block; width: 8px; height: 8px; background-color: #222222; border-radius: 50%; margin-right: 15px;"></span>
-              <span style="color: #555555; font-size: 14px; font-weight: 500; letter-spacing: 1px; text-transform: uppercase;">3. Executive Review Board</span>
-            </td>
-          </tr>
-          <tr>
-            <td>
-              <span style="display: inline-block; width: 8px; height: 8px; background-color: #222222; border-radius: 50%; margin-right: 15px;"></span>
-              <span style="color: #555555; font-size: 14px; font-weight: 500; letter-spacing: 1px; text-transform: uppercase;">4. Roster Consideration</span>
-            </td>
-          </tr>
-        </table>
-      </div>
-
-      <div style="font-size: 14px; line-height: 1.8; color: #999999; text-align: justify;">
-        <p style="margin: 0 0 20px 0;">Your dossier has been securely inducted into our A&R evaluation queue. Our team strictly reviews sound architecture, brand positioning, and campaign viability.</p>
-        <p style="margin: 0;">Due to the highly exclusive nature of our roster, only candidates selected for the Executive Review Board will receive further communication. We demand excellence, consistency, and raw talent.</p>
-      </div>
     </div>
 
-    <!-- Confidentiality Section -->
-    <div style="margin-top: 40px; padding: 20px; border: 1px solid #1A1A1A; background-color: #0A0A0A; border-radius: 4px;">
-      <p style="color: #D4AF37; font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 2px; margin: 0 0 10px 0; text-align: center;">Strictly Confidential</p>
-      <p style="color: #555555; font-size: 10px; line-height: 1.6; margin: 0; text-align: justify;">This communication and any accompanying materials contain highly confidential and proprietary information intended exclusively for the addressed recipient. Any unauthorized review, dissemination, distribution, or reproduction of this communication is strictly prohibited and may result in immediate disqualification from roster consideration.</p>
+    <div style="font-size: 14px; line-height: 1.8; color: #CCCCCC; margin-bottom: 50px; font-weight: 300;">
+      <p style="margin: 0 0 25px 0;">Thank you for submitting your material to The New 1017 Records.</p>
+      <p style="margin: 0 0 25px 0;">Our A&R team reviews every submission individually based on artistic quality, originality, and overall fit.</p>
+      <p style="margin: 0;">Due to the volume of submissions received, only artists selected to move forward will be contacted regarding next steps.</p>
     </div>
 
-    <!-- Premium Footer -->
-    <div style="text-align: center; margin-top: 40px; padding-top: 30px; border-top: 1px solid #1A1A1A;">
+    <div style="text-align: center; margin-top: 60px; padding-top: 40px;">
       <div style="margin-bottom: 25px;">
-        <a href="https://thenew1017records.us" style="color: #FFFFFF; text-decoration: none; font-size: 11px; margin: 0 20px; font-weight: 600; letter-spacing: 2px; text-transform: uppercase;">Label Portal</a>
-        <a href="mailto:contact@thenew1017records.us" style="color: #FFFFFF; text-decoration: none; font-size: 11px; margin: 0 20px; font-weight: 600; letter-spacing: 2px; text-transform: uppercase;">Executive Support</a>
+        <a href="https://thenew1017records.us" style="color: #888888; text-decoration: none; font-size: 12px; margin: 0 15px; letter-spacing: 1px;">Website</a>
+        <a href="mailto:contact@thenew1017records.us" style="color: #888888; text-decoration: none; font-size: 12px; margin: 0 15px; letter-spacing: 1px;">Contact</a>
+        <a href="mailto:contact@thenew1017records.us" style="color: #888888; text-decoration: none; font-size: 12px; margin: 0 15px; letter-spacing: 1px;">Support</a>
       </div>
-      <p style="color: #444444; font-size: 10px; font-family: monospace; letter-spacing: 1px; margin: 0 0 10px 0;">
-        SYSTEM REFERENCE: ${appId}-${Date.now().toString().slice(-6)}
-      </p>
-      <p style="color: #333333; font-size: 10px; margin: 0; letter-spacing: 1px; text-transform: uppercase;">
-        &copy; ${new Date().getFullYear()} The New 1017 Records. All Rights Reserved.
+      <p style="color: #444444; font-size: 10px; margin: 0; letter-spacing: 1px;">
+        &copy; \${new Date().getFullYear()} The New 1017 Records. All Rights Reserved.
       </p>
     </div>
   </div>
 </body>
-</html>
+</html>`ml>
           `
         });
 
@@ -844,26 +801,26 @@ export const adminUpdateApplicationStatus = createServerFn({ method: "POST" })
         const appId = currentApp.application_number ? currentApp.application_number.toString() : "Unknown ID";
         const submittedDate = new Date(currentApp.submitted_at || Date.now()).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' });
         
-        let statusTitle = "Dossier Update";
-        let statusDesc = "Your artist dossier has moved to a new evaluation stage.";
+        let statusTitle = "Submission Update";
+        let statusDesc = "There is an update regarding your recent submission.";
         let statusColor = "#D4AF37"; // Gold default
 
         if (data.status === "Pending") {
-            statusTitle = "Dossier Re-opened";
-            statusDesc = "Your dossier has been moved back to the active queue and is awaiting A&R evaluation.";
+            statusTitle = "Submission Re-opened";
+            statusDesc = "Your submission has been moved back to the active queue and is awaiting A&R review.";
             statusColor = "#888888"; // Gray
         } else if (data.status === "Reviewing") {
-            statusTitle = "A&R Evaluation";
-            statusDesc = "Our A&R executives are currently analyzing your sound architecture and brand positioning. You will be notified if your profile advances to the Executive Review Board.";
+            statusTitle = "A&R Review";
+            statusDesc = "Our A&R team is currently reviewing your materials. You will be notified if your profile advances.";
             statusColor = "#D4AF37"; // Gold
         } else if (data.status === "Approved") {
-            statusTitle = "Roster Consideration";
-            statusDesc = "Congratulations. Your dossier has passed all executive reviews. You have been approved for Roster Consideration. An executive will contact you directly regarding contract negotiations.";
+            statusTitle = "Submission Approved";
+            statusDesc = "Your submission has passed our internal review. A representative will contact you directly regarding next steps.";
             statusColor = "#10B981"; // Emerald Green
         } else if (data.status === "Rejected") {
-            statusTitle = "Dossier Concluded";
-            statusDesc = "We have concluded our evaluation. Unfortunately, your profile does not align with our current roster requirements. We demand the highest standard of excellence and exclusivity. We wish you success in your independent endeavors.";
-            statusColor = "#EF4444"; // Red
+            statusTitle = "Review Concluded";
+            statusDesc = "We have concluded our review. While we appreciate the time you took to share your music, your profile does not currently align with our roster focus. We wish you success in your independent endeavors.";
+            statusColor = "#888888"; // Gray
         }
 
         const emailHtml = `<!DOCTYPE html>
@@ -874,61 +831,45 @@ export const adminUpdateApplicationStatus = createServerFn({ method: "POST" })
 <title>${statusTitle}</title>
 </head>
 <body style="margin: 0; padding: 0; background-color: #050505; font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; color: #E5E5E5; -webkit-font-smoothing: antialiased;">
-  <div style="max-width: 600px; margin: 0 auto; padding: 40px 20px;">
+  <div style="max-width: 600px; margin: 0 auto; padding: 60px 20px;">
     
-    <!-- Luxury Text Header -->
-    <div style="text-align: center; margin-bottom: 40px; padding-bottom: 25px; border-bottom: 1px solid #222222;">
-      <h1 style="color: #FFFFFF; font-size: 22px; font-weight: 800; margin: 0; letter-spacing: 5px; text-transform: uppercase;">THE NEW 1017 RECORDS</h1>
-      <p style="color: #888888; font-size: 11px; margin: 10px 0 0 0; letter-spacing: 3px; text-transform: uppercase;">Artist Development & A&R Division</p>
-      <p style="color: #D4AF37; font-size: 10px; margin: 6px 0 0 0; letter-spacing: 2px; text-transform: uppercase;">Confidential Talent Evaluation Portal</p>
+    <div style="text-align: center; margin-bottom: 50px;">
+      <h1 style="color: #FFFFFF; font-size: 20px; font-weight: 800; margin: 0; letter-spacing: 4px; text-transform: uppercase;">THE NEW 1017 RECORDS</h1>
+      <p style="color: #888888; font-size: 11px; margin: 12px 0 0 0; letter-spacing: 2px; text-transform: uppercase;">Artist & Repertoire</p>
     </div>
     
-    <div style="background-color: #0A0A0A; border: 1px solid #1A1A1A; border-radius: 4px; padding: 40px;">
-      <div style="text-align: center; margin-bottom: 35px;">
-        <h2 style="color: ${statusColor}; font-size: 20px; font-weight: 600; margin: 0 0 10px 0; text-transform: uppercase; letter-spacing: 3px;">${statusTitle}</h2>
-        <p style="color: #666666; font-size: 12px; margin: 0; letter-spacing: 2px;">OFFICIAL DOSSIER UPDATE</p>
-      </div>
+    <div style="text-align: center; margin-bottom: 40px;">
+      <h2 style="color: ${statusColor}; font-size: 16px; font-weight: 400; margin: 0 0 15px 0; letter-spacing: 2px; text-transform: uppercase;">${statusTitle}</h2>
+    </div>
 
-      <div style="font-size: 14px; line-height: 1.8; color: #999999; text-align: justify; margin-bottom: 35px; border-left: 2px solid ${statusColor}; padding-left: 20px;">
-        <p style="margin: 0;">${statusDesc}</p>
-      </div>
-
-      <table style="width: 100%; border-collapse: collapse; margin-bottom: 40px;">
+    <div style="margin-bottom: 50px; border-top: 1px solid #1A1A1A; border-bottom: 1px solid #1A1A1A; padding: 30px 0;">
+      <table style="width: 100%; border-collapse: collapse;">
         <tr>
-          <td style="padding: 15px 0; border-bottom: 1px solid #1A1A1A; color: #666666; font-size: 13px; font-weight: 500; text-transform: uppercase; letter-spacing: 1px; width: 45%;">Artist Dossier ID</td>
-          <td style="padding: 15px 0; border-bottom: 1px solid #1A1A1A; color: #FFFFFF; font-weight: 600; font-size: 14px; text-align: right; font-family: monospace;">${appId}</td>
+          <td style="padding: 10px 0; color: #666666; font-size: 13px; font-weight: 500; letter-spacing: 1px; width: 40%;">Submission ID</td>
+          <td style="padding: 10px 0; color: #FFFFFF; font-size: 14px; text-align: right; font-family: monospace;">${appId}</td>
         </tr>
         <tr>
-          <td style="padding: 15px 0; border-bottom: 1px solid #1A1A1A; color: #666666; font-size: 13px; font-weight: 500; text-transform: uppercase; letter-spacing: 1px;">Stage Identity</td>
-          <td style="padding: 15px 0; border-bottom: 1px solid #1A1A1A; color: #FFFFFF; font-weight: 600; font-size: 14px; text-align: right;">${currentApp.artist_name}</td>
+          <td style="padding: 10px 0; color: #666666; font-size: 13px; font-weight: 500; letter-spacing: 1px;">Artist Name</td>
+          <td style="padding: 10px 0; color: #FFFFFF; font-size: 14px; text-align: right;">${currentApp.artist_name}</td>
         </tr>
         <tr>
-          <td style="padding: 15px 0; border-bottom: 1px solid #1A1A1A; color: #666666; font-size: 13px; font-weight: 500; text-transform: uppercase; letter-spacing: 1px;">Intake Date</td>
-          <td style="padding: 15px 0; border-bottom: 1px solid #1A1A1A; color: #FFFFFF; font-weight: 600; font-size: 14px; text-align: right;">${submittedDate}</td>
-        </tr>
-        <tr>
-          <td style="padding: 15px 0; border-bottom: 1px solid #1A1A1A; color: #666666; font-size: 13px; font-weight: 500; text-transform: uppercase; letter-spacing: 1px;">Current Stage</td>
-          <td style="padding: 15px 0; border-bottom: 1px solid #1A1A1A; color: ${statusColor}; font-weight: 700; font-size: 14px; text-align: right; text-transform: uppercase; letter-spacing: 1px;">${data.status === "Pending" ? "Dossier Received" : data.status === "Reviewing" ? "A&R Evaluation" : data.status === "Approved" ? "Roster Consideration" : "Concluded"}</td>
+          <td style="padding: 10px 0; color: #666666; font-size: 13px; font-weight: 500; letter-spacing: 1px;">Submission Date</td>
+          <td style="padding: 10px 0; color: #FFFFFF; font-size: 14px; text-align: right;">${submittedDate}</td>
         </tr>
       </table>
     </div>
-    
-    <!-- Confidentiality Section -->
-    <div style="margin-top: 40px; padding: 20px; border: 1px solid #1A1A1A; background-color: #0A0A0A; border-radius: 4px;">
-      <p style="color: #D4AF37; font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 2px; margin: 0 0 10px 0; text-align: center;">Strictly Confidential</p>
-      <p style="color: #555555; font-size: 10px; line-height: 1.6; margin: 0; text-align: justify;">This communication and any accompanying materials contain highly confidential and proprietary information intended exclusively for the addressed recipient. Any unauthorized review, dissemination, distribution, or reproduction of this communication is strictly prohibited and may result in immediate disqualification from roster consideration.</p>
+
+    <div style="font-size: 14px; line-height: 1.8; color: #CCCCCC; margin-bottom: 50px; font-weight: 300;">
+      <p style="margin: 0;">${statusDesc}</p>
     </div>
 
-    <!-- Premium Footer -->
-    <div style="text-align: center; margin-top: 40px; padding-top: 30px; border-top: 1px solid #1A1A1A;">
+    <div style="text-align: center; margin-top: 60px; padding-top: 40px;">
       <div style="margin-bottom: 25px;">
-        <a href="https://thenew1017records.us" style="color: #FFFFFF; text-decoration: none; font-size: 11px; margin: 0 20px; font-weight: 600; letter-spacing: 2px; text-transform: uppercase;">Label Portal</a>
-        <a href="mailto:contact@thenew1017records.us" style="color: #FFFFFF; text-decoration: none; font-size: 11px; margin: 0 20px; font-weight: 600; letter-spacing: 2px; text-transform: uppercase;">Executive Support</a>
+        <a href="https://thenew1017records.us" style="color: #888888; text-decoration: none; font-size: 12px; margin: 0 15px; letter-spacing: 1px;">Website</a>
+        <a href="mailto:contact@thenew1017records.us" style="color: #888888; text-decoration: none; font-size: 12px; margin: 0 15px; letter-spacing: 1px;">Contact</a>
+        <a href="mailto:contact@thenew1017records.us" style="color: #888888; text-decoration: none; font-size: 12px; margin: 0 15px; letter-spacing: 1px;">Support</a>
       </div>
-      <p style="color: #444444; font-size: 10px; font-family: monospace; letter-spacing: 1px; margin: 0 0 10px 0;">
-        SYSTEM REFERENCE: ${appId}-${Date.now().toString().slice(-6)}
-      </p>
-      <p style="color: #333333; font-size: 10px; margin: 0; letter-spacing: 1px; text-transform: uppercase;">
+      <p style="color: #444444; font-size: 10px; margin: 0; letter-spacing: 1px;">
         &copy; ${new Date().getFullYear()} The New 1017 Records. All Rights Reserved.
       </p>
     </div>
