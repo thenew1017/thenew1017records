@@ -1,6 +1,6 @@
 import { createClient } from "@supabase/supabase-js";
 import type { Database } from "@/integrations/supabase/types";
-import { getRequest } from "@tanstack/react-start/server";
+import { getRequest, getRequestHeader } from "@tanstack/react-start/server";
 import fs from "fs";
 import path from "path";
 
@@ -85,27 +85,44 @@ export async function assertAdmin(userId: string, customClient?: any, userEmail?
  * Retrieve client IP address securely, checking proxy headers first
  */
 export function getClientIp(): string {
-  const request = getRequest();
-  if (!request) return "127.0.0.1";
+  try {
+    const cfConnectingIp = getRequestHeader("cf-connecting-ip");
+    if (cfConnectingIp) return cfConnectingIp.trim();
 
-  const headers = request.headers;
-  
-  // Cloudflare Connecting IP
-  const cfConnectingIp = headers.get("cf-connecting-ip");
-  if (cfConnectingIp) return cfConnectingIp.trim();
+    const xForwardedFor = getRequestHeader("x-forwarded-for");
+    if (xForwardedFor) {
+      const ips = xForwardedFor.split(",");
+      return ips[0].trim();
+    }
 
-  // Standard X-Forwarded-For proxy chain
-  const xForwardedFor = headers.get("x-forwarded-for");
-  if (xForwardedFor) {
-    const ips = xForwardedFor.split(",");
-    return ips[0].trim();
+    const xRealIp = getRequestHeader("x-real-ip");
+    if (xRealIp) return xRealIp.trim();
+  } catch (err) {
+    // Silently fall back if getRequestHeader fails outside request context
   }
 
-  // Alternative fallback proxy header
-  const xRealIp = headers.get("x-real-ip");
-  if (xRealIp) return xRealIp.trim();
+  try {
+    const request = getRequest();
+    if (request && request.headers) {
+      const cfConnectingIp = request.headers.get?.("cf-connecting-ip");
+      if (cfConnectingIp) return cfConnectingIp.trim();
 
-  return "127.0.0.1";
+      const xForwardedFor = request.headers.get?.("x-forwarded-for");
+      if (xForwardedFor) {
+        const ips = xForwardedFor.split(",");
+        return ips[0].trim();
+      }
+
+      const xRealIp = request.headers.get?.("x-real-ip");
+      if (xRealIp) return xRealIp.trim();
+    }
+  } catch (err) {
+    // Silently fall back
+  }
+
+  // If we can't determine the IP, return a random UUID or unique string per request 
+  // so we don't block EVERYONE globally if the proxy headers are missing.
+  return "unknown-" + Math.random().toString(36).substring(7);
 }
 
 /**
