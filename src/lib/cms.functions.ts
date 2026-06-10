@@ -684,43 +684,41 @@ export const submitArtistApplication = createServerFn({ method: "POST" })
 <body style="margin: 0; padding: 0; background-color: #050505; font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; color: #E5E5E5; -webkit-font-smoothing: antialiased;">
   <div style="max-width: 600px; margin: 0 auto; padding: 60px 20px;">
     
+    <!-- Header -->
     <div style="text-align: center; margin-bottom: 50px;">
-      <h1 style="color: #FFFFFF; font-size: 20px; font-weight: 800; margin: 0; letter-spacing: 4px; text-transform: uppercase;">THE NEW 1017 RECORDS</h1>
-      <p style="color: #888888; font-size: 11px; margin: 12px 0 0 0; letter-spacing: 2px; text-transform: uppercase;">Artist & Repertoire</p>
-    </div>
-    
-    <div style="margin-bottom: 40px; text-align: center;">
-      <h2 style="color: #D4AF37; font-size: 16px; font-weight: 400; margin: 0 0 15px 0; letter-spacing: 2px; text-transform: uppercase;">Artist Submission Received</h2>
+      <h1 style="color: #FFFFFF; font-size: 20px; font-weight: 800; margin: 0 0 12px 0; letter-spacing: 4px; text-transform: uppercase;">THE NEW 1017 RECORDS</h1>
+      <p style="color: #888888; font-size: 11px; margin: 0 0 40px 0; letter-spacing: 2px; text-transform: uppercase;">Artist & Repertoire Division</p>
+      <h2 style="color: #D4AF37; font-size: 15px; font-weight: 400; margin: 0; letter-spacing: 2px; text-transform: uppercase;">Artist Submission Received</h2>
     </div>
 
-    <div style="margin-bottom: 50px; border-top: 1px solid #1A1A1A; border-bottom: 1px solid #1A1A1A; padding: 30px 0;">
-      <table style="width: 100%; border-collapse: collapse;">
-        <tr>
-          <td style="padding: 10px 0; color: #666666; font-size: 13px; font-weight: 500; letter-spacing: 1px; width: 40%;">Submission ID</td>
-          <td style="padding: 10px 0; color: #FFFFFF; font-size: 14px; text-align: right; font-family: monospace;">\${appId}</td>
-        </tr>
-        <tr>
-          <td style="padding: 10px 0; color: #666666; font-size: 13px; font-weight: 500; letter-spacing: 1px;">Artist Name</td>
-          <td style="padding: 10px 0; color: #FFFFFF; font-size: 14px; text-align: right;">\${sanitized.artist_name}</td>
-        </tr>
-        <tr>
-          <td style="padding: 10px 0; color: #666666; font-size: 13px; font-weight: 500; letter-spacing: 1px;">Submission Date</td>
-          <td style="padding: 10px 0; color: #FFFFFF; font-size: 14px; text-align: right;">\${new Date().toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })}</td>
-        </tr>
-      </table>
+    <!-- Submission Card -->
+    <div style="background-color: #0A0A0A; border-radius: 4px; padding: 35px; margin-bottom: 45px;">
+      <div style="margin-bottom: 25px;">
+        <p style="color: #666666; font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: 1px; margin: 0 0 6px 0;">Submission ID</p>
+        <p style="color: #FFFFFF; font-size: 15px; font-family: monospace; margin: 0;">\${appId}</p>
+      </div>
+      <div style="margin-bottom: 25px;">
+        <p style="color: #666666; font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: 1px; margin: 0 0 6px 0;">Artist Name</p>
+        <p style="color: #FFFFFF; font-size: 15px; margin: 0;">\${sanitized.artist_name}</p>
+      </div>
+      <div>
+        <p style="color: #666666; font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: 1px; margin: 0 0 6px 0;">Submission Date</p>
+        <p style="color: #FFFFFF; font-size: 15px; margin: 0;">\${new Date().toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })}</p>
+      </div>
     </div>
 
+    <!-- Body Copy -->
     <div style="font-size: 14px; line-height: 1.8; color: #CCCCCC; margin-bottom: 50px; font-weight: 300;">
       <p style="margin: 0 0 25px 0;">Thank you for submitting your material to The New 1017 Records.</p>
       <p style="margin: 0 0 25px 0;">Our A&R team reviews every submission individually based on artistic quality, originality, and overall fit.</p>
       <p style="margin: 0;">Due to the volume of submissions received, only artists selected to move forward will be contacted regarding next steps.</p>
     </div>
 
-    <div style="text-align: center; margin-top: 60px; padding-top: 40px;">
+    <!-- Footer -->
+    <div style="text-align: center; margin-top: 60px; padding-top: 40px; border-top: 1px solid #1A1A1A;">
       <div style="margin-bottom: 25px;">
         <a href="https://thenew1017records.us" style="color: #888888; text-decoration: none; font-size: 12px; margin: 0 15px; letter-spacing: 1px;">Website</a>
         <a href="mailto:contact@thenew1017records.us" style="color: #888888; text-decoration: none; font-size: 12px; margin: 0 15px; letter-spacing: 1px;">Contact</a>
-        <a href="mailto:contact@thenew1017records.us" style="color: #888888; text-decoration: none; font-size: 12px; margin: 0 15px; letter-spacing: 1px;">Support</a>
       </div>
       <p style="color: #444444; font-size: 10px; margin: 0; letter-spacing: 1px;">
         &copy; \${new Date().getFullYear()} The New 1017 Records. All Rights Reserved.
@@ -833,41 +831,39 @@ export const adminUpdateApplicationStatus = createServerFn({ method: "POST" })
 <body style="margin: 0; padding: 0; background-color: #050505; font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; color: #E5E5E5; -webkit-font-smoothing: antialiased;">
   <div style="max-width: 600px; margin: 0 auto; padding: 60px 20px;">
     
+    <!-- Header -->
     <div style="text-align: center; margin-bottom: 50px;">
-      <h1 style="color: #FFFFFF; font-size: 20px; font-weight: 800; margin: 0; letter-spacing: 4px; text-transform: uppercase;">THE NEW 1017 RECORDS</h1>
-      <p style="color: #888888; font-size: 11px; margin: 12px 0 0 0; letter-spacing: 2px; text-transform: uppercase;">Artist & Repertoire</p>
-    </div>
-    
-    <div style="text-align: center; margin-bottom: 40px;">
-      <h2 style="color: ${statusColor}; font-size: 16px; font-weight: 400; margin: 0 0 15px 0; letter-spacing: 2px; text-transform: uppercase;">${statusTitle}</h2>
+      <h1 style="color: #FFFFFF; font-size: 20px; font-weight: 800; margin: 0 0 12px 0; letter-spacing: 4px; text-transform: uppercase;">THE NEW 1017 RECORDS</h1>
+      <p style="color: #888888; font-size: 11px; margin: 0 0 40px 0; letter-spacing: 2px; text-transform: uppercase;">Artist & Repertoire Division</p>
+      <h2 style="color: ${statusColor}; font-size: 15px; font-weight: 400; margin: 0; letter-spacing: 2px; text-transform: uppercase;">${statusTitle}</h2>
     </div>
 
-    <div style="margin-bottom: 50px; border-top: 1px solid #1A1A1A; border-bottom: 1px solid #1A1A1A; padding: 30px 0;">
-      <table style="width: 100%; border-collapse: collapse;">
-        <tr>
-          <td style="padding: 10px 0; color: #666666; font-size: 13px; font-weight: 500; letter-spacing: 1px; width: 40%;">Submission ID</td>
-          <td style="padding: 10px 0; color: #FFFFFF; font-size: 14px; text-align: right; font-family: monospace;">${appId}</td>
-        </tr>
-        <tr>
-          <td style="padding: 10px 0; color: #666666; font-size: 13px; font-weight: 500; letter-spacing: 1px;">Artist Name</td>
-          <td style="padding: 10px 0; color: #FFFFFF; font-size: 14px; text-align: right;">${currentApp.artist_name}</td>
-        </tr>
-        <tr>
-          <td style="padding: 10px 0; color: #666666; font-size: 13px; font-weight: 500; letter-spacing: 1px;">Submission Date</td>
-          <td style="padding: 10px 0; color: #FFFFFF; font-size: 14px; text-align: right;">${submittedDate}</td>
-        </tr>
-      </table>
+    <!-- Submission Card -->
+    <div style="background-color: #0A0A0A; border-radius: 4px; padding: 35px; margin-bottom: 45px;">
+      <div style="margin-bottom: 25px;">
+        <p style="color: #666666; font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: 1px; margin: 0 0 6px 0;">Submission ID</p>
+        <p style="color: #FFFFFF; font-size: 15px; font-family: monospace; margin: 0;">${appId}</p>
+      </div>
+      <div style="margin-bottom: 25px;">
+        <p style="color: #666666; font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: 1px; margin: 0 0 6px 0;">Artist Name</p>
+        <p style="color: #FFFFFF; font-size: 15px; margin: 0;">${currentApp.artist_name}</p>
+      </div>
+      <div>
+        <p style="color: #666666; font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: 1px; margin: 0 0 6px 0;">Submission Date</p>
+        <p style="color: #FFFFFF; font-size: 15px; margin: 0;">${submittedDate}</p>
+      </div>
     </div>
 
+    <!-- Body Copy -->
     <div style="font-size: 14px; line-height: 1.8; color: #CCCCCC; margin-bottom: 50px; font-weight: 300;">
       <p style="margin: 0;">${statusDesc}</p>
     </div>
 
-    <div style="text-align: center; margin-top: 60px; padding-top: 40px;">
+    <!-- Footer -->
+    <div style="text-align: center; margin-top: 60px; padding-top: 40px; border-top: 1px solid #1A1A1A;">
       <div style="margin-bottom: 25px;">
         <a href="https://thenew1017records.us" style="color: #888888; text-decoration: none; font-size: 12px; margin: 0 15px; letter-spacing: 1px;">Website</a>
         <a href="mailto:contact@thenew1017records.us" style="color: #888888; text-decoration: none; font-size: 12px; margin: 0 15px; letter-spacing: 1px;">Contact</a>
-        <a href="mailto:contact@thenew1017records.us" style="color: #888888; text-decoration: none; font-size: 12px; margin: 0 15px; letter-spacing: 1px;">Support</a>
       </div>
       <p style="color: #444444; font-size: 10px; margin: 0; letter-spacing: 1px;">
         &copy; ${new Date().getFullYear()} The New 1017 Records. All Rights Reserved.
