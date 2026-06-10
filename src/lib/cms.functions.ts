@@ -574,7 +574,7 @@ export const submitArtistApplication = createServerFn({ method: "POST" })
     const admin = getAdminClient();
     const { data: insertedData, error } = await admin
       .from("artist_applications")
-      .upsert(sanitized, { onConflict: "email" })
+      .insert(sanitized)
       .select("id, application_number")
       .single();
     if (error) {
