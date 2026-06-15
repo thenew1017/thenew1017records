@@ -63,12 +63,13 @@ export function Hero({ settings }: { settings?: Record<string, any> }) {
             {hero.eyebrow}
           </span>
           
-          <h1 className="font-display font-black text-5xl sm:text-6xl md:text-7xl lg:text-8xl tracking-tight uppercase leading-[0.9] text-white">
+          <h1 className="sr-only">The New 1017 Records</h1>
+          <h2 className="font-display font-black text-5xl sm:text-6xl md:text-7xl lg:text-8xl tracking-tight uppercase leading-[0.9] text-white">
             {hero.title?.split(" ").slice(0, -1).join(" ")}{" "}
             <span className="text-stroke font-black block sm:inline">
               {hero.title?.split(" ").slice(-1)[0]}
             </span>
-          </h1>
+          </h2>
 
           <motion.p
             initial={{ opacity: 0 }}
@@ -218,8 +219,7 @@ function LogoEmblem({ displayBanner, title }: { displayBanner: string; title: st
             alt={title}
             onLoad={() => setLogoLoaded(true)}
             loading="eager"
-            // @ts-ignore
-            fetchpriority="high"
+            fetchPriority="high"
             className={`w-full max-w-[85%] h-auto object-contain transition-all duration-700 ease-out group-hover:scale-[1.04] drop-shadow-[0_4px_12px_rgba(0,0,0,0.85)] drop-shadow-[0_0_10px_rgba(229,213,192,0.08)] group-hover:drop-shadow-[0_8px_20px_rgba(0,0,0,0.9)] group-hover:drop-shadow-[0_0_15px_rgba(229,213,192,0.12)] ${
               logoLoaded ? "opacity-100" : "opacity-0"
             }`}

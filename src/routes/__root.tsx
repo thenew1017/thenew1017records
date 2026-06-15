@@ -182,9 +182,10 @@ function RootShell({ children }: { children: React.ReactNode }) {
     <html lang="en" className="overflow-x-hidden w-full max-w-full">
       <head>
         <HeadContent />
-        {jsonLds.map((content, i) => (
-           <script key={i} type="application/ld+json" dangerouslySetInnerHTML={{ __html: content as string }} />
-        ))}
+        {jsonLds.map((content, i) => {
+            const rawHtml = typeof content === "string" ? content : JSON.stringify(content);
+            return <script key={i} type="application/ld+json" dangerouslySetInnerHTML={{ __html: rawHtml.replace(/</g, '\\u003c') }} />;
+        })}
       </head>
       <body className="overflow-x-hidden w-full max-w-full">
         {children}
