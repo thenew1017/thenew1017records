@@ -24,6 +24,7 @@ export const getRouter = () => {
     context: { queryClient, nonce },
     scrollRestoration: true,
     defaultPreloadStaleTime: 0,
+    ssr: { nonce },
   });
 
   return router;
