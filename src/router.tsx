@@ -27,6 +27,8 @@ export const getRouter = () => {
     ssr: { nonce },
   });
 
+  console.log("ROUTER SSR NONCE IN GETROUTER:", router.options.ssr);
+
   return router;
 };
 

@@ -217,14 +217,12 @@ function RootComponent() {
   }, [router.state.location.pathname]);
 
   return (
-    <RootShell>
-      <QueryClientProvider client={queryClient}>
-        <PageTransitionProvider>
-          <Outlet />
-          <PageTransitionOverlay />
-        </PageTransitionProvider>
-        <Toaster position="bottom-right" theme="dark" />
-      </QueryClientProvider>
-    </RootShell>
+    <QueryClientProvider client={queryClient}>
+      <PageTransitionProvider>
+        <Outlet />
+        <PageTransitionOverlay />
+      </PageTransitionProvider>
+      <Toaster position="bottom-right" theme="dark" />
+    </QueryClientProvider>
   );
 }
