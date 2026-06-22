@@ -12,12 +12,20 @@ export const getRouter = () => {
     },
   });
 
+  let nonce = "";
+  if (typeof window === "undefined" && typeof crypto !== "undefined" && crypto.getRandomValues) {
+    const array = new Uint8Array(16);
+    crypto.getRandomValues(array);
+    nonce = Buffer.from(array).toString("base64");
+  }
+
   const router = createRouter({
     routeTree,
-    context: { queryClient },
+    context: { queryClient, nonce },
     scrollRestoration: true,
     defaultPreloadStaleTime: 0,
   });
 
   return router;
 };
+

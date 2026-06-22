@@ -85,7 +85,7 @@ function ErrorComponent({ error, reset }: { error: Error; reset: () => void }) {
   );
 }
 
-export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()({
+export const Route = createRootRouteWithContext<{ queryClient: QueryClient, nonce?: string }>()({
   head: () => ({
     meta: [
       { charSet: "utf-8" },
@@ -172,24 +172,32 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
 import { useRouterState } from "@tanstack/react-router";
 
 function RootShell({ children }: { children: React.ReactNode }) {
+  const router = useRouter();
   const routerState = useRouterState();
+  const nonce = router.options.context.nonce;
+
   const jsonLds = routerState.matches
     .flatMap((m) => m.meta?.filter((meta: any) => meta.name === "jsonld") || [])
     .map((meta: any) => meta.content)
     .filter(Boolean);
 
+  const cspMeta = nonce ? (
+    <meta httpEquiv="Content-Security-Policy" content={`default-src 'self'; script-src 'self' 'nonce-${nonce}' 'strict-dynamic' https://va.vercel-scripts.com https://vercel.live; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; img-src 'self' data: blob: https:; font-src 'self' data: https://fonts.gstatic.com; connect-src 'self' https://vveslmalxlprmlfcdjae.supabase.co wss://vveslmalxlprmlfcdjae.supabase.co https://va.vercel-scripts.com https://vercel.live https://get.geojs.io; media-src 'self' data: blob: https:; frame-src 'self' https://www.youtube.com https://open.spotify.com https://w.soundcloud.com https://music.apple.com; object-src 'none'; base-uri 'none'; upgrade-insecure-requests;`} />
+  ) : null;
+
   return (
     <html lang="en" className="overflow-x-hidden w-full max-w-full">
       <head>
+        {cspMeta}
         <HeadContent />
         {jsonLds.map((content, i) => {
             const rawHtml = typeof content === "string" ? content : JSON.stringify(content);
-            return <script key={i} type="application/ld+json" dangerouslySetInnerHTML={{ __html: rawHtml.replace(/</g, '\\u003c') }} />;
+            return <script nonce={nonce} key={i} type="application/ld+json" dangerouslySetInnerHTML={{ __html: rawHtml.replace(/</g, '\\u003c') }} />;
         })}
       </head>
       <body className="overflow-x-hidden w-full max-w-full">
         {children}
-        <Scripts />
+        <Scripts nonce={nonce} />
       </body>
     </html>
   );
