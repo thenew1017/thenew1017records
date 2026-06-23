@@ -220,6 +220,9 @@ function LogoEmblem({ displayBanner, title }: { displayBanner: string; title: st
             onLoad={() => setLogoLoaded(true)}
             loading="eager"
             fetchPriority="high"
+            decoding="async"
+            width={1200}
+            height={675}
             className={`w-full max-w-[85%] h-auto object-contain transition-all duration-700 ease-out group-hover:scale-[1.04] drop-shadow-[0_4px_12px_rgba(0,0,0,0.85)] drop-shadow-[0_0_10px_rgba(229,213,192,0.08)] group-hover:drop-shadow-[0_8px_20px_rgba(0,0,0,0.9)] group-hover:drop-shadow-[0_0_15px_rgba(229,213,192,0.12)] ${
               logoLoaded ? "opacity-100" : "opacity-0"
             }`}

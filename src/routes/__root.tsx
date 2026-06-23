@@ -105,6 +105,16 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient, nonc
     ],
     links: [
       {
+        rel: "preconnect",
+        href: "https://vveslmalxlprmlfcdjae.supabase.co",
+        crossOrigin: "anonymous" as any,
+      },
+      {
+        rel: "preload",
+        as: "image",
+        href: "https://vveslmalxlprmlfcdjae.supabase.co/storage/v1/object/public/media/founder/spotlight-1780301297380.jpg",
+      },
+      {
         rel: "icon",
         href: "/favicon.ico",
         sizes: "48x48",

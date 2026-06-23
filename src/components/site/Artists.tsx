@@ -136,9 +136,9 @@ export function CinematicArtistImage({
             <PremiumImage
               src={src}
               alt={alt}
-              loading="eager"
+              loading="lazy"
               decoding="async"
-              fetchPriority="high"
+              fetchPriority="auto"
               aspectRatioClass=""
               className="artist-photo-image"
               style={{
@@ -205,9 +205,9 @@ export function CinematicArtistImage({
             <PremiumImage
               src={src}
               alt={alt}
-              loading="eager"
+              loading="lazy"
               decoding="async"
-              fetchPriority="high"
+              fetchPriority="auto"
               aspectRatioClass=""
               className="transition-transform duration-[700ms] ease-out transform-gpu artist-photo-image"
               style={{
